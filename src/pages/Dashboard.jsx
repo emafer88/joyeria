@@ -1,7 +1,5 @@
-import { DashboardTemplate } from "../components/templates/DashboardTemplate";
+import { DashboardTemplate } from "../components/template/DashboardTemplate";
 
 export const Dashboard = () => {
-  return (
-    <DashboardTemplate/>
-  );
+  return <DashboardTemplate />;
 };

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { MetodosPagoTemplate } from "../components/templates/MetodosPagoTemplate";
+import { MetodosPagoTemplate } from "../components/template/MetodosPagoTemplate";
 import { useMetodosPagoStore } from "../store/MetodosPagoStore";
 import { useEmpresaStore } from "../store/EmpresaStore";
 import { Spinner1 } from "../components/moleculas/Spinner1";

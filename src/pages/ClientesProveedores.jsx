@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ClientesProveedoresTemplate } from "../components/templates/ClientesProveedoresTemplate";
+import { ClientesProveedoresTemplate } from "../components/template/ClientesProveedoresTemplate";
 import { useEmpresaStore } from "../store/EmpresaStore";
 import { useClientesProveedoresStore } from "../store/ClientesProveedoresStore";
 import { useLocation } from "react-router-dom";

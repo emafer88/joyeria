@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { CrudTemplate } from "../components/templates/CrudTemplate";
+import { CrudTemplate } from "../components/template/CrudTemplate";
 import { RegistrarInventario } from "../components/organismos/formularios/RegistrarInventario";
 import { TablaInventarios } from "../components/organismos/tablas/TablaInventarios";
 import { useQuery } from "@tanstack/react-query";
@@ -66,11 +66,10 @@ export const Inventario = () => {
         {productosItemSelect?.nombre && (
           <span>
             {" "}
-            Producto: {" "}<strong>{productosItemSelect?.nombre}</strong>{" "}
+            Producto: <strong>{productosItemSelect?.nombre}</strong>{" "}
           </span>
         )}
-|
-        <Title>Inventario</Title>
+        |<Title>Inventario</Title>
         <Btn1 funcion={nuevoRegistro} titulo="Registrar" />
       </section>
       <section className="area2">

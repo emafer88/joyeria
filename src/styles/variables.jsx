@@ -12,7 +12,7 @@ import { TbBrandSupabase } from "react-icons/tb";
 import { FaReact } from "react-icons/fa";
 import { BsArrowDown, BsArrowUpShort } from "react-icons/bs";
 import { FaBalanceScale } from "react-icons/fa";
-import logo from "../assets/ada369logo.png";
+import logo from "../assets/diamante.png";
 import { FcGoogle } from "react-icons/fc";
 
 import { RiCloseLine } from "react-icons/ri";
@@ -46,7 +46,7 @@ import { IoIosArrowBack } from "react-icons/io";
 import { GrAdd } from "react-icons/gr";
 import { FaSearch } from "react-icons/fa";
 export const v = {
-  iconobuscar:FaSearch,
+  iconobuscar: FaSearch,
   colorPrincipal: `#F3D20C`,
   colorSecundario: `#DAC1FF`,
   iconoagregar: GrAdd,

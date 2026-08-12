@@ -1,10 +1,6 @@
 import styled from "styled-components";
 import { useState } from "react";
-import {
-  LinksArray,
-  SecondarylinksArray,
-  ToggleTema,
-} from "../../../index";
+import { LinksArray, SecondarylinksArray, ToggleTema } from "../../../index";
 import { v } from "../../../styles/variables";
 import { NavLink } from "react-router-dom";
 import { Icon } from "@iconify/react";
@@ -13,14 +9,13 @@ export const MenuMovil = ({ setState }) => {
 
   return (
     <Container>
-        
       <Main $isopen={state.toString()}>
         <Container $isopen={state.toString()} className={state ? "active" : ""}>
           <div className="Logocontent">
             <div className="imgcontent">
               <img src={v.logo} />
             </div>
-            <h2>Ada369 3.0</h2>
+            <h2>CUBIKS JEWERLY</h2>
           </div>
           {LinksArray.map(({ icon, label, to }) => (
             <div
@@ -199,7 +194,6 @@ const Container = styled.div`
   }
 `;
 const Main = styled.div`
-
   .Sidebarbutton {
     position: fixed;
     top: 70px;
@@ -208,7 +202,8 @@ const Main = styled.div`
     height: 32px;
     border-radius: 50%;
     background: ${(props) => props.theme.bgtgderecha};
-    box-shadow: 0 0 4px ${(props) => props.theme.bg3},
+    box-shadow:
+      0 0 4px ${(props) => props.theme.bg3},
       0 0 7px ${(props) => props.theme.bg};
     display: flex;
     align-items: center;

@@ -1,8 +1,5 @@
-
-import { ImpresorasTemplate } from "../components/templates/ImpresorasTemplate";
+import { ImpresorasTemplate } from "../components/template/ImpresorasTemplate";
 
 export const Impresoras = () => {
-  return (
-    <ImpresorasTemplate/>
-  );
+  return <ImpresorasTemplate />;
 };
