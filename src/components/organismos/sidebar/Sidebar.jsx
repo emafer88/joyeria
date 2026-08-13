@@ -72,7 +72,7 @@ export function Sidebar({ state, setState }) {
               <Icon
                 color="#CE82FF"
                 className="Linkicon"
-                icon="heroicons:ellipsis-horizontal-circle-solid"
+                icon="heroicons:arrow-left-start-on-rectangle-20-solid"
               />
               <span className={state ? "label_ver" : "label_oculto"}>
                 SALIR
@@ -161,6 +161,7 @@ const Container = styled.div`
       width: 100%;
       align-items: center;
       .Linkicon {
+        cursor: pointer;
         display: flex;
         font-size: 33px;
         filter: grayscale(100%);

@@ -12,24 +12,23 @@ import Swal from "sweetalert2";
 const AuthContext = createContext();
 export const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState([]);
-  
+
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session == null) {
         setUser(null);
-        
       } else {
         setUser(session?.user);
-        
+
         insertarDatos(session?.user.id, session?.user.email);
       }
     });
     return () => {
-      data.subscription;
+      data.subscription.unsubscribe();
     };
   }, []);
   const insertarDatos = async (id_auth, correo) => {
-    const response = await MostrarUsuarios({ id_auth: id_auth }); 
+    const response = await MostrarUsuarios({ id_auth: id_auth });
     if (response) {
       return;
     } else {

@@ -4,8 +4,10 @@ import { LinksArray, SecondarylinksArray, ToggleTema } from "../../../index";
 import { v } from "../../../styles/variables";
 import { NavLink } from "react-router-dom";
 import { Icon } from "@iconify/react";
+import { useAuthStore } from "../../../store/AuthStore";
 export const MenuMovil = ({ setState }) => {
   const [state, setstate] = useState(true);
+  const { cerrarSesion } = useAuthStore();
 
   return (
     <Container>
@@ -77,6 +79,20 @@ export const MenuMovil = ({ setState }) => {
               </section>
             </div>
           </div>
+          <div className={state ? "LinkContainer active" : "LinkContainer"}>
+            <div className="Links" onClick={cerrarSesion}>
+              <section className={state ? "content open" : "content"}>
+                <Icon
+                  color="#CE82FF"
+                  className="Linkicon"
+                  icon="heroicons:arrow-left-start-on-rectangle-20-solid"
+                />
+                <span className={state ? "label_ver" : "label_oculto"}>
+                  SALIR
+                </span>
+              </section>
+            </div>
+          </div>
 
           <ToggleTema />
         </Container>
@@ -139,6 +155,7 @@ const Container = styled.div`
     position: relative;
     text-transform: uppercase;
     font-weight: 700;
+    cursor: pointer;
   }
 
   .Links {

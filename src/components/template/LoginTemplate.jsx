@@ -62,7 +62,7 @@ export function LoginTemplate() {
       <div className="card">
         <ContentLogo>
           <img src={v.logo} />
-          <span>ada369 - POS VENTAS</span>
+          <span>CUBIKS JEWELRY</span>
         </ContentLogo>
         <Title $paddingbottom="40px">Ingresar Modo</Title>
         {stateModos && (

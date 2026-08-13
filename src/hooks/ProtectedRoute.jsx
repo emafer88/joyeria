@@ -6,28 +6,29 @@ import { useUsuariosStore } from "../store/UsuariosStore";
 
 export const ProtectedRoute = ({ children, accessBy }) => {
   const { user } = UserAuth();
-  const {mostrarPermisosGlobales } = usePermisosStore();
+  const { mostrarPermisosGlobales } = usePermisosStore();
   const location = useLocation();
-  const {datausuarios} = useUsuariosStore()
+  const { datausuarios } = useUsuariosStore();
 
   const {
-    data:dataPermisosGlobales,
+    data: dataPermisosGlobales,
     isLoading: isLoadingPermisosGlobales,
     error: errorPermisosGlobales,
   } = useQuery({
     queryKey: ["mostrar permisos globales", datausuarios?.id],
     queryFn: () => mostrarPermisosGlobales({ id_usuario: datausuarios?.id }),
-    enabled: !!datausuarios,
+    enabled: !!datausuarios?.id,
   });
-  if(isLoadingPermisosGlobales){
-     return <span>cargando permisos...</span>
+  if (isLoadingPermisosGlobales) {
+    return <span>cargando permisos...</span>;
   }
   const hasPermission = dataPermisosGlobales?.some(
-    (item) => item.modulos?.link === location.pathname
+    (item) => item.modulos?.link === location.pathname,
   );
- 
+
   if (accessBy === "non-authenticated") {
     if (!user) {
+      console.log("no hay usuario");
       return children;
     } else {
       return <Navigate to="/" />;
@@ -36,8 +37,8 @@ export const ProtectedRoute = ({ children, accessBy }) => {
     if (user) {
       if (!hasPermission) {
         // return <Navigate to="/404" />;
-      } 
- 
+      }
+
       return children;
     }
   }
