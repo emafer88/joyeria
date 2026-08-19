@@ -5,7 +5,8 @@ import { useEffect } from "react";
 import { useModulosStore } from "../../index";
 import { usePermisosStore } from "../../store/PermisosStore";
 export function ConfiguracionesTemplate() {
-  const {dataPermisosConfiguracion} = usePermisosStore();
+  const { dataPermisosConfiguracion } = usePermisosStore();
+
   useEffect(() => {
     const handleMouseMove = (e) => {
       document.querySelectorAll(".card").forEach((card) => {
@@ -64,12 +65,12 @@ const Container = styled.div`
   align-items: center;
   background-color: ${({ theme }) => theme.bgtotal};
   display: flex;
-  height:calc(100vh - 50px);
-   margin-top:50px;
+  height: calc(100vh - 50px);
+  margin-top: 50px;
   justify-content: center;
   width: 100%;
   align-items: flex-start;
- 
+
   #cards {
     display: flex;
     flex-wrap: wrap;
