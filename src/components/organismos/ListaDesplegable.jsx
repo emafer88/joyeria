@@ -11,9 +11,15 @@ export function ListaDesplegable({
   refetch,
   funcioncrud,
 }) {
-  if (!state) return;
   const [selectedIndex, setSelectedIndex] = useState(0);
   const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    if (state) setSelectedIndex(0);
+  }, [state]);
+
+  if (!state) return null;
+
   function seleccionar(p) {
     if (refetch) {
       refetch();
@@ -28,6 +34,9 @@ export function ListaDesplegable({
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       seleccionar(data[selectedIndex]);
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      setState();
     } else if (e.key === "ArrowUp") {
       setSelectedIndex((prevIndex) =>
         prevIndex === 0 ? data.length - 1 : prevIndex - 1

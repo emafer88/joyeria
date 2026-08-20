@@ -153,6 +153,7 @@ export function HeaderPos() {
         setStateListaproductos(false);
       }
     }
+    return () => clearTimeout(timeout);
   }, [buscador]);
   return (
     <Header>
@@ -206,6 +207,9 @@ export function HeaderPos() {
                 if (e.key === "ArrowDown" && stateListaproductos) {
                   e.preventDefault(); // Evita que el input capture el foco
                   document.querySelector("[tabindex='0'").focus(); //mandar el foco a la lista
+                } else if (e.key === "Escape" && stateListaproductos) {
+                  e.preventDefault();
+                  setStateListaproductos(false);
                 }
               }}
             />
