@@ -13,13 +13,14 @@ export function Btn1({
   height,
   decorador,
   imagen,
+  type,
 }) {
   return (
     <Container
       $width={width}
       disabled={disabled}
       $color={color}
-      type="submit"
+      type={type || "submit"}
       $bgcolor={bgcolor}
       onClick={funcion }
       $border={border}

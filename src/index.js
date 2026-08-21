@@ -97,3 +97,4 @@ export * from "./supabase/crudVenta";
 export * from "./supabase/supabase.config";
 export * from "./utils/Conversiones";
 export * from "./utils/dataEstatica";
+export * from "./utils/ValidarImagenes";

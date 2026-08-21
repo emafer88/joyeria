@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import {
   BuscarProductos,MostrarProductos,EliminarProductos,InsertarProductos,EditarProductos, Generarcodigo,
+  MostrarImagenesProducto,SubirImagenesProducto,EliminarImagenProducto,
   supabase
 } from "../index";
 const tabla ="productos"
@@ -67,5 +68,22 @@ export const useProductosStore = create((set, get) => ({
     if (error) {
       throw new Error(error.message);
     }
+  },
+  imagenesProducto: [],
+  mostrarImagenesProducto: async (idProducto) => {
+    const response = await MostrarImagenesProducto(idProducto);
+    set({ imagenesProducto: response });
+    return response;
+  },
+  subirImagenesProducto: async (idProducto, files, ordenInicial) => {
+    const subidas = await SubirImagenesProducto(idProducto, files, ordenInicial);
+    const { imagenesProducto } = get();
+    set({ imagenesProducto: [...imagenesProducto, ...subidas] });
+    return subidas;
+  },
+  eliminarImagenProducto: async (imagen) => {
+    await EliminarImagenProducto(imagen);
+    const { imagenesProducto } = get();
+    set({ imagenesProducto: imagenesProducto.filter((img) => img.id !== imagen.id) });
   },
 }));
