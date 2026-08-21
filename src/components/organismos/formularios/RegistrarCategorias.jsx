@@ -116,6 +116,7 @@ export function RegistrarCategorias({
             )}
 
             <Btn1
+              type="button"
               funcion={abrirImagenes}
               titulo="+imagen(opcional)"
               color="#5f5f5f"

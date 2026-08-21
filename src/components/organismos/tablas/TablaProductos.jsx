@@ -4,6 +4,8 @@ import {
   ContentAccionesTabla,
   Paginacion,
   useProductosStore,
+  ImagenContent,
+  Icono,
 } from "../../../index";
 import Swal from "sweetalert2";
 import { v } from "../../../styles/variables";
@@ -60,6 +62,26 @@ export function TablaProductos({
     setAccion("Editar");
   }
   const columns = [
+    {
+      accessorKey: "imagen_portada",
+      header: "Imagen",
+      enableSorting: false,
+      cell: (info) => (
+        <td data-title="Imagen" className="ContentCell">
+          {info.getValue() ? (
+            <ImagenContent imagen={info.getValue()} />
+          ) : (
+            <Icono>{<v.iconoimagenvacia />}</Icono>
+          )}
+        </td>
+      ),
+      enableColumnFilter: true,
+      filterFn: (row, columnId, filterStatuses) => {
+        if (filterStatuses.length === 0) return true;
+        const status = row.getValue(columnId);
+        return filterStatuses.includes(status?.id);
+      },
+    },
     {
       accessorKey: "nombre",
       header: "Descripcion",
