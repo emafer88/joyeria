@@ -9,14 +9,14 @@ import { v } from "../../../styles/variables";
 import { NavLink } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useUsuariosStore } from "../../../store/UsuariosStore";
+import { usePermisosDeMenu } from "../../../hooks/usePermisosDeMenu";
 
 export function Sidebar({ state, setState }) {
   const { cerrarSesion } = useAuthStore();
   const queryClient = useQueryClient();
-  const { datausuarios } = useUsuariosStore();
-  const esSuperAdmin = datausuarios?.roles?.nombre === "superadmin";
-  const LinksArray = getLinksArray(esSuperAdmin);
+  const { esSuperAdmin, puedeVer } = usePermisosDeMenu();
+  const LinksArray = getLinksArray(esSuperAdmin).filter((l) => puedeVer(l.to));
+  const linksSecundarios = SecondarylinksArray.filter((l) => puedeVer(l.to));
   //  const salir =()=>{
   //   cerrarSesion()
   //   queryClient.clear();
@@ -52,7 +52,7 @@ export function Sidebar({ state, setState }) {
           </div>
         ))}
         <Divider />
-        {SecondarylinksArray.map(({ icon, label, to, color }) => (
+        {linksSecundarios.map(({ icon, label, to, color }) => (
           <div
             className={state ? "LinkContainer active" : "LinkContainer"}
             key={label}

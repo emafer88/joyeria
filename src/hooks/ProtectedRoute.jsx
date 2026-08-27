@@ -3,6 +3,7 @@ import { UserAuth } from "../context/AuthContent";
 import { usePermisosStore } from "../store/PermisosStore";
 import { useQuery } from "@tanstack/react-query";
 import { useUsuariosStore } from "../store/UsuariosStore";
+import { RUTAS_SIN_PERMISO } from "./usePermisosDeMenu";
 
 export const ProtectedRoute = ({ children, accessBy }) => {
   const { user } = UserAuth();
@@ -27,9 +28,20 @@ export const ProtectedRoute = ({ children, accessBy }) => {
   if (isLoadingPermisosGlobales) {
     return <span>cargando permisos...</span>;
   }
-  const hasPermission = dataPermisosGlobales?.some(
-    (item) => item.modulos?.link === location.pathname,
-  );
+  const esSuperAdmin = datausuarios?.roles?.nombre === "superadmin";
+  const hasPermission =
+    esSuperAdmin ||
+    RUTAS_SIN_PERMISO.includes(location.pathname) ||
+    dataPermisosGlobales?.some((item) => {
+      const link = item.modulos?.link;
+      if (!link) return false;
+      // "/reportes" tiene subpáginas (/reportes/report_ventas, etc.) que
+      // comparten el mismo permiso del módulo padre.
+      return (
+        location.pathname === link ||
+        (link === "/reportes" && location.pathname.startsWith("/reportes/"))
+      );
+    });
 
   if (accessBy === "non-authenticated") {
     if (!user) {
@@ -41,7 +53,7 @@ export const ProtectedRoute = ({ children, accessBy }) => {
   } else if (accessBy === "authenticated") {
     if (user) {
       if (!hasPermission) {
-        // return <Navigate to="/404" />;
+        return <Navigate to="/404" />;
       }
 
       return children;

@@ -5,13 +5,13 @@ import { v } from "../../../styles/variables";
 import { NavLink } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { useAuthStore } from "../../../store/AuthStore";
-import { useUsuariosStore } from "../../../store/UsuariosStore";
+import { usePermisosDeMenu } from "../../../hooks/usePermisosDeMenu";
 export const MenuMovil = ({ setState }) => {
   const [state, setstate] = useState(true);
   const { cerrarSesion } = useAuthStore();
-  const { datausuarios } = useUsuariosStore();
-  const esSuperAdmin = datausuarios?.roles?.nombre === "superadmin";
-  const LinksArray = getLinksArray(esSuperAdmin);
+  const { esSuperAdmin, puedeVer } = usePermisosDeMenu();
+  const LinksArray = getLinksArray(esSuperAdmin).filter((l) => puedeVer(l.to));
+  const linksSecundarios = SecondarylinksArray.filter((l) => puedeVer(l.to));
 
   return (
     <Container>
@@ -45,7 +45,7 @@ export const MenuMovil = ({ setState }) => {
             </div>
           ))}
           <Divider />
-          {SecondarylinksArray.map(({ icon, label, to, color }) => (
+          {linksSecundarios.map(({ icon, label, to, color }) => (
             <div
               className={state ? "LinkContainer active" : "LinkContainer"}
               key={label}
