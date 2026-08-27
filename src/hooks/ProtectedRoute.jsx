@@ -19,6 +19,11 @@ export const ProtectedRoute = ({ children, accessBy }) => {
     queryFn: () => mostrarPermisosGlobales({ id_usuario: datausuarios?.id }),
     enabled: !!datausuarios?.id,
   });
+  if (user === undefined) {
+    // Todavía no se confirmó si hay sesión o no (Supabase no respondió aún):
+    // no decidir ninguna redirección todavía para no rebotar de más.
+    return <span>cargando...</span>;
+  }
   if (isLoadingPermisosGlobales) {
     return <span>cargando permisos...</span>;
   }

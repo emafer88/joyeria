@@ -1,11 +1,13 @@
 import { create } from "zustand";
-import { supabase, MostrarUsuarios, ObtenerIdAuthSupabase } from "../index";
-import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "../index";
 
 export const useAuthStore = create((set) => ({
   loginGoogle: async () => {
     await supabase.auth.signInWithOAuth({
       provider: "google",
+      options: {
+        queryParams: { prompt: "select_account" },
+      },
     });
   },
   cerrarSesion: async () => {
@@ -24,14 +26,6 @@ export const useAuthStore = create((set) => ({
         throw new Error("Error al iniciar sesión: " + error.message);
       }
     }
-    return data.user
-  },
-  crearUserYLogin:async(p)=>{
-    const { data, error } = await supabase.auth.signUp({
-      email: p.email,
-      password: p.password,
-      
-    })
     return data.user
   },
   // obtenerIdAuthSupabase: async () => {

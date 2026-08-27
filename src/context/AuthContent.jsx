@@ -11,7 +11,9 @@ import Swal from "sweetalert2";
 
 const AuthContext = createContext();
 export const AuthContextProvider = ({ children }) => {
-  const [user, setUser] = useState([]);
+  // undefined = todavía no se sabe si hay sesión (esperando a Supabase);
+  // null = confirmado que no hay sesión; objeto = usuario logueado.
+  const [user, setUser] = useState(undefined);
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange(async (event, session) => {

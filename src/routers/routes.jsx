@@ -4,6 +4,7 @@ import {
   Configuraciones,
   Home,
   Login,
+  AdminLogin,
   Productos,
   ProtectedRoute,
   POS,
@@ -37,6 +38,14 @@ export function MyRoutes() {
         element={
           <ProtectedRoute accessBy="non-authenticated">
             <Login />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute accessBy="non-authenticated">
+            <AdminLogin />
           </ProtectedRoute>
         }
       />

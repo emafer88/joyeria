@@ -61,6 +61,7 @@ export * from "./pages/Configuraciones";
 export * from "./pages/Empresa";
 export * from "./pages/Home";
 export * from "./pages/Login";
+export * from "./pages/AdminLogin";
 export * from "./pages/POS";
 export * from "./pages/Productos";
 export * from "./routers/routes";
