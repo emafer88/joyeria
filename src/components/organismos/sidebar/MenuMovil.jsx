@@ -1,13 +1,17 @@
 import styled from "styled-components";
 import { useState } from "react";
-import { LinksArray, SecondarylinksArray, ToggleTema } from "../../../index";
+import { getLinksArray, SecondarylinksArray, ToggleTema } from "../../../index";
 import { v } from "../../../styles/variables";
 import { NavLink } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { useAuthStore } from "../../../store/AuthStore";
+import { useUsuariosStore } from "../../../store/UsuariosStore";
 export const MenuMovil = ({ setState }) => {
   const [state, setstate] = useState(true);
   const { cerrarSesion } = useAuthStore();
+  const { datausuarios } = useUsuariosStore();
+  const esSuperAdmin = datausuarios?.roles?.nombre === "superadmin";
+  const LinksArray = getLinksArray(esSuperAdmin);
 
   return (
     <Container>

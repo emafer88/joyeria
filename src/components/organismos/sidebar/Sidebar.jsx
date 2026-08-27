@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import {
-  LinksArray,
+  getLinksArray,
   SecondarylinksArray,
   ToggleTema,
   useAuthStore,
@@ -9,10 +9,14 @@ import { v } from "../../../styles/variables";
 import { NavLink } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useUsuariosStore } from "../../../store/UsuariosStore";
 
 export function Sidebar({ state, setState }) {
   const { cerrarSesion } = useAuthStore();
   const queryClient = useQueryClient();
+  const { datausuarios } = useUsuariosStore();
+  const esSuperAdmin = datausuarios?.roles?.nombre === "superadmin";
+  const LinksArray = getLinksArray(esSuperAdmin);
   //  const salir =()=>{
   //   cerrarSesion()
   //   queryClient.clear();
