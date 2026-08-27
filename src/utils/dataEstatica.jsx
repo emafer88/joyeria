@@ -20,33 +20,34 @@ export const DesplegableUser = [
 ];
 
 //data SIDEBAR
-export const LinksArray = [
-  {
-    label: "Home",
-    icon: "noto-v1:house",
-    to: "/",
-  },
-  {
+// Sin "Home": ya no se muestra en el menú para ningún rol.
+// Para empleados (cualquier rol que no sea "superadmin"), VENDER va primero.
+export const getLinksArray = (esSuperAdmin) => {
+  const dashboard = {
     label: "Dashboard",
     icon: "fluent-emoji-flat:antenna-bars",
     to: "/dashboard",
-  },
-  {
+  };
+  const vender = {
     label: "VENDER",
     icon: "flat-color-icons:shop",
     to: "/pos",
-  },
-  {
+  };
+  const inventario = {
     label: "Inventario",
     icon: "flat-ui:box",
     to: "/inventario",
-  },
-  {
+  };
+  const reportes = {
     label: "Reportes",
     icon: "flat-ui:graph",
     to: "/reportes",
-  },
-];
+  };
+
+  return esSuperAdmin
+    ? [dashboard, vender, inventario, reportes]
+    : [vender, dashboard, inventario, reportes];
+};
 export const SecondarylinksArray = [
   {
     label: "Configuración",

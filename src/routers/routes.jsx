@@ -2,8 +2,9 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import {
   Categorias,
   Configuraciones,
-  Home,
   Login,
+  AdminLogin,
+  InicioPublico,
   Productos,
   ProtectedRoute,
   POS,
@@ -12,6 +13,8 @@ import {
   Empresa,
   ClientesProveedores,
 } from "../index";
+import { UserAuth } from "../context/AuthContent";
+import { useUsuariosStore } from "../store/UsuariosStore";
 import { BasicosConfig } from "../components/organismos/EmpresaConfigDesign/BasicosConfig";
 import { MonedaConfig } from "../components/organismos/EmpresaConfigDesign/MonedaConfig";
 import { MetodosPago } from "../pages/MetodosPago";
@@ -29,6 +32,32 @@ import { ReportInventarios } from "../components/organismos/reports/ReportInvent
 import ReportVentas from "../components/organismos/reports/ReportVentas";
 import ReportStockBajoMinimo from "../components/organismos/reports/ReportStockBajoMinimo";
 
+// "/" es pública: a un visitante sin sesión le muestra la home con el botón
+// "Iniciar sesión". A un usuario ya logueado lo manda directo a su pantalla
+// principal según el rol: superadmin -> /dashboard, cualquier otro -> /pos.
+function HomeRoute() {
+  const { user } = UserAuth();
+  if (user === undefined) {
+    return <span>cargando...</span>;
+  }
+  if (user) {
+    return (
+      <Layout>
+        <RedirigirSegunRol />
+      </Layout>
+    );
+  }
+  return <InicioPublico />;
+}
+
+// Se monta dentro de <Layout>, que ya esperó a que datausuarios esté
+// resuelto antes de renderizar hijos, así que acá el rol ya está disponible.
+function RedirigirSegunRol() {
+  const { datausuarios } = useUsuariosStore();
+  const esSuperAdmin = datausuarios?.roles?.nombre === "superadmin";
+  return <Navigate to={esSuperAdmin ? "/dashboard" : "/pos"} replace />;
+}
+
 export function MyRoutes() {
   return (
     <Routes>
@@ -37,6 +66,14 @@ export function MyRoutes() {
         element={
           <ProtectedRoute accessBy="non-authenticated">
             <Login />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute accessBy="non-authenticated">
+            <AdminLogin />
           </ProtectedRoute>
         }
       />
@@ -181,16 +218,7 @@ export function MyRoutes() {
           </Layout>
         }
       />
-      <Route
-        path="/"
-        element={
-          <Layout>
-            <ProtectedRoute accessBy="authenticated">
-              <Home />
-            </ProtectedRoute>
-          </Layout>
-        }
-      />
+      <Route path="/" element={<HomeRoute />} />
       <Route
         path="/dashboard"
         element={

@@ -72,13 +72,14 @@ export async function EditarUsuarios(p) {
   }
 
   await EliminarPermisos({ id_usuario });
-  selectModules.forEach(async (idModule) => {
-    let pp = {
-      id_usuario: id_usuario,
-      idmodulo: idModule,
-    };
-    await InsertarPermisos(pp);
-  });
+  // Esperar a que TODOS los permisos queden guardados antes de dar por
+  // terminada la edición (forEach con async no espera nada, y un error acá
+  // quedaba silenciado).
+  await Promise.all(
+    selectModules.map((idModule) =>
+      InsertarPermisos({ id_usuario, idmodulo: idModule })
+    )
+  );
 }
 
 // Edita únicamente datos del usuario (perfil, tema, etc.) sin tocar

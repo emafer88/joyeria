@@ -1,13 +1,17 @@
 import styled from "styled-components";
 import { useState } from "react";
-import { LinksArray, SecondarylinksArray, ToggleTema } from "../../../index";
+import { getLinksArray, SecondarylinksArray, ToggleTema } from "../../../index";
 import { v } from "../../../styles/variables";
 import { NavLink } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { useAuthStore } from "../../../store/AuthStore";
+import { usePermisosDeMenu } from "../../../hooks/usePermisosDeMenu";
 export const MenuMovil = ({ setState }) => {
   const [state, setstate] = useState(true);
   const { cerrarSesion } = useAuthStore();
+  const { esSuperAdmin, puedeVer } = usePermisosDeMenu();
+  const LinksArray = getLinksArray(esSuperAdmin).filter((l) => puedeVer(l.to));
+  const linksSecundarios = SecondarylinksArray.filter((l) => puedeVer(l.to));
 
   return (
     <Container>
@@ -41,7 +45,7 @@ export const MenuMovil = ({ setState }) => {
             </div>
           ))}
           <Divider />
-          {SecondarylinksArray.map(({ icon, label, to, color }) => (
+          {linksSecundarios.map(({ icon, label, to, color }) => (
             <div
               className={state ? "LinkContainer active" : "LinkContainer"}
               key={label}

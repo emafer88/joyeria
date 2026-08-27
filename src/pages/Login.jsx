@@ -1,5 +1,5 @@
 import { LoginTemplate } from "../index";
 
 export function Login() {
-  return (<LoginTemplate/>);
+  return (<LoginTemplate modo="empleado" />);
 }

@@ -64,13 +64,13 @@ export const useUsuariosStore = create((set) => ({
     });
 
     if (Array.isArray(selectModules) && selectModules.length > 0) {
-      selectModules.forEach(async (idModule) => {
-        let p = {
-          id_usuario: dataUserNew?.id,
-          idmodulo: idModule,
-        };
-        await InsertarPermisos(p);
-      });
+      // Esperar a que TODOS los permisos queden guardados (forEach con
+      // async no espera nada, y un error acá quedaba silenciado).
+      await Promise.all(
+        selectModules.map((idModule) =>
+          InsertarPermisos({ id_usuario: dataUserNew?.id, idmodulo: idModule })
+        )
+      );
     } else {
       throw new Error("No hay módulos seleccionados");
     }
