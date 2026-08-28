@@ -22,13 +22,18 @@ import {
   MostrarInventarioListado,
   ReservarPieza,
   InsertarLineaPieza,
-} from "../supabase/crudJoyeria";
+  AjustarPieza,
+  MarcarPieza,
+  DevolverPieza,
+  MostrarMovimientosPieza,
+} from "../supabaseCrud/crudJoyeria";
 
 export const K_DISENOS = "joyeria_disenos";
 export const K_VARIANTES = "joyeria_variantes";
 export const K_RESUMEN_PIEZAS = "joyeria_resumen_piezas";
 export const K_PIEZAS = "joyeria_piezas";
 export const K_INV_LISTADO = "joyeria_inv_listado";
+export const K_MOV_PIEZA = "joyeria_mov_pieza";
 
 // ---------------------------------------------------------------------------
 // Queries
@@ -108,11 +113,21 @@ export const useInventarioListadoQuery = () => {
   });
 };
 
+/** Historial (kardex) de una pieza. Se carga solo cuando hay idPieza. */
+export const useMovimientosPiezaQuery = (idPieza) =>
+  useQuery({
+    queryKey: [K_MOV_PIEZA, idPieza],
+    queryFn: () => MostrarMovimientosPieza({ id_pieza: idPieza }),
+    enabled: !!idPieza,
+    refetchOnWindowFocus: false,
+  });
+
 // ---------------------------------------------------------------------------
 // Mutations
 // ---------------------------------------------------------------------------
 
-const num = (v) => (v === "" || v === null || v === undefined ? null : Number(v));
+const num = (v) =>
+  v === "" || v === null || v === undefined ? null : Number(v);
 
 export const useGuardarDisenoMutation = () => {
   const qc = useQueryClient();
@@ -151,7 +166,7 @@ export const useEliminarDisenoMutation = () => {
     mutationFn: (id) => EliminarProductoJoyeria({ id }),
     onError: (e) =>
       toast.error(
-        "No se pudo eliminar el diseño (¿tiene piezas cargadas?): " + e.message
+        "No se pudo eliminar el diseño (¿tiene piezas cargadas?): " + e.message,
       ),
     onSuccess: () => {
       toast.success("Diseño eliminado");
@@ -200,7 +215,8 @@ export const useEliminarVarianteMutation = (idProducto) => {
     mutationFn: (id) => EliminarVariante({ id }),
     onError: (e) =>
       toast.error(
-        "No se pudo eliminar la variante (¿tiene piezas cargadas?): " + e.message
+        "No se pudo eliminar la variante (¿tiene piezas cargadas?): " +
+          e.message,
       ),
     onSuccess: () => {
       toast.success("Variante eliminada");
@@ -220,14 +236,16 @@ export const useAgregarPiezaCarritoMutation = () => {
     mutationFn: async (pieza) => {
       if (pieza?.estado !== "disponible") {
         throw new Error(
-          `La pieza no está disponible (${pieza?.estado ?? "desconocido"})`
+          `La pieza no está disponible (${pieza?.estado ?? "desconocido"})`,
         );
       }
       const empresa = useEmpresaStore.getState().dataempresa;
       const usuario = useUsuariosStore.getState().datausuarios;
       const cierre = useCierreCajaStore.getState().dataCierreCaja;
       const ventas = useVentasStore.getState();
-      const fecha = new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
+      const fecha = new Date(
+        Date.now() - new Date().getTimezoneOffset() * 60000,
+      )
         .toISOString()
         .slice(0, 19)
         .replace("T", " ");
@@ -260,7 +278,9 @@ export const useAgregarPiezaCarritoMutation = () => {
         costo: pieza.costo,
         descripcion: `${pieza.producto} · ${pieza.material} ${
           pieza.pureza ?? ""
-        } · ${pieza.peso} g`.replace(/\s+/g, " ").trim(),
+        } · ${pieza.peso} g`
+          .replace(/\s+/g, " ")
+          .trim(),
         id_sucursal: cierre?.caja?.id_sucursal,
         id_almacen: pieza.id_almacen,
       });
@@ -270,6 +290,56 @@ export const useAgregarPiezaCarritoMutation = () => {
       toast.success("Pieza agregada al carrito");
       qc.invalidateQueries({ queryKey: ["mostrar detalle venta"] });
       qc.invalidateQueries({ queryKey: [K_INV_LISTADO] });
+    },
+  });
+};
+
+/**
+ * Movimiento manual sobre una pieza: ajuste (peso/costo/precio), marcar
+ * (perdida / danada / disponible) o devolución post-venta. `tipo` decide qué
+ * RPC se llama; invalida piezas, inventario, resumen e historial de la pieza.
+ */
+export const useMovimientoPiezaMutation = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ tipo, pieza, values }) => {
+      const empresa = useEmpresaStore.getState().dataempresa;
+      const usuario = useUsuariosStore.getState().datausuarios;
+      const base = {
+        id_pieza: pieza.id_pieza ?? pieza.id,
+        id_empresa: empresa?.id,
+        id_usuario: usuario?.id ?? null,
+      };
+      if (tipo === "ajuste") {
+        return AjustarPieza({
+          ...base,
+          peso: num(values.peso),
+          costo: num(values.costo),
+          precio_venta: num(values.precio_venta),
+          nota: values.nota || null,
+        });
+      }
+      if (tipo === "marcar") {
+        return MarcarPieza({ ...base, estado: values.estado, nota: values.nota || null });
+      }
+      if (tipo === "devolver") {
+        return DevolverPieza({
+          ...base,
+          destino: values.destino,
+          nota: values.nota || null,
+        });
+      }
+      throw new Error(`Tipo de movimiento inválido: ${tipo}`);
+    },
+    onError: (e) => toast.error(e.message),
+    onSuccess: (_data, vars) => {
+      toast.success("Movimiento registrado");
+      qc.invalidateQueries({ queryKey: [K_PIEZAS] });
+      qc.invalidateQueries({ queryKey: [K_INV_LISTADO] });
+      qc.invalidateQueries({ queryKey: [K_RESUMEN_PIEZAS] });
+      qc.invalidateQueries({
+        queryKey: [K_MOV_PIEZA, vars.pieza.id_pieza ?? vars.pieza.id],
+      });
     },
   });
 };

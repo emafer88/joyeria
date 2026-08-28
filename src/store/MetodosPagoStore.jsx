@@ -1,5 +1,10 @@
 import { create } from "zustand";
-import { MostrarMetodosPago,InsertarMetodosPago,EliminarMetodosPago,EditarMetodosPago } from "../supabase/crudMetodosPago";
+import {
+  MostrarMetodosPago,
+  InsertarMetodosPago,
+  EliminarMetodosPago,
+  EditarMetodosPago,
+} from "../supabaseCrud/crudMetodosPago";
 
 export const useMetodosPagoStore = create((set) => ({
   dataMetodosPago: null,
@@ -21,5 +26,4 @@ export const useMetodosPagoStore = create((set) => ({
   editarMetodosPago: async (p, fileold, filenew) => {
     await EditarMetodosPago(p, fileold, filenew);
   },
-
 }));

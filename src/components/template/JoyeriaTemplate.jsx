@@ -7,6 +7,8 @@ import { ListaProductosJoyeria } from "../organismos/joyeria/ListaProductosJoyer
 import { FormProductoJoyeria } from "../organismos/joyeria/FormProductoJoyeria";
 import { FormVariante } from "../organismos/joyeria/FormVariante";
 import { FormAltaMasivaPiezas } from "../organismos/joyeria/FormAltaMasivaPiezas";
+import { FormMovimientoPieza } from "../organismos/joyeria/FormMovimientoPieza";
+import { HistorialPieza } from "../organismos/joyeria/HistorialPieza";
 import { TablaInventarioJoyeria } from "../organismos/joyeria/TablaInventarioJoyeria";
 
 /**
@@ -31,6 +33,8 @@ export function JoyeriaTemplate() {
       {modal === "piezas_masivo" && (
         <FormAltaMasivaPiezas onClose={cerrarModal} />
       )}
+      {modal === "mov_pieza" && <FormMovimientoPieza onClose={cerrarModal} />}
+      {modal === "historial_pieza" && <HistorialPieza onClose={cerrarModal} />}
 
       <div className="subtabs">
         <button

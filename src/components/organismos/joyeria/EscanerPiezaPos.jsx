@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Btn1 } from "../../../index";
 import { useEmpresaStore } from "../../../store/EmpresaStore";
 import { EscanerCodigoBarras } from "./EscanerCodigoBarras";
-import { PosBuscarPieza } from "../../../supabase/crudJoyeria";
+import { PosBuscarPieza } from "../../../supabaseCrud/crudJoyeria";
 import { useAgregarPiezaCarritoMutation } from "../../../tanstack/JoyeriaStack";
 
 const ESTADO_LABEL = {
@@ -59,9 +59,7 @@ export function EscanerPiezaPos() {
       </FloatBtn>
 
       {open && (
-        <Overlay
-          onClick={(e) => e.target === e.currentTarget && cerrar()}
-        >
+        <Overlay onClick={(e) => e.target === e.currentTarget && cerrar()}>
           <Panel>
             <div className="head">
               <h2>Escanear pieza</h2>
@@ -92,8 +90,8 @@ export function EscanerPiezaPos() {
                     agregar.isPending
                       ? "Agregando…"
                       : pieza.estado === "disponible"
-                      ? "Agregar al carrito"
-                      : "No disponible"
+                        ? "Agregar al carrito"
+                        : "No disponible"
                   }
                   bgcolor="#F9D70B"
                   disabled={pieza.estado !== "disponible" || agregar.isPending}

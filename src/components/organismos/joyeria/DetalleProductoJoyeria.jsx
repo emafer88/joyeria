@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import styled from "styled-components";
 import Swal from "sweetalert2";
+import { Icon } from "@iconify/react";
 import { Btn1 } from "../../../index";
 import { v } from "../../../styles/variables";
 import { useJoyeriaStore } from "../../../store/JoyeriaStore";
@@ -23,11 +24,15 @@ const ESTADO_LABEL = {
 /** Lista de piezas de una variante (se carga solo al expandir). */
 function PiezasDeVariante({ idVariante, producto, material, pureza }) {
   const { data: piezas = [], isLoading } = usePiezasVarianteQuery(idVariante);
+  const { abrirModalPieza } = useJoyeriaStore();
   const [sel, setSel] = useState(() => new Set());
+
+  const abrir = (modal, p) =>
+    abrirModalPieza(modal, { ...p, id_pieza: p.id, producto, material, pureza });
 
   const seleccionadas = useMemo(
     () => piezas.filter((p) => sel.has(p.id)),
-    [piezas, sel]
+    [piezas, sel],
   );
 
   const toggle = (id) =>
@@ -38,7 +43,9 @@ function PiezasDeVariante({ idVariante, producto, material, pureza }) {
     });
   const toggleTodas = () =>
     setSel((prev) =>
-      prev.size === piezas.length ? new Set() : new Set(piezas.map((p) => p.id))
+      prev.size === piezas.length
+        ? new Set()
+        : new Set(piezas.map((p) => p.id)),
     );
 
   const imprimir = (lista) =>
@@ -81,6 +88,7 @@ function PiezasDeVariante({ idVariante, producto, material, pureza }) {
               <th>Costo</th>
               <th>Precio</th>
               <th>Estado</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -99,6 +107,20 @@ function PiezasDeVariante({ idVariante, producto, material, pureza }) {
                 <td>{p.costo}</td>
                 <td>{p.precio_venta}</td>
                 <td>{ESTADO_LABEL[p.estado] ?? p.estado}</td>
+                <td className="acc-pieza">
+                  <button
+                    title="Ajustar / marcar / devolver"
+                    onClick={() => abrir("mov_pieza", p)}
+                  >
+                    <Icon icon="mdi:tune-vertical" />
+                  </button>
+                  <button
+                    title="Ver historial"
+                    onClick={() => abrir("historial_pieza", p)}
+                  >
+                    <Icon icon="mdi:history" />
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -111,7 +133,7 @@ function PiezasDeVariante({ idVariante, producto, material, pureza }) {
 /**
  * Contenido expandido de un diseño: sus variantes con el conteo de piezas
  * (disponibles / total), el alta masiva de piezas y la lista de piezas.
- * @param {{ diseno: import("../../../supabase/crudJoyeria").DisenoJoyeria }} props
+ * @param {{ diseno: import("../../../supabaseCrud/crudJoyeria").DisenoJoyeria }} props
  */
 export function DetalleProductoJoyeria({ diseno }) {
   const { abrirModal, setDisenoSelect, setVarianteSelect } = useJoyeriaStore();
@@ -183,12 +205,9 @@ export function DetalleProductoJoyeria({ diseno }) {
                 <span className="sku">{variante.sku_prefijo}</span>
                 <button
                   className="conteo"
-                  onClick={() =>
-                    setVerPiezasDe(abierta ? null : variante.id)
-                  }
+                  onClick={() => setVerPiezasDe(abierta ? null : variante.id)}
                 >
-                  {c.disponibles} disp. / {c.total} piezas{" "}
-                  {abierta ? "▲" : "▼"}
+                  {c.disponibles} disp. / {c.total} piezas {abierta ? "▲" : "▼"}
                 </button>
               </div>
               <div className="acciones">
@@ -324,5 +343,22 @@ const Container = styled.div`
   }
   .mono {
     font-family: monospace;
+  }
+  .acc-pieza {
+    display: flex;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .acc-pieza button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: ${({ theme }) => theme.text};
+    display: flex;
+    opacity: 0.75;
+  }
+  .acc-pieza button:hover {
+    opacity: 1;
   }
 `;

@@ -1,9 +1,10 @@
 # Módulo de inventario de joyería — estado y pendientes
 
-> Retomar acá. Inventario serializado: cada **pieza física** es un registro con
-> SKU y código de barras únicos. Jerarquía: Categoría → Diseño (`productos`) →
-> Variante (`producto_variantes`) → Pieza (`piezas_inventario`) → Movimientos
-> (`movimientos_piezas`).
+> **Etapas 1–7 completas y probadas en dev (2026-08-28).** Inventario serializado:
+> cada **pieza física** es un registro con SKU y código de barras únicos. Jerarquía:
+> Categoría → Diseño (`productos`) → Variante (`producto_variantes`) →
+> Pieza (`piezas_inventario`) → Movimientos (`movimientos_piezas`).
+> Pendiente opcional: endurecer la venta abandonada en el POS (ver Notas / gotchas).
 
 ## Cómo levantar
 
@@ -24,19 +25,36 @@ npm run dev
 | Etapa | Qué es | Estado | Probado en dev |
 |---|---|---|---|
 | 1 | SQL (tablas, RPC, triggers, RLS) | Aplicado en Supabase por el usuario | ✅ (verificación SQL OK) |
-| 2 | Catálogo: alta/edición de diseños y variantes | Código listo, compila | ⬜ pendiente |
-| 3 | Alta masiva de piezas | Código listo, compila | ⬜ pendiente |
-| 4 | Etiquetas con código de barras (EAN-13) | Código listo, compila | ⬜ pendiente |
-| 5 | Pantalla de inventario (TanStack Table) | Código listo, compila | ⬜ pendiente |
-| 6 | POS: escanear pieza y agregar al carrito | Código listo, compila | ⬜ pendiente |
-| 7 | Movimientos manuales (ajuste / pérdida / daño / devolución) + historial | **NO iniciado** | — |
+| 2 | Catálogo: alta/edición de diseños y variantes | Código listo, compila | ✅ 2026-08-28 |
+| 3 | Alta masiva de piezas | Código listo, compila | ✅ 2026-08-28 |
+| 4 | Etiquetas con código de barras (EAN-13) | Código listo, compila | ✅ 2026-08-28 |
+| 5 | Pantalla de inventario (TanStack Table) | Código listo, compila | ✅ 2026-08-28 |
+| 6 | POS: escanear pieza y agregar al carrito | Código listo, compila | ✅ 2026-08-28 (tras fix, ver abajo) |
+| 7 | Movimientos manuales (ajuste / pérdida / daño / devolución) + historial | Código listo, compila | ✅ 2026-08-28 |
 
 ### SQL aplicado
 - `sql/2026-08-27_modulo_joyeria.sql` (corrido y verificado en Supabase).
 - Rollback disponible: `sql/2026-08-27_rollback_modulo_joyeria.sql`.
+- **`supabase/migrations/20260828193000_fix_joyeria_reserva_pieza_after_insert.sql`** (aplicado).
+  Bug encontrado probando la Etapa 6: `zz_joyeria_detalle_venta_biu` era `BEFORE INSERT`
+  y hacía `UPDATE piezas_inventario SET id_detalle_venta = NEW.id` cuando la fila de
+  `detalle_venta` todavía no existía → violación de FK `piezas_inventario_id_detalle_venta_fkey`.
+  La línea de venta nunca se creaba y la pieza quedaba `reservada` colgada; además, con
+  `id_detalle_venta` en NULL, cobrar tampoco marcaba la pieza como `vendida`.
+  Fix: el `BEFORE` solo normaliza `cantidad := 1`; la reserva pasa a un trigger nuevo
+  `zz_joyeria_detalle_venta_ai` **`AFTER INSERT OR UPDATE`** + limpieza de piezas trabadas.
+
+### Workflow de SQL nuevo
+- A partir de ahora el SQL nuevo va como archivo en **`supabase/migrations/`**
+  (`<timestamp>_descripcion.sql`), no en `sql/`. La baseline del esquema remoto está en
+  `supabase/migrations/20260828181817_remote_schema.sql` (traída con `supabase db pull`).
 
 ### Archivos del frontend (etapas 2–6)
-- `src/supabase/crudJoyeria.jsx` — todos los wrappers de RPC / queries.
+> Nota: la carpeta `src/supabase/` se renombró a **`src/supabaseCrud/`** (refactor
+> general de la rama). Todas las rutas de abajo con `src/supabase/...` viven ahora
+> en `src/supabaseCrud/...`.
+
+- `src/supabaseCrud/crudJoyeria.jsx` — todos los wrappers de RPC / queries.
 - `src/store/JoyeriaStore.jsx` — selección compartida + control de modales.
 - `src/tanstack/JoyeriaStack.jsx` — queries y mutations con invalidación.
 - `src/components/organismos/joyeria/`
@@ -105,30 +123,43 @@ npm run dev
 
 ---
 
-## SIGUIENTE PASO — Etapa 7: movimientos manuales + historial
+## Etapa 7: movimientos manuales + historial — CÓDIGO LISTO (compila), ⬜ probar en dev
 
-RPCs ya creados en el SQL (etapa 1), falta solo el frontend:
+RPCs de la etapa 1 (sin SQL nuevo): `ajustar_pieza`, `marcar_pieza`, `devolver_pieza`,
+`joyeria_movimientos_pieza(_id_pieza)`.
 
-- **`ajustar_pieza`** — corregir peso / costo / precio de una pieza no vendida.
-- **`marcar_pieza`** — marcar `perdida` / `danada`, o volver a `disponible`.
-- **`devolver_pieza`** — devolución post-venta (pieza `vendida` → `disponible` o `danada`).
-- **`joyeria_movimientos_pieza(_id_pieza)`** — historial de la pieza.
+Hecho:
+- `crudJoyeria.jsx`: `AjustarPieza`, `MarcarPieza`, `DevolverPieza`, `MostrarMovimientosPieza`.
+- `JoyeriaStack.jsx`: `useMovimientoPiezaMutation` (un `tipo` = 'ajuste' | 'marcar' | 'devolver'
+  → la RPC correspondiente; invalida `K_PIEZAS`, `K_INV_LISTADO`, `K_RESUMEN_PIEZAS`,
+  `K_MOV_PIEZA`) + `useMovimientosPiezaQuery(idPieza)`.
+- `JoyeriaStore.jsx`: `piezaSelect` + `setPiezaSelect` + `abrirModalPieza(modal, pieza)`;
+  `cerrarModal` ahora limpia `piezaSelect`. Modales nuevos: `'mov_pieza'`, `'historial_pieza'`.
+- `FormMovimientoPieza.jsx` — modal con pestañas. Si la pieza está `vendida` → solo
+  **Devolver** (destino disponible/dañada). Si no → **Ajustar** (peso/costo/precio, campo
+  vacío = no toca) o **Marcar** (estado destino = disponible/dañada/perdida menos el actual).
+  Nota opcional. Las validaciones fuertes las hace la BD.
+- `HistorialPieza.jsx` — timeline de `movimientos_piezas` (tipo, estado ant→nuevo, fecha,
+  usuario, notas).
+- `JoyeriaTemplate.jsx` — renderiza los 2 modales nuevos.
+- Enganche: botones ⚙ (movimiento) e 🕘 (historial) por pieza en la tabla de
+  `DetalleProductoJoyeria.jsx` (Catálogo) y en la fila de pieza de `TablaInventarioJoyeria.jsx`
+  (Inventario).
 
-A construir:
-1. `crudJoyeria.jsx`: wrappers `AjustarPieza`, `MarcarPieza`, `DevolverPieza`,
-   `MostrarMovimientosPieza`.
-2. `JoyeriaStack.jsx`: mutations (invalidar `K_PIEZAS`, `K_INV_LISTADO`,
-   `K_RESUMEN_PIEZAS`) + query del historial.
-3. Componentes:
-   - `FormAjustePieza.jsx` — modal para ajuste / marcar / devolver (según estado
-     de la pieza).
-   - `HistorialPieza.jsx` — timeline de `movimientos_piezas` (tipo,
-     estado anterior → nuevo, fecha, usuario, notas).
-4. Enganche: en `TablaInventarioJoyeria.jsx` (fila de pieza) y/o en la lista de
-   piezas de `DetalleProductoJoyeria.jsx`, agregar acciones “Ajustar”,
-   “Marcar” y “Ver historial”.
-
-No hace falta correr más SQL para la etapa 7.
+### Pruebas pendientes Etapa 7 (en `npm run dev`, Productos → Joyería)
+1. **Ajustar**: en una pieza `disponible`, botón ⚙ → pestaña *Ajustar* → cambiar precio
+   → Registrar. El precio se actualiza en la tabla y en el historial aparece un
+   movimiento `ajuste` con el "peso x→y, costo…, precio…".
+2. **Marcar perdida/dañada**: ⚙ → *Marcar* → estado `Perdida` + nota → Registrar.
+   La pieza pasa a `Perdida`, el resumen de disponibles baja, historial suma `perdida`.
+3. **Revertir**: en esa pieza `perdida`, ⚙ → *Marcar* → `Disponible` → vuelve a stock.
+4. **Devolver**: sobre una pieza `vendida` (cobrá una en el POS antes), ⚙ → *Devolver*
+   → destino `Disponible` → la pieza vuelve a `disponible`, historial suma `devolucion`.
+   Con destino `Dañada` queda `danada`.
+5. **Guardas de la BD**: intentar *Ajustar* o *Marcar* una pieza `vendida` no debería
+   ofrecerse (el modal muestra solo *Devolver*); *Devolver* una NO vendida debe fallar
+   con toast de error.
+6. **Historial** (🕘): abre el timeline, más reciente arriba, con fechas locales.
 
 ---
 
@@ -140,3 +171,9 @@ No hace falta correr más SQL para la etapa 7.
   el flujo de venta normal (productos por cantidad) quedó intacto.
 - Toda la app está en **JavaScript/JSX** (no TypeScript) — se siguió ese patrón.
 - Etiquetas: codificador EAN-13 propio, sin dependencias nuevas.
+- **Venta abandonada:** si se cierra la app sin cobrar ni cancelar, la pieza queda
+  `reservada` hasta que el POS se vuelva a montar y corra `EliminarVentasIncompletas`
+  (borra la venta `pendiente` → cascada a `detalle_venta` → trigger
+  `zz_joyeria_detalle_venta_ad` libera la pieza). Es el comportamiento del POS legacy,
+  no un bug. Endurecimiento opcional pendiente: liberar al quitar del panel del escáner
+  o un cleanup por antigüedad de reservas.

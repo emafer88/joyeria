@@ -1,11 +1,10 @@
 import { create } from "zustand";
 import {
   MostrarCajaXSucursal,
-
   EditarCaja,
   EliminarCaja,
-} from "../supabase/crudCaja";
-import { supabase } from "../supabase/supabase.config";
+} from "../supabaseCrud/crudCaja";
+import { supabase } from "../supabaseCrud/supabase.config";
 const tabla = "caja";
 export const useCajasStore = create((set) => ({
   stateCaja: false,

@@ -1,5 +1,8 @@
 import { create } from "zustand";
-import { InsertarMovStock, MostrarMovStock } from "../supabase/crudMovStock";
+import {
+  InsertarMovStock,
+  MostrarMovStock,
+} from "../supabaseCrud/crudMovStock";
 
 export const useMovStockStore = create((set) => ({
   tipo: "ingreso",
@@ -10,7 +13,7 @@ export const useMovStockStore = create((set) => ({
     await InsertarMovStock(p);
   },
   mostrarMovStock: async (p) => {
-   const result= await MostrarMovStock(p);
-   return result
+    const result = await MostrarMovStock(p);
+    return result;
   },
 }));

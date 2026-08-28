@@ -7,7 +7,7 @@ import {
   InsertarPermisos,
   MostrarPermisosGlobales,
   MostrarPermisosConfiguracion,
-} from "../supabase/crudPermisos";
+} from "../supabaseCrud/crudPermisos";
 export const usePermisosStore = create((set, get) => ({
   datapermisos: [],
   selectedModules: [],

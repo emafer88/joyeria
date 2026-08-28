@@ -2,7 +2,7 @@ import { create } from "zustand";
 import {
   EditarImpresoras,
   MostrarImpresoraXCaja,
-} from "../supabase/crudImpresoras";
+} from "../supabaseCrud/crudImpresoras";
 const fetchWithTimeout = (url, timeout = 5000) => {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error("Timeout")), timeout);
@@ -33,7 +33,7 @@ export const useImpresorasStore = create((set, get) => ({
     try {
       const response = await fetchWithTimeout(
         "http://localhost:5075/api/get-local-ip",
-        5000
+        5000,
       );
       if (!response.ok) {
         throw new Error(`Error de red: ${response.statusText}`);
@@ -69,5 +69,4 @@ export const useImpresorasStore = create((set, get) => ({
     }));
     return response;
   },
-  
 }));

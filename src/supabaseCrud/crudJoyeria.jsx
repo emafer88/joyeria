@@ -275,3 +275,54 @@ export async function MostrarCategoriasJoyeria(p) {
   if (error) throw new Error(error.message);
   return data || [];
 }
+
+// ---------------------------------------------------------------------------
+// Movimientos manuales (ajuste / marcar / devolver) + historial de la pieza
+// ---------------------------------------------------------------------------
+
+/** Corrige peso / costo / precio de una pieza no vendida (deja kardex 'ajuste'). */
+export async function AjustarPieza(p) {
+  const { error } = await supabase.rpc("ajustar_pieza", {
+    _id_pieza: p.id_pieza,
+    _id_empresa: p.id_empresa,
+    _id_usuario: p.id_usuario ?? null,
+    _peso: p.peso ?? null,
+    _costo: p.costo ?? null,
+    _precio_venta: p.precio_venta ?? null,
+    _nota: p.nota ?? null,
+  });
+  if (error) throw new Error(error.message);
+}
+
+/** Marca la pieza como `perdida` / `danada`, o la vuelve a `disponible`. */
+export async function MarcarPieza(p) {
+  const { error } = await supabase.rpc("marcar_pieza", {
+    _id_pieza: p.id_pieza,
+    _id_empresa: p.id_empresa,
+    _id_usuario: p.id_usuario ?? null,
+    _estado: p.estado,
+    _nota: p.nota ?? null,
+  });
+  if (error) throw new Error(error.message);
+}
+
+/** Devolución post-venta: pieza `vendida` -> `disponible` o `danada`. */
+export async function DevolverPieza(p) {
+  const { error } = await supabase.rpc("devolver_pieza", {
+    _id_pieza: p.id_pieza,
+    _id_empresa: p.id_empresa,
+    _id_usuario: p.id_usuario ?? null,
+    _destino: p.destino ?? "disponible",
+    _nota: p.nota ?? null,
+  });
+  if (error) throw new Error(error.message);
+}
+
+/** Historial (kardex) de una pieza, más reciente primero. @returns {Promise<any[]>} */
+export async function MostrarMovimientosPieza(p) {
+  const { data, error } = await supabase.rpc("joyeria_movimientos_pieza", {
+    _id_pieza: p.id_pieza,
+  });
+  if (error) throw new Error(error.message);
+  return data || [];
+}

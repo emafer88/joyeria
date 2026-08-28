@@ -7,6 +7,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { Icon } from "@iconify/react";
 import { Spinner1 } from "../../../index";
 import { v } from "../../../styles/variables";
 import { useJoyeriaStore } from "../../../store/JoyeriaStore";
@@ -44,7 +45,7 @@ const uniq = (arr) => [...new Set(arr.filter(Boolean))].sort();
  * conteo de disponibles y expandir/colapsar.
  */
 export function TablaInventarioJoyeria() {
-  const { buscador } = useJoyeriaStore();
+  const { buscador, abrirModalPieza } = useJoyeriaStore();
   const { data: rows = [], isLoading, error } = useInventarioListadoQuery();
 
   const [filtros, setFiltros] = useState({
@@ -262,19 +263,32 @@ export function TablaInventarioJoyeria() {
                   </td>
                   <td>{p.almacen || "—"}</td>
                   <td>
-                    <button
-                      title="Imprimir etiqueta"
-                      className="rowprint"
-                      onClick={() =>
-                        imprimirEtiquetas([p], {
-                          producto: p.producto,
-                          material: p.material,
-                          pureza: p.pureza,
-                        })
-                      }
-                    >
-                      <v.iconocodigobarras />
-                    </button>
+                    <div className="rowacc">
+                      <button
+                        title="Ajustar / marcar / devolver"
+                        onClick={() => abrirModalPieza("mov_pieza", p)}
+                      >
+                        <Icon icon="mdi:tune-vertical" />
+                      </button>
+                      <button
+                        title="Ver historial"
+                        onClick={() => abrirModalPieza("historial_pieza", p)}
+                      >
+                        <Icon icon="mdi:history" />
+                      </button>
+                      <button
+                        title="Imprimir etiqueta"
+                        onClick={() =>
+                          imprimirEtiquetas([p], {
+                            producto: p.producto,
+                            material: p.material,
+                            pureza: p.pureza,
+                          })
+                        }
+                      >
+                        <v.iconocodigobarras />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               );
@@ -397,13 +411,22 @@ const Container = styled.div`
   .mono {
     font-family: monospace;
   }
-  .rowprint {
+  .rowacc {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .rowacc button {
     background: none;
     border: none;
     cursor: pointer;
     font-size: 17px;
     color: ${({ theme }) => theme.text};
     display: flex;
+    opacity: 0.7;
+  }
+  .rowacc button:hover {
+    opacity: 1;
   }
   .badge {
     padding: 2px 9px;

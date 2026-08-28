@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from "../supabase/supabase.config";
+import { supabase } from "../supabaseCrud/supabase.config";
 import {
   MostrarUsuarios,
   InsertarEmpresa,

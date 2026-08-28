@@ -1,12 +1,12 @@
 import { create } from "zustand";
-import { supabase } from "../supabase/supabase.config";
+import { supabase } from "../supabaseCrud/supabase.config";
 
 export const useReportesStore = create((set, get) => ({
   totalventas: 0,
   totalventasAnterior: 0,
   porcentajeCambio: 0,
-  totalCantidadDetalleVentas:0,
-  totalGanancias:0,
+  totalCantidadDetalleVentas: 0,
+  totalGanancias: 0,
   resetearventas: () =>
     set({
       idventa: 0,
@@ -16,7 +16,7 @@ export const useReportesStore = create((set, get) => ({
     // Calcular el total general en el frontend
     const totalGeneral = data.reduce(
       (sum, venta) => sum + Number(venta.total_ventas),
-      0
+      0,
     );
     set({ totalventas: totalGeneral });
     get().setCalcularPorcentajeCambio();
@@ -25,15 +25,15 @@ export const useReportesStore = create((set, get) => ({
   mostrarCantidadDetalleVentasDashboard: async (p) => {
     const { data } = await supabase.rpc(
       "dashboardsumarcantidaddetalleventa",
-      p
+      p,
     );
-set({totalCantidadDetalleVentas:data})
+    set({ totalCantidadDetalleVentas: data });
     return data;
   },
   mostrarVentasDashboardPeriodoAnterior: async (p) => {
     const { data, error } = await supabase.rpc(
       "dashboardsumarventasporempresaperiodoanterior",
-      p
+      p,
     );
     set({ totalventasAnterior: data });
     get().setCalcularPorcentajeCambio();
@@ -45,12 +45,12 @@ set({totalCantidadDetalleVentas:data})
   mostrarGananciasDetalleVenta: async (p) => {
     const { data, error } = await supabase.rpc(
       "dashboardsumargananciadetalleventa",
-      p
-    ); 
+      p,
+    );
     if (error) {
       throw new Error(error.message);
     }
-    set({totalGanancias:data})
+    set({ totalGanancias: data });
     return data;
   },
   setCalcularPorcentajeCambio: () => {
