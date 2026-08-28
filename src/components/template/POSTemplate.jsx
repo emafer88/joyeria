@@ -19,6 +19,7 @@ import { PantallaIngresoSalidaDinero } from "../organismos/POSDesign/CajaDesign/
 import { useCierreCajaStore } from "../../store/CierreCajaStore";
 import { MenuFlotante } from "../organismos/POSDesign/MenuFlotante";
 import { SelectAlmacenModal } from "../organismos/POSDesign/SelectAlmacenModal";
+import { EscanerPiezaPos } from "../organismos/joyeria/EscanerPiezaPos";
 import { useStockStore } from "../../store/StockStore";
 import { useBuscarProductosQuery } from "../../tanstack/ProductosStack";
 import { useMostrarAlmacenesXSucursalQuery } from "../../tanstack/AlmacenesStack";
@@ -52,6 +53,7 @@ export function POSTemplate() {
       </Main>
       <FooterPos />
       <MenuFlotante />
+      <EscanerPiezaPos />
       {stateIngresoSalida && <PantallaIngresoSalidaDinero />}
       {stateCierreCaja && <PantallaCierreCaja />}
     </Container>

@@ -3,8 +3,8 @@ import {
   MostrarCierreCajaAperturada,
   AperturarCierreCaja,
   CerrarTurnoCaja,
-} from "../supabase/crudCierresCaja";
-import { supabase } from "../supabase/supabase.config";
+} from "../supabaseCrud/crudCierresCaja";
+import { supabase } from "../supabaseCrud/supabase.config";
 const tabla = "cierrecaja";
 export const useCierreCajaStore = create((set) => ({
   stateConteoCaja: false,
@@ -34,7 +34,7 @@ export const useCierreCajaStore = create((set) => ({
   mostrarCierreCajaPorEmpresa: async (p) => {
     const { data, error } = await supabase.rpc(
       "mostrarcajasabiertasporempresa",
-      p
+      p,
     );
 
     if (error) {

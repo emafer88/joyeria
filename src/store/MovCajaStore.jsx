@@ -4,7 +4,7 @@ import {
   MostrarEfectivoSinVentasMovcierrecaja,
   Mostrarmovimientoscajalive,
   MostrarVentasMetodoPagoMovCaja,
-} from "../supabase/crudMovimientosCaja";
+} from "../supabaseCrud/crudMovimientosCaja";
 
 export const useMovCajaStore = create((set, get) => ({
   totalVentasMetodoPago: 0,
@@ -35,33 +35,33 @@ export const useMovCajaStore = create((set, get) => ({
     const result = await MostrarEfectivoSinVentasMovcierrecaja(p);
     // Filtrar solo los movimientos de tipo "apertura"
     const movimientosApertura = result.filter(
-      (item) => item.tipo_movimiento === "apertura"
+      (item) => item.tipo_movimiento === "apertura",
     );
     // Sumar la columna "monto" solo para los movimientos de tipo "apertura"
     const totalApertura = movimientosApertura.reduce(
       (total, item) => total + (item.monto || 0),
-      0
+      0,
     );
     set({ totalAperturaCaja: totalApertura });
 
     // Filtrar solo los movimientos de tipo "ingreso"
     const movimientosIngreso = result.filter(
-      (item) => item.tipo_movimiento === "ingreso"
+      (item) => item.tipo_movimiento === "ingreso",
     );
     const totalIngreso = movimientosIngreso.reduce(
       (total, item) => total + (item.monto || 0),
-      0
+      0,
     );
     set({ totalIngresosVariosCaja: totalIngreso });
 
     // Filtrar solo los movimientos de tipo "salida"
     const movimientosSalida = result.filter(
-      (item) => item.tipo_movimiento === "salida"
+      (item) => item.tipo_movimiento === "salida",
     );
     // Sumar la columna "monto" solo para los movimientos de tipo "salida"
     const totalSalida = movimientosSalida.reduce(
       (total, item) => total + (item.monto || 0),
-      0
+      0,
     );
     set({ totalGastosVariosCaja: totalSalida });
     const totalEfectivoCajaSinVentas =
@@ -75,16 +75,16 @@ export const useMovCajaStore = create((set, get) => ({
     //sumamos el total
     const totalMonto = result.reduce(
       (total, item) => total + (item.monto || 0),
-      0
+      0,
     );
     // Filtrar solo las ventas en efectivo
     const ventasEfectivo = result.filter(
-      (item) => item.metodo_pago === "Efectivo"
+      (item) => item.metodo_pago === "Efectivo",
     );
     // Sumar la columna "monto" solo para ventas en efectivo
     const totalEfectivo = ventasEfectivo.reduce(
       (total, item) => total + (item.monto || 0),
-      0
+      0,
     );
     set({ totalVentasMetodoPago: totalMonto });
     set({ totalVentasEfectivo: totalEfectivo });

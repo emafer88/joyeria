@@ -1,4 +1,4 @@
-import { supabase } from "../supabase/supabase.config";
+import { supabase } from "./supabase.config";
 const tabla = "permisos";
 export async function MostrarPermisos(p) {
   const { data } = await supabase

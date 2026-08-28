@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { MostrarRoles } from "../supabase/crudRol";
+import { MostrarRoles } from "../supabaseCrud/crudRol";
 
 export const useRolesStore = create((set) => ({
   rolesItemSelect: [],

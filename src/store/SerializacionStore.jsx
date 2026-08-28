@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { supabase } from "../supabase/supabase.config";
+import { supabase } from "../supabaseCrud/supabase.config";
 const tabla = "serializacion_comprobantes";
 export const useSerializacionStore = create((set) => ({
   dataComprobantes: null,

@@ -6,10 +6,10 @@ import {
   InsertarCredencialesUser,
   InsertarUsuarios,
 } from "../index";
-import { InsertarAsignacionCajaSucursal } from "../supabase/crudAsignacionCajaSucursal";
+import { InsertarAsignacionCajaSucursal } from "../supabaseCrud/crudAsignacionCajaSucursal";
 import { usePermisosStore } from "./PermisosStore";
-import { InsertarPermisos } from "../supabase/crudPermisos";
-import { supabase } from "../supabase/supabase.config";
+import { InsertarPermisos } from "../supabaseCrud/crudPermisos";
+import { supabase } from "../supabaseCrud/supabase.config";
 const tabla = "usuarios";
 export const useUsuariosStore = create((set) => ({
   refetchs: null,
@@ -68,8 +68,8 @@ export const useUsuariosStore = create((set) => ({
       // async no espera nada, y un error acá quedaba silenciado).
       await Promise.all(
         selectModules.map((idModule) =>
-          InsertarPermisos({ id_usuario: dataUserNew?.id, idmodulo: idModule })
-        )
+          InsertarPermisos({ id_usuario: dataUserNew?.id, idmodulo: idModule }),
+        ),
       );
     } else {
       throw new Error("No hay módulos seleccionados");

@@ -3,8 +3,8 @@ import {
   BuscarUsuariosAsignados,
   MostrarSucursalCajaAsignada,
   MostrarUsuariosAsignados,
-} from "../supabase/crudAsignacionCajaSucursal";
-import { supabase } from "../supabase/supabase.config";
+} from "../supabaseCrud/crudAsignacionCajaSucursal";
+import { supabase } from "../supabaseCrud/supabase.config";
 const tabla = "asignacion_sucursal";
 export const useAsignacionCajaSucursalStore = create((set) => ({
   buscador: "",

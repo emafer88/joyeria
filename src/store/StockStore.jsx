@@ -4,7 +4,7 @@ import {
   InsertarStock,
   MostrarStockXAlmacenesYProducto,
   MostrarStockXAlmacenYProducto,
-} from "../supabase/crudStock";
+} from "../supabaseCrud/crudStock";
 
 export const useStockStore = create((set) => ({
   stateModal: false,
@@ -26,7 +26,7 @@ export const useStockStore = create((set) => ({
     set({ dataStockXAlmacenesYProducto: response });
     return response;
   },
-  editarStock: async (p,tipo) => {
-    await EditarStock(p,tipo);
+  editarStock: async (p, tipo) => {
+    await EditarStock(p, tipo);
   },
 }));

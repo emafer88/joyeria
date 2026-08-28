@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { supabase } from "../supabase/supabase.config";
+import { supabase } from "../supabaseCrud/supabase.config";
 
 export const useReportStore = create((set) => ({
   reportStockPorAlmacenSucursal: async (p) => {

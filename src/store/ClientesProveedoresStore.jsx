@@ -1,10 +1,16 @@
 import { create } from "zustand";
-import {MostrarClientesProveedores,InsertarClientesProveedores,EditarClientesProveedores,EliminarClientesProveedores,BuscarClientesProveedores} from "../supabase/crudClientesProveedores"
+import {
+  MostrarClientesProveedores,
+  InsertarClientesProveedores,
+  EditarClientesProveedores,
+  EliminarClientesProveedores,
+  BuscarClientesProveedores,
+} from "../supabaseCrud/crudClientesProveedores";
 import { useLocation } from "react-router-dom";
 
 export const useClientesProveedoresStore = create((set, get) => ({
-  tipo:"",
-  setTipo:(p)=>set({tipo:p}),
+  tipo: "",
+  setTipo: (p) => set({ tipo: p }),
   buscador: "",
   setBuscador: (p) => {
     set({ buscador: p });
@@ -41,9 +47,7 @@ export const useClientesProveedoresStore = create((set, get) => ({
     set(mostrarCliPro(parametros));
   },
   buscarCliPro: async (p) => {
-   
-   
-     const response = await BuscarClientesProveedores(p);
+    const response = await BuscarClientesProveedores(p);
     set({ dataclipro: response });
     return response;
   },
