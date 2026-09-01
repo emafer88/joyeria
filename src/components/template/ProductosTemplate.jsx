@@ -12,6 +12,7 @@ import { useState } from "react";
 import ConfettiExplosion from "react-confetti-explosion";
 import { Toaster } from "sonner";
 import { JoyeriaTemplate } from "./JoyeriaTemplate";
+import { InventarioProductos } from "../organismos/productos/InventarioProductos";
 export function ProductosTemplate() {
   const [openRegistro, SetopenRegistro] = useState(false);
   const { dataProductos, setBuscador, generarCodigo } = useProductosStore();
@@ -20,6 +21,8 @@ export function ProductosTemplate() {
   const [isExploding, setIsExploding] = useState(false);
   // pestañas: 'productos' (catálogo plano actual) | 'joyeria' (inventario serializado)
   const [tab, setTab] = useState("productos");
+  // sub-pestañas dentro de "Productos": 'catalogo' | 'inventario'
+  const [vistaProducto, setVistaProducto] = useState("catalogo");
   function nuevoRegistro() {
     SetopenRegistro(!openRegistro);
     setAccion("Nuevo");
@@ -50,40 +53,61 @@ export function ProductosTemplate() {
       {tab === "joyeria" ? (
         <JoyeriaTemplate />
       ) : (
-        <div className="grid-productos">
-          {openRegistro && (
-            <RegistrarProductos
-              setIsExploding={setIsExploding}
-              onClose={() => SetopenRegistro(!openRegistro)}
-              dataSelect={dataSelect}
-              accion={accion}
-              state={openRegistro}
-            />
+        <>
+          <div className="subtabs">
+            <button
+              className={vistaProducto === "catalogo" ? "on" : ""}
+              onClick={() => setVistaProducto("catalogo")}
+            >
+              Catálogo
+            </button>
+            <button
+              className={vistaProducto === "inventario" ? "on" : ""}
+              onClick={() => setVistaProducto("inventario")}
+            >
+              Inventario
+            </button>
+          </div>
+
+          {vistaProducto === "inventario" ? (
+            <InventarioProductos />
+          ) : (
+            <div className="grid-productos">
+              {openRegistro && (
+                <RegistrarProductos
+                  setIsExploding={setIsExploding}
+                  onClose={() => SetopenRegistro(!openRegistro)}
+                  dataSelect={dataSelect}
+                  accion={accion}
+                  state={openRegistro}
+                />
+              )}
+
+              <section className="area1">
+                <Title>Productos</Title>
+                <Btn1
+                  funcion={nuevoRegistro}
+                  bgcolor={v.colorPrincipal}
+                  titulo="nuevo"
+                  icono={<v.iconoagregar />}
+                />
+              </section>
+              <section className="area2">
+                <Buscador setBuscador={setBuscador} />
+              </section>
+
+              <section className="main">
+                {isExploding && <ConfettiExplosion />}
+                <TablaProductos
+                  setdataSelect={setdataSelect}
+                  setAccion={setAccion}
+                  SetopenRegistro={SetopenRegistro}
+                  data={dataProductos}
+                />
+              </section>
+            </div>
           )}
-
-          <section className="area1">
-            <Title>Productos</Title>
-            <Btn1
-              funcion={nuevoRegistro}
-              bgcolor={v.colorPrincipal}
-              titulo="nuevo"
-              icono={<v.iconoagregar />}
-            />
-          </section>
-          <section className="area2">
-            <Buscador setBuscador={setBuscador} />
-          </section>
-
-          <section className="main">
-            {isExploding && <ConfettiExplosion />}
-            <TablaProductos
-              setdataSelect={setdataSelect}
-              setAccion={setAccion}
-              SetopenRegistro={SetopenRegistro}
-              data={dataProductos}
-            />
-          </section>
-        </div>
+        </>
       )}
     </Container>
   );
@@ -114,6 +138,25 @@ const Container = styled.div`
   .tabs button.on {
     opacity: 1;
     border-bottom-color: #f3d20c;
+  }
+  .subtabs {
+    display: flex;
+    gap: 6px;
+  }
+  .subtabs button {
+    background: none;
+    border: 1px solid ${({ theme }) => theme.color2};
+    border-radius: 999px;
+    padding: 6px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    color: ${({ theme }) => theme.text};
+    opacity: 0.6;
+  }
+  .subtabs button.on {
+    opacity: 1;
+    background: ${({ theme }) => theme.color2};
   }
   .grid-productos {
     flex: 1;

@@ -1,18 +1,23 @@
 import styled from "styled-components";
-import { CrudTemplate } from "../components/template/CrudTemplate";
-import { RegistrarInventario } from "../components/organismos/formularios/RegistrarInventario";
-import { TablaInventarios } from "../components/organismos/tablas/TablaInventarios";
+import { RegistrarInventario } from "../formularios/RegistrarInventario";
+import { TablaInventarios } from "../tablas/TablaInventarios";
 import { useQuery } from "@tanstack/react-query";
 
-import { useMovStockStore } from "../store/MovStockStore";
-import { useEmpresaStore } from "../store/EmpresaStore";
-import { useProductosStore } from "../store/ProductosStore";
-import { Title } from "../components/atomos/Title";
-import { Btn1 } from "../components/moleculas/Btn1";
+import { useMovStockStore } from "../../../store/MovStockStore";
+import { useEmpresaStore } from "../../../store/EmpresaStore";
+import { useProductosStore } from "../../../store/ProductosStore";
+import { Title } from "../../atomos/Title";
+import { Btn1 } from "../../moleculas/Btn1";
 import { useState } from "react";
-import { BuscadorList } from "../components/ui/lists/BuscadorList";
-import { useGlobalStore } from "../store/GlobalStore";
-export const Inventario = () => {
+import { BuscadorList } from "../../ui/lists/BuscadorList";
+import { useGlobalStore } from "../../../store/GlobalStore";
+
+/**
+ * Sub-pestaña "Inventario" dentro de "Productos" (movimientos de stock del
+ * catálogo plano). Movido desde pages/Inventario.jsx para vivir junto al
+ * catálogo, igual que Joyería tiene su propio Catálogo/Inventario.
+ */
+export function InventarioProductos() {
   const { mostrarMovStock } = useMovStockStore();
   const { dataempresa } = useEmpresaStore();
   const { buscarProductos, buscador } = useProductosStore();
@@ -56,7 +61,7 @@ export const Inventario = () => {
   function nuevoRegistro() {
     setStateClose(true);
     setAccion("Nuevo");
-    setItemSelect([]);
+    setdataSelect([]);
   }
   return (
     <Container>
@@ -90,20 +95,16 @@ export const Inventario = () => {
       </section>
     </Container>
   );
-};
+}
 const Container = styled.div`
-  height: calc(100vh - 80px);
-
-  margin-top: 50px;
-  padding: 15px;
   display: grid;
   grid-template:
     "area1" 60px
     "area2" 60px
     "main" auto;
+  gap: 8px;
   .area1 {
     grid-area: area1;
-    /* background-color: rgba(103, 93, 241, 0.14); */
     display: flex;
     justify-content: end;
     align-items: center;
@@ -111,13 +112,11 @@ const Container = styled.div`
   }
   .area2 {
     grid-area: area2;
-    /* background-color: rgba(7, 237, 45, 0.14); */
     display: flex;
     justify-content: end;
     align-items: center;
   }
   .main {
     grid-area: main;
-    /* background-color: rgba(237, 7, 221, 0.14); */
   }
 `;

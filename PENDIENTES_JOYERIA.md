@@ -13,7 +13,7 @@ npm run dev
 ```
 
 - **Catálogo / Inventario de joyería:** Configuración → **Productos** → pestaña **Joyería**
-  (sub-pestañas *Catálogo* e *Inventario*).
+  (sub-pestañas _Catálogo_ e _Inventario_).
 - **Venta de piezas:** **POS** → botón flotante abajo a la izquierda (ícono de código de barras).
 
 `npm run build` compila OK con todas las etapas 1–6.
@@ -22,17 +22,18 @@ npm run dev
 
 ## Estado por etapa
 
-| Etapa | Qué es | Estado | Probado en dev |
-|---|---|---|---|
-| 1 | SQL (tablas, RPC, triggers, RLS) | Aplicado en Supabase por el usuario | ✅ (verificación SQL OK) |
-| 2 | Catálogo: alta/edición de diseños y variantes | Código listo, compila | ✅ 2026-08-28 |
-| 3 | Alta masiva de piezas | Código listo, compila | ✅ 2026-08-28 |
-| 4 | Etiquetas con código de barras (EAN-13) | Código listo, compila | ✅ 2026-08-28 |
-| 5 | Pantalla de inventario (TanStack Table) | Código listo, compila | ✅ 2026-08-28 |
-| 6 | POS: escanear pieza y agregar al carrito | Código listo, compila | ✅ 2026-08-28 (tras fix, ver abajo) |
-| 7 | Movimientos manuales (ajuste / pérdida / daño / devolución) + historial | Código listo, compila | ✅ 2026-08-28 |
+| Etapa | Qué es                                                                  | Estado                              | Probado en dev                      |
+| ----- | ----------------------------------------------------------------------- | ----------------------------------- | ----------------------------------- |
+| 1     | SQL (tablas, RPC, triggers, RLS)                                        | Aplicado en Supabase por el usuario | ✅ (verificación SQL OK)            |
+| 2     | Catálogo: alta/edición de diseños y variantes                           | Código listo, compila               | ✅ 2026-08-28                       |
+| 3     | Alta masiva de piezas                                                   | Código listo, compila               | ✅ 2026-08-28                       |
+| 4     | Etiquetas con código de barras (EAN-13)                                 | Código listo, compila               | ✅ 2026-08-28                       |
+| 5     | Pantalla de inventario (TanStack Table)                                 | Código listo, compila               | ✅ 2026-08-28                       |
+| 6     | POS: escanear pieza y agregar al carrito                                | Código listo, compila               | ✅ 2026-08-28 (tras fix, ver abajo) |
+| 7     | Movimientos manuales (ajuste / pérdida / daño / devolución) + historial | Código listo, compila               | ✅ 2026-08-28                       |
 
 ### SQL aplicado
+
 - `sql/2026-08-27_modulo_joyeria.sql` (corrido y verificado en Supabase).
 - Rollback disponible: `sql/2026-08-27_rollback_modulo_joyeria.sql`.
 - **`supabase/migrations/20260828193000_fix_joyeria_reserva_pieza_after_insert.sql`** (aplicado).
@@ -45,11 +46,13 @@ npm run dev
   `zz_joyeria_detalle_venta_ai` **`AFTER INSERT OR UPDATE`** + limpieza de piezas trabadas.
 
 ### Workflow de SQL nuevo
+
 - A partir de ahora el SQL nuevo va como archivo en **`supabase/migrations/`**
   (`<timestamp>_descripcion.sql`), no en `sql/`. La baseline del esquema remoto está en
   `supabase/migrations/20260828181817_remote_schema.sql` (traída con `supabase db pull`).
 
 ### Archivos del frontend (etapas 2–6)
+
 > Nota: la carpeta `src/supabase/` se renombró a **`src/supabaseCrud/`** (refactor
 > general de la rama). Todas las rutas de abajo con `src/supabase/...` viven ahora
 > en `src/supabaseCrud/...`.
@@ -76,6 +79,7 @@ npm run dev
 ## PRUEBAS PENDIENTES (hacer en `npm run dev`)
 
 ### Etapa 2 — Catálogo (Productos → Joyería → Catálogo)
+
 1. **Nuevo diseño**: “Cadena Cartier”, categoría “Cadenas”, descripción libre → Guardar.
 2. Expandir el diseño (▸) → **+ variante**: material “Oro”, pureza “10K”,
    prefijo “CAR10” (o vacío → se deriva) → Guardar.
@@ -84,6 +88,7 @@ npm run dev
    debe fallar por el FK RESTRICT — todavía sin piezas, borra OK.)
 
 ### Etapa 3 — Alta masiva (en una variante, botón “+ piezas”)
+
 1. Cargar 3 filas: `7.8 / 4200 / 6500 / 5`, `8.1 / 4350 / 6700 / 3`,
    `10.4 / 5800 / 8900 / 2` → **Generar piezas**.
 2. Deben salir **10 piezas** `CAR10-0001` … `CAR10-0010`, cada una con un
@@ -92,6 +97,7 @@ npm run dev
    el toggle despliega la tabla de piezas.
 
 ### Etapa 4 — Etiquetas
+
 1. En la fase de resultado del alta masiva se ve la **etiqueta de ejemplo**
    con el código de barras dibujado. **“Imprimir etiquetas”** abre la hoja
    con todas + diálogo de impresión.
@@ -101,15 +107,17 @@ npm run dev
 4. Si el navegador bloquea la ventana emergente, sale un aviso para habilitarla.
 
 ### Etapa 5 — Inventario (Productos → Joyería → Inventario)
+
 1. Se ve el árbol Categoría → Diseño → Variante → Piezas, expandido.
 2. Probar: filtro por **Estado = Disponible**; **orden** por Peso y por Precio
    (clic en cabecera); **búsqueda** `CAR10-0005` (usa el buscador de arriba);
    **Expandir / Colapsar todo**; **Imprimir** una variante.
 3. Resumen arriba: total / disponibles / reservadas / vendidas.
 4. **Nota:** esta tabla solo lista variantes **con piezas** (INNER JOIN en el RPC).
-   Las variantes vacías se ven en la sub-pestaña *Catálogo*.
+   Las variantes vacías se ven en la sub-pestaña _Catálogo_.
 
 ### Etapa 6 — POS (botón flotante de código de barras)
+
 1. Abrir caja → abrir el panel → escanear (o teclear + Enter) el `barcode` de
    una pieza **disponible** → ficha → **Agregar al carrito** → aparece en el
    detalle de venta.
@@ -129,6 +137,7 @@ RPCs de la etapa 1 (sin SQL nuevo): `ajustar_pieza`, `marcar_pieza`, `devolver_p
 `joyeria_movimientos_pieza(_id_pieza)`.
 
 Hecho:
+
 - `crudJoyeria.jsx`: `AjustarPieza`, `MarcarPieza`, `DevolverPieza`, `MostrarMovimientosPieza`.
 - `JoyeriaStack.jsx`: `useMovimientoPiezaMutation` (un `tipo` = 'ajuste' | 'marcar' | 'devolver'
   → la RPC correspondiente; invalida `K_PIEZAS`, `K_INV_LISTADO`, `K_RESUMEN_PIEZAS`,
@@ -147,17 +156,18 @@ Hecho:
   (Inventario).
 
 ### Pruebas pendientes Etapa 7 (en `npm run dev`, Productos → Joyería)
-1. **Ajustar**: en una pieza `disponible`, botón ⚙ → pestaña *Ajustar* → cambiar precio
+
+1. **Ajustar**: en una pieza `disponible`, botón ⚙ → pestaña _Ajustar_ → cambiar precio
    → Registrar. El precio se actualiza en la tabla y en el historial aparece un
    movimiento `ajuste` con el "peso x→y, costo…, precio…".
-2. **Marcar perdida/dañada**: ⚙ → *Marcar* → estado `Perdida` + nota → Registrar.
+2. **Marcar perdida/dañada**: ⚙ → _Marcar_ → estado `Perdida` + nota → Registrar.
    La pieza pasa a `Perdida`, el resumen de disponibles baja, historial suma `perdida`.
-3. **Revertir**: en esa pieza `perdida`, ⚙ → *Marcar* → `Disponible` → vuelve a stock.
-4. **Devolver**: sobre una pieza `vendida` (cobrá una en el POS antes), ⚙ → *Devolver*
+3. **Revertir**: en esa pieza `perdida`, ⚙ → _Marcar_ → `Disponible` → vuelve a stock.
+4. **Devolver**: sobre una pieza `vendida` (cobrá una en el POS antes), ⚙ → _Devolver_
    → destino `Disponible` → la pieza vuelve a `disponible`, historial suma `devolucion`.
    Con destino `Dañada` queda `danada`.
-5. **Guardas de la BD**: intentar *Ajustar* o *Marcar* una pieza `vendida` no debería
-   ofrecerse (el modal muestra solo *Devolver*); *Devolver* una NO vendida debe fallar
+5. **Guardas de la BD**: intentar _Ajustar_ o _Marcar_ una pieza `vendida` no debería
+   ofrecerse (el modal muestra solo _Devolver_); _Devolver_ una NO vendida debe fallar
    con toast de error.
 6. **Historial** (🕘): abre el timeline, más reciente arriba, con fechas locales.
 
@@ -177,3 +187,5 @@ Hecho:
   `zz_joyeria_detalle_venta_ad` libera la pieza). Es el comportamiento del POS legacy,
   no un bug. Endurecimiento opcional pendiente: liberar al quitar del panel del escáner
   o un cleanup por antigüedad de reservas.
+
+claude --resume abef5745-5aed-4803-8b92-b8525338f1e1
