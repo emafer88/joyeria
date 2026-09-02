@@ -208,6 +208,20 @@ export async function PosBuscarPieza(p) {
   return (data && data[0]) || null;
 }
 
+/**
+ * Búsqueda por texto parcial (nombre/SKU/código) de piezas disponibles, para
+ * integrarlas al buscador principal del POS junto con los productos normales.
+ * @returns {Promise<any[]>}
+ */
+export async function PosBuscarPiezasTexto(p) {
+  const { data, error } = await supabase.rpc("pos_buscar_piezas_texto", {
+    _id_empresa: p.id_empresa,
+    _buscador: p.buscador,
+  });
+  if (error) throw new Error(error.message);
+  return data || [];
+}
+
 /** Reserva la pieza (disponible -> reservada) de forma atómica. */
 export async function ReservarPieza(p) {
   const { error } = await supabase.rpc("reservar_pieza", {

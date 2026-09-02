@@ -23,7 +23,6 @@ import { SucursalesCaja } from "../pages/SucursalesCaja";
 import { Impresoras } from "../pages/Impresoras";
 import { Usuarios } from "../pages/Usuarios";
 import { Almacenes } from "../pages/Almacenes";
-import { Inventario } from "../pages/Inventario";
 import { ConfiguracionTicket } from "../pages/ConfiguracionTicket";
 import { MiPerfil } from "../pages/MiPerfil";
 import { SerializacionComprobantes } from "../pages/SerializacionComprobantes";
@@ -99,15 +98,10 @@ export function MyRoutes() {
         }
       />
       
+      {/* "Inventario" ahora vive dentro de Configuración > Productos como sub-pestaña. */}
       <Route
         path="/inventario"
-        element={
-          <Layout>
-            <ProtectedRoute accessBy="authenticated">
-              <Inventario />
-            </ProtectedRoute>
-          </Layout>
-        }
+        element={<Navigate to="/configuracion/productos" replace />}
       />
        <Route
         path="/reportes"
