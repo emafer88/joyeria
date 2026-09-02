@@ -81,6 +81,10 @@ export function AreaDetalleventaPos() {
     <AreaDetalleventa className={items?.length > 0 ? "" : "animacion"}>
     {items?.length > 0 ? (
       items?.map((item, index) => {
+        // Una pieza de joyería serializada es un objeto físico único: su
+        // cantidad siempre es 1 (no se puede vender 2 veces el mismo código),
+        // así que los controles de cantidad quedan deshabilitados.
+        const esPieza = item.id_pieza != null;
         return (
           <Itemventa key={index}>
             <article className="contentdescripcion">
@@ -125,17 +129,21 @@ export function AreaDetalleventaPos() {
             </article>
             <article className="contentbtn">
               <Btn1
-                funcion={() =>
-                  mutateEditarCantidadDV({
-                    id: item.id,
-                    cantidad: item.cantidad + 1,
-                  })
+                disabled={esPieza}
+                funcion={
+                  esPieza
+                    ? undefined
+                    : () =>
+                        mutateEditarCantidadDV({
+                          id: item.id,
+                          cantidad: item.cantidad + 1,
+                        })
                 }
                 width="20px"
                 height="35px"
                 icono={<Icon icon="mdi:add-bold" />}
               ></Btn1>
-              {editIndex === index ? (
+              {editIndex === index && !esPieza ? (
                 <InputText2>
                   <input
                     type="number"
@@ -152,18 +160,26 @@ export function AreaDetalleventaPos() {
                   <span className="cantidad">{item.cantidad}</span>
                   <Icon
                     icon="mdi:pencil"
-                    onClick={() => handleEditClick(index, item.cantidad)}
-                    className="edit-icon"
+                    onClick={
+                      esPieza
+                        ? undefined
+                        : () => handleEditClick(index, item.cantidad)
+                    }
+                    className={esPieza ? "edit-icon disabled" : "edit-icon"}
                   />
                 </>
               )}
 
               <Btn1
-                funcion={() =>
-                  mutateEditarCantidadDV({
-                    id: item.id,
-                    cantidad: item.cantidad - 1,
-                  })
+                disabled={esPieza}
+                funcion={
+                  esPieza
+                    ? undefined
+                    : () =>
+                        mutateEditarCantidadDV({
+                          id: item.id,
+                          cantidad: item.cantidad - 1,
+                        })
                 }
                 width="20px"
                 height="35px"
@@ -294,6 +310,10 @@ const Itemventa = styled.section`
     .edit-icon {
       cursor: pointer;
       font-size: 18px;
+    }
+    .edit-icon.disabled {
+      cursor: not-allowed;
+      opacity: 0.35;
     }
   }
   .contentTotaldetalleventa {
