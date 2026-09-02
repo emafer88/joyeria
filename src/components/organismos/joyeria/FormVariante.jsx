@@ -1,9 +1,17 @@
+import { useState } from "react";
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
-import { InputText, Btn1 } from "../../../index";
+import Swal from "sweetalert2";
+import { InputText, Btn1, SubidorImagenes } from "../../../index";
 import { v } from "../../../styles/variables";
 import { useJoyeriaStore } from "../../../store/JoyeriaStore";
-import { useGuardarVarianteMutation } from "../../../tanstack/JoyeriaStack";
+import {
+  useGuardarVarianteMutation,
+  useImagenesVarianteQuery,
+  useSubirImagenesVarianteMutation,
+  useEliminarImagenVarianteMutation,
+  useReordenarImagenesVarianteMutation,
+} from "../../../tanstack/JoyeriaStack";
 
 /**
  * Modal para crear / editar una VARIANTE (material + pureza) de un diseño.
@@ -14,6 +22,28 @@ export function FormVariante({ onClose }) {
   const { accion, disenoSelect, varianteSelect } = useJoyeriaStore();
   const esEditar = accion === "Editar";
   const { mutate, isPending } = useGuardarVarianteMutation();
+
+  // --- imágenes de la variante ---
+  const idVariante = esEditar ? varianteSelect?.id : null;
+  const [pendientes, setPendientes] = useState([]); // File[] sin subir
+  const { data: imagenesExistentes = [] } = useImagenesVarianteQuery(idVariante);
+  const subirImagenes = useSubirImagenesVarianteMutation();
+  const eliminarImagen = useEliminarImagenVarianteMutation(idVariante);
+  const reordenarImagenes = useReordenarImagenesVarianteMutation(idVariante);
+
+  const quitarImagenExistente = (imagen) => {
+    Swal.fire({
+      title: "¿Eliminar esta imagen?",
+      text: "Se borrará de inmediato, no espera a que guardes el formulario.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, eliminar",
+    }).then((r) => {
+      if (r.isConfirmed) eliminarImagen.mutate(imagen);
+    });
+  };
 
   const {
     register,
@@ -41,7 +71,18 @@ export function FormVariante({ onClose }) {
         idProducto: disenoSelect?.id,
         values: { ...values, id: varianteSelect?.id },
       },
-      { onSuccess: onClose }
+      {
+        onSuccess: async (idVarianteGuardada) => {
+          if (pendientes.length > 0) {
+            await subirImagenes.mutateAsync({
+              idVariante: idVarianteGuardada,
+              files: pendientes,
+              ordenInicial: imagenesExistentes.length + 1,
+            });
+          }
+          onClose();
+        },
+      }
     );
   };
 
@@ -124,6 +165,15 @@ export function FormVariante({ onClose }) {
             />
             <label className="form__label">Notas (opcional)</label>
           </InputText>
+
+          <SubidorImagenes
+            label="Imágenes de la variante (opcional)"
+            imagenesExistentes={imagenesExistentes}
+            pendientes={pendientes}
+            onPendientesChange={setPendientes}
+            onEliminarExistente={quitarImagenExistente}
+            onReordenar={(imgs) => reordenarImagenes.mutate(imgs)}
+          />
 
           <Btn1
             icono={<v.iconoguardar />}

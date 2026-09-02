@@ -28,6 +28,10 @@ import {
   MarcarPieza,
   DevolverPieza,
   MostrarMovimientosPieza,
+  MostrarImagenesVariante,
+  SubirImagenesVariante,
+  EliminarImagenVariante,
+  ReordenarImagenesVariante,
 } from "../supabaseCrud/crudJoyeria";
 
 export const K_DISENOS = "joyeria_disenos";
@@ -36,6 +40,7 @@ export const K_RESUMEN_PIEZAS = "joyeria_resumen_piezas";
 export const K_PIEZAS = "joyeria_piezas";
 export const K_INV_LISTADO = "joyeria_inv_listado";
 export const K_MOV_PIEZA = "joyeria_mov_pieza";
+export const K_IMG_VARIANTE = "joyeria_img_variante";
 
 // ---------------------------------------------------------------------------
 // Queries
@@ -138,6 +143,15 @@ export const useMovimientosPiezaQuery = (idPieza) =>
     queryKey: [K_MOV_PIEZA, idPieza],
     queryFn: () => MostrarMovimientosPieza({ id_pieza: idPieza }),
     enabled: !!idPieza,
+    refetchOnWindowFocus: false,
+  });
+
+/** Galería de imágenes de una variante (se carga solo cuando hay idVariante). */
+export const useImagenesVarianteQuery = (idVariante) =>
+  useQuery({
+    queryKey: [K_IMG_VARIANTE, idVariante],
+    queryFn: () => MostrarImagenesVariante(idVariante),
+    enabled: !!idVariante,
     refetchOnWindowFocus: false,
   });
 
@@ -359,6 +373,47 @@ export const useMovimientoPiezaMutation = () => {
       qc.invalidateQueries({
         queryKey: [K_MOV_PIEZA, vars.pieza.id_pieza ?? vars.pieza.id],
       });
+    },
+  });
+};
+
+// ---------------------------------------------------------------------------
+// Imágenes de la variante
+// ---------------------------------------------------------------------------
+
+export const useSubirImagenesVarianteMutation = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ idVariante, files, ordenInicial }) =>
+      SubirImagenesVariante(idVariante, files, ordenInicial),
+    onError: (e) => toast.error(e.message),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: [K_IMG_VARIANTE, vars.idVariante] });
+      qc.invalidateQueries({ queryKey: [K_VARIANTES] });
+    },
+  });
+};
+
+export const useEliminarImagenVarianteMutation = (idVariante) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (imagen) => EliminarImagenVariante(imagen),
+    onError: (e) => toast.error(e.message),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [K_IMG_VARIANTE, idVariante] });
+      qc.invalidateQueries({ queryKey: [K_VARIANTES] });
+    },
+  });
+};
+
+export const useReordenarImagenesVarianteMutation = (idVariante) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (imagenes) => ReordenarImagenesVariante(imagenes),
+    onError: (e) => toast.error(e.message),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [K_IMG_VARIANTE, idVariante] });
+      qc.invalidateQueries({ queryKey: [K_VARIANTES] });
     },
   });
 };
