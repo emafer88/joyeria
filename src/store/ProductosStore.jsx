@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import {
   BuscarProductos,MostrarProductos,EliminarProductos,InsertarProductos,EditarProductos, Generarcodigo,
-  MostrarImagenesProducto,SubirImagenesProducto,EliminarImagenProducto,
+  MostrarImagenesProducto,SubirImagenesProducto,EliminarImagenProducto,ReordenarImagenesProducto,
   supabase
 } from "../index";
 const tabla ="productos"
@@ -85,5 +85,15 @@ export const useProductosStore = create((set, get) => ({
     await EliminarImagenProducto(imagen);
     const { imagenesProducto } = get();
     set({ imagenesProducto: imagenesProducto.filter((img) => img.id !== imagen.id) });
+  },
+  reordenarImagenesProducto: async (imagenes) => {
+    await ReordenarImagenesProducto(imagenes);
+    const nuevoOrden = new Map(imagenes.map((img) => [img.id, img.orden]));
+    const { imagenesProducto } = get();
+    set({
+      imagenesProducto: imagenesProducto
+        .map((img) => ({ ...img, orden: nuevoOrden.get(img.id) ?? img.orden }))
+        .sort((a, b) => a.orden - b.orden),
+    });
   },
 }));

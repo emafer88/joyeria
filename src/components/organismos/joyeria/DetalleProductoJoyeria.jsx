@@ -195,10 +195,20 @@ export function DetalleProductoJoyeria({ diseno }) {
       {variantes.map((variante) => {
         const c = contar(variante.id);
         const abierta = verPiezasDe === variante.id;
+        const portada = [...(variante.producto_variante_imagenes ?? [])].sort(
+          (a, b) => (a.orden ?? 0) - (b.orden ?? 0),
+        )[0];
         return (
           <div className="variante" key={variante.id}>
             <div className="cab">
               <div className="info">
+                {portada ? (
+                  <img className="thumb" src={portada.url} alt="" />
+                ) : (
+                  <span className="thumb thumb-vacio">
+                    <v.iconoimagenvacia />
+                  </span>
+                )}
                 <strong>
                   {variante.material} {variante.pureza}
                 </strong>
@@ -285,6 +295,20 @@ const Container = styled.div`
     align-items: center;
     gap: 14px;
     flex-wrap: wrap;
+  }
+  .info .thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+  .info .thumb-vacio {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed ${({ theme }) => theme.color2};
+    font-size: 20px;
   }
   .info .sku {
     font-family: monospace;

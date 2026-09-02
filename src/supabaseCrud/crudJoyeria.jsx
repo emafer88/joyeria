@@ -1,3 +1,4 @@
+import Swal from "sweetalert2";
 import { supabase } from "../index";
 
 /**
@@ -80,11 +81,15 @@ export async function CrearVariante(p) {
   return data;
 }
 
-/** @returns {Promise<VarianteJoyeria[]>} */
+/**
+ * Trae las variantes del diseño con su galería embebida
+ * (`producto_variante_imagenes`) para poder mostrar la portada en la lista.
+ * @returns {Promise<VarianteJoyeria[]>}
+ */
 export async function MostrarVariantes(p) {
   const { data, error } = await supabase
     .from("producto_variantes")
-    .select("*")
+    .select("*, producto_variante_imagenes(id, url, path, orden)")
     .eq("id_producto", p.id_producto)
     .order("material", { ascending: true })
     .order("pureza", { ascending: true });
@@ -339,4 +344,110 @@ export async function MostrarMovimientosPieza(p) {
   });
   if (error) throw new Error(error.message);
   return data || [];
+}
+
+// ---------------------------------------------------------------------------
+// Galería de imágenes por variante (espejo de producto_imagenes)
+// Bucket "imagenes" (público), carpeta `variantes/{id_variante}/...`.
+// "Portada" de la variante = la fila con `orden` más bajo.
+// ---------------------------------------------------------------------------
+
+const BUCKET_IMG = "imagenes";
+const TABLA_IMG_VARIANTE = "producto_variante_imagenes";
+
+function nombreUnicoImg() {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+/** @returns {Promise<any[]>} imágenes de la variante, ordenadas por `orden`. */
+export async function MostrarImagenesVariante(idVariante) {
+  const { data, error } = await supabase
+    .from(TABLA_IMG_VARIANTE)
+    .select()
+    .eq("id_variante", idVariante)
+    .order("orden", { ascending: true });
+  if (error) throw new Error(error.message);
+  return data || [];
+}
+
+/**
+ * Sube archivos ya validados (ver ValidarImagenesProducto) y crea sus filas.
+ * `ordenInicial` = siguiente número de orden a usar.
+ * @returns {Promise<any[]>} filas creadas
+ */
+export async function SubirImagenesVariante(idVariante, files, ordenInicial = 1) {
+  const subidas = [];
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const ruta = `variantes/${idVariante}/${nombreUnicoImg()}`;
+
+    const { error: errorUpload } = await supabase.storage
+      .from(BUCKET_IMG)
+      .upload(ruta, file, { cacheControl: "3600", upsert: true });
+    if (errorUpload) {
+      Swal.fire({ icon: "error", title: "Oops...", text: errorUpload.message });
+      continue;
+    }
+
+    const { data: urlPublica } = await supabase.storage
+      .from(BUCKET_IMG)
+      .getPublicUrl(ruta);
+
+    const { data: fila, error: errorInsert } = await supabase
+      .from(TABLA_IMG_VARIANTE)
+      .insert({
+        id_variante: idVariante,
+        orden: ordenInicial + i,
+        path: ruta,
+        url: urlPublica.publicUrl,
+      })
+      .select()
+      .single();
+    if (errorInsert) {
+      Swal.fire({ icon: "error", title: "Oops...", text: errorInsert.message });
+      await supabase.storage.from(BUCKET_IMG).remove([ruta]);
+      continue;
+    }
+
+    subidas.push(fila);
+  }
+  return subidas;
+}
+
+/**
+ * Borra la imagen. A diferencia de EliminarImagenProducto, si el archivo ya
+ * no está en storage igual se borra la fila (evita filas huérfanas
+ * imposibles de quitar); solo aborta si storage falla por otro motivo.
+ */
+export async function EliminarImagenVariante(imagen) {
+  const { error: errorStorage } = await supabase.storage
+    .from(BUCKET_IMG)
+    .remove([imagen.path]);
+  if (
+    errorStorage &&
+    !/not.*found|no such|does not exist/i.test(errorStorage.message || "")
+  ) {
+    Swal.fire({ icon: "error", title: "Oops...", text: errorStorage.message });
+    return;
+  }
+  const { error: errorTabla } = await supabase
+    .from(TABLA_IMG_VARIANTE)
+    .delete()
+    .eq("id", imagen.id);
+  if (errorTabla) {
+    Swal.fire({ icon: "error", title: "Oops...", text: errorTabla.message });
+  }
+}
+
+/** imagenes: [{ id, orden }, ...] ya reordenadas en el frontend. */
+export async function ReordenarImagenesVariante(imagenes) {
+  for (const img of imagenes) {
+    await supabase
+      .from(TABLA_IMG_VARIANTE)
+      .update({ orden: img.orden })
+      .eq("id", img.id);
+  }
 }

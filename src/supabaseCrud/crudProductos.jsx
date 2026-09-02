@@ -138,11 +138,17 @@ export async function EditarImagenProducto(imagen, nuevoFile) {
   }
 }
 
+// Si el archivo ya no está en storage (fila huérfana) igual se borra la fila
+// de la tabla, para que el botón "quitar" del formulario no quede sin efecto;
+// solo se aborta si storage falla por un motivo distinto a "no existe".
 export async function EliminarImagenProducto(imagen) {
   const { error: errorStorage } = await supabase.storage
     .from(bucket)
     .remove([imagen.path]);
-  if (errorStorage) {
+  if (
+    errorStorage &&
+    !/not.*found|no such|does not exist/i.test(errorStorage.message || "")
+  ) {
     Swal.fire({ icon: "error", title: "Oops...", text: errorStorage.message });
     return;
   }

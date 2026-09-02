@@ -14,8 +14,7 @@ import {
   Btngenerarcodigo,
   useAlmacenesStore,
   ConvertirMinusculas,
-  Icono,
-  ValidarImagenesProducto,
+  SubidorImagenes,
 } from "../../../index";
 import { useForm } from "react-hook-form";
 import { useEmpresaStore } from "../../../store/EmpresaStore";
@@ -66,12 +65,11 @@ export function RegistrarProductos({
     mostrarImagenesProducto,
     subirImagenesProducto,
     eliminarImagenProducto,
+    reordenarImagenesProducto,
   } = useProductosStore();
   //#region imagenes producto
   const [files, setFiles] = useState([]); // File[] nuevos, aún no subidos
-  const [previews, setPreviews] = useState([]); // dataURL de preview, mismo índice que files
   const [imagenesExistentes, setImagenesExistentes] = useState([]);
-  const inputImagenesRef = useRef(null);
   const { data: dataImagenesProducto } = useQuery({
     queryKey: ["mostrar imagenes producto", dataSelect?.id],
     queryFn: () => mostrarImagenesProducto(dataSelect.id),
@@ -82,38 +80,14 @@ export function RegistrarProductos({
       setImagenesExistentes(dataImagenesProducto);
     }
   }, [dataImagenesProducto]);
-  function abrirImagenes() {
-    inputImagenesRef.current.click();
-  }
-  async function prepararImagenes(e) {
-    const archivosSeleccionados = Array.from(e.target.files);
-    if (archivosSeleccionados.length === 0) return;
-    const resultado = await ValidarImagenesProducto(
-      archivosSeleccionados,
-      imagenesExistentes.length + files.length
+  async function reordenarImagenes(imagenesConOrden) {
+    await reordenarImagenesProducto(imagenesConOrden);
+    const mapa = new Map(imagenesConOrden.map((x) => [x.id, x.orden]));
+    setImagenesExistentes((prev) =>
+      [...prev]
+        .map((img) => ({ ...img, orden: mapa.get(img.id) ?? img.orden }))
+        .sort((a, b) => a.orden - b.orden)
     );
-    if (!resultado.valido) {
-      Swal.fire({ icon: "error", title: "Oops...", text: resultado.mensaje });
-      e.target.value = "";
-      return;
-    }
-    const nuevasPreviews = await Promise.all(
-      archivosSeleccionados.map(
-        (file) =>
-          new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.readAsDataURL(file);
-          })
-      )
-    );
-    setFiles((prev) => [...prev, ...archivosSeleccionados]);
-    setPreviews((prev) => [...prev, ...nuevasPreviews]);
-    e.target.value = "";
-  }
-  function quitarImagenNueva(index) {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
-    setPreviews((prev) => prev.filter((_, i) => i !== index));
   }
   function quitarImagenExistente(imagen) {
     Swal.fire({
@@ -398,51 +372,13 @@ export function RegistrarProductos({
 
           <form className="formulario" onSubmit={handleSubmit(handlesub)}>
             <section className="seccionImagenes">
-              <label>Imágenes del producto (opcional, máx. 10):</label>
-              <GaleriaImagenes>
-                {imagenesExistentes.map((img) => (
-                  <Miniatura key={img.id}>
-                    <img src={img.url} alt="imagen producto" />
-                    <button
-                      type="button"
-                      className="quitar"
-                      onClick={() => quitarImagenExistente(img)}
-                    >
-                      {<v.iconocerrar />}
-                    </button>
-                  </Miniatura>
-                ))}
-                {previews.map((preview, index) => (
-                  <Miniatura key={`nueva-${index}`}>
-                    <img src={preview} alt="imagen nueva" />
-                    <button
-                      type="button"
-                      className="quitar"
-                      onClick={() => quitarImagenNueva(index)}
-                    >
-                      {<v.iconocerrar />}
-                    </button>
-                  </Miniatura>
-                ))}
-                {imagenesExistentes.length === 0 && previews.length === 0 && (
-                  <Icono>{<v.iconoimagenvacia />}</Icono>
-                )}
-              </GaleriaImagenes>
-              <Btn1
-                type="button"
-                funcion={abrirImagenes}
-                titulo="+imagen(es)"
-                color="#5f5f5f"
-                bgcolor="rgb(183, 183, 182)"
-                icono={<v.iconosupabase />}
-              />
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/gif,image/bmp"
-                multiple
-                ref={inputImagenesRef}
-                style={{ display: "none" }}
-                onChange={prepararImagenes}
+              <SubidorImagenes
+                label="Imágenes del producto (opcional)"
+                imagenesExistentes={imagenesExistentes}
+                pendientes={files}
+                onPendientesChange={setFiles}
+                onEliminarExistente={quitarImagenExistente}
+                onReordenar={reordenarImagenes}
               />
             </section>
             <section className="seccion1">
@@ -733,43 +669,6 @@ const ContainerBtngenerar = styled.div`
   position: absolute;
   right: 0;
   top: 10%;
-`;
-const GaleriaImagenes = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  min-height: 50px;
-`;
-const Miniatura = styled.div`
-  position: relative;
-  width: 60px;
-  height: 60px;
-  border-radius: 8px;
-  overflow: hidden;
-  flex-shrink: 0;
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .quitar {
-    position: absolute;
-    top: 0;
-    right: 0;
-    background: rgba(10, 9, 9, 0.6);
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 18px;
-    height: 18px;
-    padding: 0;
-    svg {
-      font-size: 12px;
-    }
-  }
 `;
 const ContainerMensajeStock = styled.div`
   text-align: center;
