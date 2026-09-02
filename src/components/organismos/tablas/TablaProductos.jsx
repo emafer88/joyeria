@@ -43,12 +43,12 @@ export function TablaProductos({
     }
     Swal.fire({
       title: "¿Estás seguro(a)(e)?",
-      text: "Una vez eliminado, ¡no podrá recuperar este registro!",
+      text: "El producto se desactivará y dejará de aparecer en el catálogo, el buscador y el punto de venta. El historial de ventas no se ve afectado.",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
-      confirmButtonText: "Si, eliminar",
+      confirmButtonText: "Si, desactivar",
     }).then(async (result) => {
       if (result.isConfirmed) {
         await eliminarProductos({ id: p.id });

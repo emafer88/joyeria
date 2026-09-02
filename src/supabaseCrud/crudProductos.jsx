@@ -30,15 +30,16 @@ export async function BuscarProductos(p) {
   }
   return data;
 }
+// "Eliminar" un producto lo desactiva en vez de borrarlo físicamente: si
+// tiene ventas registradas, un DELETE viola la FK de detalle_venta y rompe
+// el historial. Al desactivarlo deja de listarse en catálogo/buscador/POS
+// (ver mostrarproductos/buscarproductos en Supabase) pero sus ventas pasadas
+// y sus imágenes se conservan intactas por si se necesita reactivarlo.
 export async function EliminarProductos(p) {
-  const { data: archivos } = await supabase.storage
-    .from(bucket)
-    .list(`productos/${p.id}`);
-  if (archivos && archivos.length > 0) {
-    const rutas = archivos.map((a) => `productos/${p.id}/${a.name}`);
-    await supabase.storage.from(bucket).remove(rutas);
-  }
-  const { error } = await supabase.from(tabla).delete().eq("id", p.id);
+  const { error } = await supabase
+    .from(tabla)
+    .update({ activo: false })
+    .eq("id", p.id);
   if (error) {
     throw new Error(error.message);
   }
