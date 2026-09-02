@@ -27,6 +27,7 @@ import {
   useBuscarPiezasPosQuery,
   useAgregarPiezaCarritoMutation,
 } from "../../../tanstack/JoyeriaStack";
+import { PosBuscarPieza } from "../../../supabaseCrud/crudJoyeria";
 
 
 export function HeaderPos() {
@@ -159,27 +160,44 @@ export function HeaderPos() {
    mutate()
   }, []);
   useEffect(() => {
+    let cancelado = false;
     let timeout;
     const texto = buscador.trim();
     const isCodigoDeBarras = /^[0-9]{3,}$/.test(texto);
     if (isCodigoDeBarras) {
       setStateListaproductos(false);
-      timeout = setTimeout(() => {
-        const piezaEncontrada = dataPiezas?.find(
-          (pz) => pz.barcode === texto || pz.sku === texto
-        );
+      timeout = setTimeout(async () => {
+        // 1) Producto normal por código exacto (lista ya precargada).
         const productoEncontrado = dataProductos?.find(
           (p) => p.codigo_barras === texto
         );
-        if (piezaEncontrada) {
-          agregarPieza.mutate(piezaEncontrada, {
-            onSuccess: () => setBuscador(""),
-          });
-        } else if (productoEncontrado) {
+        if (productoEncontrado) {
           selectProductos(productoEncontrado);
           mutationInsertarVentas();
           setBuscador("");
-        } else {
+          return;
+        }
+        // 2) Pieza de joyería: consulta directa por código/SKU exacto. No
+        // depende del refetch reactivo de dataPiezas (que llegaba tarde al
+        // escanear y hacía fallar la búsqueda).
+        try {
+          const pieza = await PosBuscarPieza({
+            codigo: texto,
+            id_empresa: dataempresa?.id,
+          });
+          if (cancelado) return;
+          if (pieza) {
+            agregarPieza.mutate(pieza, { onSuccess: () => setBuscador("") });
+            return;
+          }
+        } catch (e) {
+          if (!cancelado) {
+            toast.error(e.message);
+            setBuscador("");
+          }
+          return;
+        }
+        if (!cancelado) {
           toast.error("Producto no encontrado");
           setBuscador("");
         }
@@ -193,7 +211,10 @@ export function HeaderPos() {
         setStateListaproductos(false);
       }
     }
-    return () => clearTimeout(timeout);
+    return () => {
+      cancelado = true;
+      clearTimeout(timeout);
+    };
   }, [buscador]);
   return (
     <Header>
