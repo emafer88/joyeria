@@ -23,6 +23,10 @@ import { toast } from "sonner";
 import { SelectList } from "../../ui/lists/SelectList";
 import { useStockStore } from "../../../store/StockStore";
 import { useEliminarVentasIncompletasMutate } from "../../../tanstack/VentasStack";
+import {
+  useBuscarPiezasPosQuery,
+  useAgregarPiezaCarritoMutation,
+} from "../../../tanstack/JoyeriaStack";
 
 
 export function HeaderPos() {
@@ -44,6 +48,19 @@ export function HeaderPos() {
     useAlmacenesStore();
   const { insertarDetalleVentas } = useDetalleVentasStore();
   const queryClient = useQueryClient();
+  // Piezas de joyería que matchean el mismo texto buscado, para que el
+  // buscador principal también pueda venderlas (antes solo se encontraban
+  // por código exacto desde el escáner flotante de joyería).
+  const { data: dataPiezas } = useBuscarPiezasPosQuery();
+  const agregarPieza = useAgregarPiezaCarritoMutation();
+  const dataCombinada = [
+    ...(dataProductos ?? []),
+    ...(dataPiezas ?? []).map((pz) => ({
+      ...pz,
+      _tipo: "pieza",
+      nombre: `💍 ${pz.producto} · ${pz.material}${pz.pureza ? " " + pz.pureza : ""} · ${pz.peso}g — $${Number(pz.precio_venta).toFixed(2)}`,
+    })),
+  ];
 
   const buscadorRef = useRef(null);
   const fechaactual = useFormattedDate();
@@ -84,6 +101,22 @@ export function HeaderPos() {
     setBuscador("");
     buscadorRef.current.focus();
     setCantidadInput(1);
+  }
+  // Punto único de entrada al hacer click en un ítem del buscador: si es una
+  // pieza de joyería usa el flujo de reserva (id_pieza), si es un producto
+  // normal sigue el flujo legacy de siempre.
+  function manejarSeleccionItem(item) {
+    if (item?._tipo === "pieza") {
+      agregarPieza.mutate(item, {
+        onSuccess: () => {
+          setBuscador("");
+          buscadorRef.current.focus();
+        },
+      });
+      return;
+    }
+    selectProductos(item);
+    mutationInsertarVentas();
   }
   async function insertarDVentas(idventa) {
     const productosItemSelect =
@@ -132,10 +165,17 @@ export function HeaderPos() {
     if (isCodigoDeBarras) {
       setStateListaproductos(false);
       timeout = setTimeout(() => {
+        const piezaEncontrada = dataPiezas?.find(
+          (pz) => pz.barcode === texto || pz.sku === texto
+        );
         const productoEncontrado = dataProductos?.find(
           (p) => p.codigo_barras === texto
         );
-        if (productoEncontrado) {
+        if (piezaEncontrada) {
+          agregarPieza.mutate(piezaEncontrada, {
+            onSuccess: () => setBuscador(""),
+          });
+        } else if (productoEncontrado) {
           selectProductos(productoEncontrado);
           mutationInsertarVentas();
           setBuscador("");
@@ -214,11 +254,10 @@ export function HeaderPos() {
               }}
             />
             <ListaDesplegable
-              funcioncrud={mutationInsertarVentas}
               top="59px"
-              funcion={selectProductos}
+              funcion={manejarSeleccionItem}
               setState={() => setStateListaproductos(!stateListaproductos)}
-              data={dataProductos}
+              data={dataCombinada}
               state={stateListaproductos}
             />
           </InputText2>
