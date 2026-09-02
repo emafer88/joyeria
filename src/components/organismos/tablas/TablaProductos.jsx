@@ -18,7 +18,6 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { FaArrowsAltV } from "react-icons/fa";
 export function TablaProductos({
   data,
   SetopenRegistro,
@@ -84,10 +83,15 @@ export function TablaProductos({
     },
     {
       accessorKey: "nombre",
-      header: "Descripcion",
+      header: "Descripción",
       cell: (info) => (
-        <td data-title="DESCRIPCION" className="ContentCell">
-          <span>{info.getValue()}</span>
+        <td data-title="DESCRIPCIÓN" className="ContentCell">
+          <div className="celdaDescripcion">
+            <span className="nombreProducto">{info.getValue()}</span>
+            {info.row.original.categoria && (
+              <span className="pillCategoria">{info.row.original.categoria}</span>
+            )}
+          </div>
         </td>
       ),
       enableColumnFilter: true,
@@ -212,21 +216,16 @@ export function TablaProductos({
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <th key={header.id}>
-                    {header.column.columnDef.header}
-                    {header.column.getCanSort() && (
-                      <span
-                        style={{ cursor: "pointer" }}
-                        onClick={header.column.getToggleSortingHandler()}
-                      >
-                        <FaArrowsAltV />
-                      </span>
-                    )}
-                    {
-                      {
-                        asc: " 🔼",
-                        desc: " 🔽",
-                      }[header.column.getIsSorted()]
-                    }
+                    <span
+                      className={`th-label ${
+                        header.column.getCanSort() ? "sortable" : ""
+                      }`}
+                      onClick={header.column.getToggleSortingHandler()}
+                    >
+                      {header.column.columnDef.header}
+                      {{ asc: " ▲", desc: " ▼" }[header.column.getIsSorted()] ??
+                        ""}
+                    </span>
                     <div
                       onMouseDown={header.getResizeHandler()}
                       onTouchStart={header.getResizeHandler()}
@@ -268,6 +267,9 @@ const Container = styled.div`
   margin: 5% 3%;
   @media (min-width: ${v.bpbart}) {
     margin: 2%;
+    border: 2px solid ${({ theme }) => theme.color2};
+    border-radius: 16px;
+    padding: 10px 18px 18px;
   }
   @media (min-width: ${v.bphomer}) {
     margin: 2em auto;
@@ -301,10 +303,23 @@ const Container = styled.div`
       th {
         border-bottom: 2px solid ${({ theme }) => theme.color2};
         font-weight: 700;
+        font-size: 0.82em;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
         text-align: center;
         color: ${({ theme }) => theme.text};
+        opacity: 0.6;
+        padding-bottom: 0.7em;
         &:first-of-type {
           text-align: center;
+        }
+        .th-label.sortable {
+          cursor: pointer;
+          user-select: none;
+        }
+        .th-label.sortable:hover {
+          opacity: 1;
+          color: ${v.colorPrincipal};
         }
       }
     }
@@ -348,18 +363,18 @@ const Container = styled.div`
       tr {
         margin-bottom: 1em;
         &:nth-of-type(even) {
-          background-color: rgba(161, 161, 161, 0.1);
+          background-color: rgba(161, 161, 161, 0.07);
         }
         @media (min-width: ${v.bpbart}) {
           display: table-row;
           border-width: 1px;
+          transition: background-color 0.15s;
+          &:hover {
+            background-color: rgba(243, 210, 12, 0.09);
+          }
         }
         &:last-of-type {
           margin-bottom: 0;
-        }
-        &:nth-of-type(even) {
-          @media (min-width: ${v.bpbart}) {
-          }
         }
       }
       th[scope="row"] {
@@ -377,14 +392,34 @@ const Container = styled.div`
         display: flex;
         justify-content: space-between;
         align-items: center;
-        height: 50px;
-        
+        min-height: 64px;
 
         border-bottom: 1px solid rgba(161, 161, 161, 0.32);
         @media (min-width: ${v.bpbart}) {
           justify-content: center;
           border-bottom: none;
         }
+      }
+      .celdaDescripcion {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 5px;
+        @media (min-width: ${v.bpbart}) {
+          align-items: flex-start;
+        }
+      }
+      .celdaDescripcion .nombreProducto {
+        font-weight: 600;
+        text-transform: capitalize;
+      }
+      .celdaDescripcion .pillCategoria {
+        font-size: 12px;
+        text-transform: capitalize;
+        background: ${({ theme }) => theme.color2};
+        border-radius: 8px;
+        padding: 2px 8px;
+        opacity: 0.85;
       }
       td {
         text-align: right;
