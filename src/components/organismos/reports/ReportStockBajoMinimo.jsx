@@ -1,4 +1,3 @@
-"use client";
 import {
   Document,
   Page,
@@ -6,32 +5,31 @@ import {
   View,
   PDFViewer,
   StyleSheet,
-  Font,
 } from "@react-pdf/renderer";
 import styled from "styled-components";
 import { useQuery } from "@tanstack/react-query";
 import { useReportStore } from "../../../store/ReportStore";
-import { useAlmacenesStore } from "../../../store/AlmacenesStore";
-import { useSucursalesStore } from "../../../store/SucursalesStore";
+import { useEmpresaStore } from "../../../store/EmpresaStore";
+import { useReportesFiltrosStore } from "../../../store/ReportesFiltrosStore";
+
+// Formatea números; deja pasar strings/null sin romper con .toFixed.
+const num = (v) => (typeof v === "number" ? v.toFixed(2) : v ?? "-");
 
 const ReportStockBajoMinimo = () => {
   const { reportStockBajoMinimo } = useReportStore();
-  const { almacenSelectItem } = useAlmacenesStore();
-  const { sucursalesItemSelect } = useSucursalesStore();
+  const { dataempresa } = useEmpresaStore();
+  const { sucursalSel, almacenSel } = useReportesFiltrosStore();
+
+  const params = {
+    _id_empresa: dataempresa?.id,
+    sucursal_id: sucursalSel?.id ?? null,
+    almacen_id: almacenSel?.id ?? null,
+  };
 
   const { data, isLoading, error } = useQuery({
-    queryKey: [
-      "report Stock Por Almacen Sucursal Bajo Minimo",
-      {
-        sucursal_id: sucursalesItemSelect?.id,
-        almacen_id: almacenSelectItem?.id,
-      },
-    ],
-    queryFn: () =>
-      reportStockBajoMinimo({
-        sucursal_id: sucursalesItemSelect?.id,
-        almacen_id: almacenSelectItem?.id,
-      }),
+    queryKey: ["report Stock Por Almacen Sucursal Bajo Minimo", params],
+    queryFn: () => reportStockBajoMinimo(params),
+    enabled: !!dataempresa?.id,
     refetchOnWindowFocus: false,
   });
 
@@ -41,12 +39,6 @@ const ReportStockBajoMinimo = () => {
   if (error) {
     return <span>Error {error.message}</span>;
   }
-
-  // Register the font
-  Font.register({
-    family: "Inconsolata",
-    src: "http://fonts.gstatic.com/s/inconsolata/v15/7bMKuoy6Nh0ft0SHnIGMuaCWcynf_cDxXwCLxiixG1c.ttf",
-  });
 
   const styles = StyleSheet.create({
     page: {
@@ -81,7 +73,7 @@ const ReportStockBajoMinimo = () => {
     cell: {
       flex: 1,
       textAlign: "center",
-      fontFamily: "Inconsolata",
+      fontFamily: "Courier",
       fontSize: 9,
       padding: 3,
       borderRightColor: "#000",
@@ -91,7 +83,7 @@ const ReportStockBajoMinimo = () => {
       flex: 1,
 
       fontWeight: "bold",
-      fontFamily: "Inconsolata",
+      fontFamily: "Courier",
       textAlign: "center",
       fontSize: 9,
       padding: 3,
@@ -100,7 +92,7 @@ const ReportStockBajoMinimo = () => {
     },
     reportInfo: {
       fontSize: 12,
-      fontFamily: "Inconsolata",
+      fontFamily: "Courier",
       marginBottom: 5,
     },
     title: {
@@ -108,11 +100,11 @@ const ReportStockBajoMinimo = () => {
       fontWeight: "bold",
       textAlign: "left",
       marginBottom: 10,
-      fontFamily: "Inconsolata",
+      fontFamily: "Courier",
     },
     subTitle: {
       fontSize: 12,
-      fontFamily: "Inconsolata",
+      fontFamily: "Courier",
       marginBottom: 5,
       textAlign: "left",
     },
@@ -121,19 +113,19 @@ const ReportStockBajoMinimo = () => {
       textAlign: "right",
       fontSize: 12,
       marginTop: 10,
-      fontFamily: "Inconsolata",
+      fontFamily: "Courier",
     },
     codeCell: {
       flex: 0.8,
       textAlign: "center",
-      fontFamily: "Inconsolata",
+      fontFamily: "Courier",
       fontSize: 9,
       padding: 3,
     },
     descriptionCell: {
       flex: 2,
       textAlign: "left",
-      fontFamily: "Inconsolata",
+      fontFamily: "Courier",
       fontSize: 9,
       padding: 3,
       paddingLeft: 5,
@@ -141,7 +133,7 @@ const ReportStockBajoMinimo = () => {
     numberCell: {
       flex: 0.8,
       textAlign: "center",
-      fontFamily: "Inconsolata",
+      fontFamily: "Courier",
       fontSize: 9,
       padding: 3,
       paddingRight: 5,
@@ -150,7 +142,7 @@ const ReportStockBajoMinimo = () => {
       flex: 0.8,
 
       fontWeight: "bold",
-      fontFamily: "Inconsolata",
+      fontFamily: "Courier",
       textAlign: "center",
       fontSize: 9,
       padding: 3,
@@ -158,7 +150,7 @@ const ReportStockBajoMinimo = () => {
     headerDescriptionCell: {
       flex: 2,
       fontWeight: "bold",
-      fontFamily: "Inconsolata",
+      fontFamily: "Courier",
       textAlign: "center",
       fontSize: 9,
       padding: 3,
@@ -167,7 +159,7 @@ const ReportStockBajoMinimo = () => {
       flex: 0.8,
 
       fontWeight: "bold",
-      fontFamily: "Inconsolata",
+      fontFamily: "Courier",
       textAlign: "center",
       fontSize: 9,
       padding: 3,
@@ -175,7 +167,7 @@ const ReportStockBajoMinimo = () => {
     totalLabelCell: {
       flex: 2.8,
       textAlign: "right",
-      fontFamily: "Inconsolata",
+      fontFamily: "Courier",
       fontWeight: "bold",
       fontSize: 9,
       padding: 3,
@@ -194,100 +186,68 @@ const ReportStockBajoMinimo = () => {
     </View>
   );
 
-  const renderTableRow = (rowData) => (
-    <View style={styles.row} key={rowData.codigo_articulo}>
+  const renderTableRow = (rowData, i) => (
+    <View style={styles.row} key={rowData.codigo_articulo ?? i}>
       <Text style={styles.codeCell}>{rowData.codigo_articulo}</Text>
       <Text style={styles.descriptionCell}>{rowData.descripcion_articulo}</Text>
-      <Text style={styles.numberCell}>
-        {typeof rowData.stock === "number"
-          ? rowData.stock.toFixed(2)
-          : rowData.stock}
-      </Text>
-      <Text style={styles.numberCell}>
-        {typeof rowData.stock === "number"
-          ? rowData.stock_minimo.toFixed(2)
-          : rowData.stock_minimo}
-      </Text>
-      <Text style={styles.numberCell}>
-        {typeof rowData.precio_costo === "number"
-          ? rowData.precio_costo.toFixed(2)
-          : rowData.precio_costo}
-      </Text>
-      <Text style={styles.numberCell}>
-        {typeof rowData.total === "number"
-          ? rowData.total.toFixed(2)
-          : rowData.total}
-      </Text>
+      <Text style={styles.numberCell}>{num(rowData.stock)}</Text>
+      <Text style={styles.numberCell}>{num(rowData.stock_minimo)}</Text>
+      <Text style={styles.numberCell}>{num(rowData.precio_costo)}</Text>
+      <Text style={styles.numberCell}>{num(rowData.total)}</Text>
     </View>
   );
 
-  // Calcular totales del inventario
-  const totalStock =
-    data?.reduce((acc, item) => acc + (item.stock || 0), 0) || 0;
-  const totalValor =
-    data?.reduce((acc, item) => acc + (item.total || 0), 0) || 0;
+  const rows = data ?? [];
+  const totalStock = rows.reduce((acc, item) => acc + Number(item.stock || 0), 0);
+  const totalValor = rows.reduce((acc, item) => acc + Number(item.total || 0), 0);
 
   const currentDate = new Date();
   const formattedDate = `${currentDate.toLocaleDateString()} ${currentDate.toLocaleTimeString()}`;
 
-  // Sample data for preview (will be replaced by actual data in production)
-  const sampleData = [
-    {
-      codigo_articulo: "0001",
-      descripcion_articulo: "Servicio de Consultoría Técnica",
-      stock: 11,
-      precio_costo: null,
-      total: null,
-    },
-   
-  ];
-
-  // Use sample data for preview if no data is available
-  const displayData = data?.length > 0 ? data : sampleData;
-
   return (
     <Container className="main">
-      {
-        data?.length > 0 ? ( <PDFViewer className="pdfviewer">
-          <Document title="Reporte de Inventario Valorizado">
-            <Page size="A4" orientation="portrait">
-              <View style={styles.page}>
-                <View style={styles.section}>
-                  {/* ENCABEZADO */}
-                  <Text style={styles.title}>Reporte de stock bajo minimo</Text>
-                  <Text style={styles.subTitle}>
-                    Fecha y Hora del reporte: {formattedDate}
-                  </Text>
-                  <Text style={styles.subTitle}>
-                    Sucursal: {sucursalesItemSelect?.nombre || "Genérica"}
-                  </Text>
-                  <Text style={styles.subTitle}>
-                    Almacén: {almacenSelectItem?.nombre || "Almacén principal"}
-                  </Text>
-  
-                  <View style={styles.table}>
-                    {renderTableHeader()}
-                    {displayData.map((item) => renderTableRow(item))}
-  
-                    {/* Total general */}
+      <PDFViewer className="pdfviewer">
+        <Document title="Reporte de stock bajo mínimo">
+          <Page size="A4" orientation="portrait">
+            <View style={styles.page}>
+              <View style={styles.section}>
+                {/* ENCABEZADO */}
+                <Text style={styles.title}>Reporte de stock bajo mínimo</Text>
+                <Text style={styles.subTitle}>
+                  Fecha y Hora del reporte: {formattedDate}
+                </Text>
+                <Text style={styles.subTitle}>
+                  Sucursal: {sucursalSel?.nombre || "Todas"}
+                </Text>
+                <Text style={styles.subTitle}>
+                  Almacén: {almacenSel?.nombre || "Todos"}
+                </Text>
+
+                <View style={styles.table}>
+                  {renderTableHeader()}
+                  {rows.length === 0 && (
                     <View style={styles.row}>
-                      <Text style={styles.totalLabelCell}>TOTAL</Text>
-                      <Text style={styles.numberCell}>
-                        {totalStock.toFixed(2)}
-                      </Text>
-                      <Text style={styles.numberCell}></Text>
-                      <Text style={styles.numberCell}>
-                        {totalValor.toFixed(2)}
+                      <Text style={styles.descriptionCell}>
+                        No hay productos por debajo del stock mínimo.
                       </Text>
                     </View>
+                  )}
+                  {rows.map((item, i) => renderTableRow(item, i))}
+
+                  {/* Total general */}
+                  <View style={styles.row}>
+                    <Text style={styles.totalLabelCell}>TOTAL</Text>
+                    <Text style={styles.numberCell}>{totalStock.toFixed(2)}</Text>
+                    <Text style={styles.numberCell}></Text>
+                    <Text style={styles.numberCell}></Text>
+                    <Text style={styles.numberCell}>{totalValor.toFixed(2)}</Text>
                   </View>
                 </View>
               </View>
-            </Page>
-          </Document>
-        </PDFViewer>):(<span>sin datos</span>)
-      }
-     
+            </View>
+          </Page>
+        </Document>
+      </PDFViewer>
     </Container>
   );
 };

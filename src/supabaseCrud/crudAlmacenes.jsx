@@ -38,6 +38,18 @@ export async function MostrarAlmacenesXSucursal(p) {
     .eq("id_sucursal", p.id_sucursal);
   return data;
 }
+// Lista plana de TODOS los almacenes de la empresa (para el filtro de
+// Reportes). Une por `sucursales!inner` para scopear por empresa y traer el
+// nombre de la sucursal de cada almacén.
+export async function MostrarAlmacenesXEmpresaPlano(p) {
+  const { data, error } = await supabase
+    .from(tabla)
+    .select("id, nombre, id_sucursal, sucursales!inner(nombre, id_empresa)")
+    .eq("sucursales.id_empresa", p.id_empresa)
+    .order("nombre", { ascending: true });
+  if (error) throw new Error(error.message);
+  return data || [];
+}
 export async function EliminarAlmacen(p) {
   const { error } = await supabase.from(tabla).delete().eq("id", p.id);
   if (error) {

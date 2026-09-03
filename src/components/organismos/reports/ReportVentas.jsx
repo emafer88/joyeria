@@ -1,4 +1,3 @@
-"use client";
 import {
   Document,
   Page,
@@ -8,62 +7,62 @@ import {
   StyleSheet,
 } from "@react-pdf/renderer";
 import styled from "styled-components";
+import dayjs from "dayjs";
 import { useQuery } from "@tanstack/react-query";
 import { useReportStore } from "../../../store/ReportStore";
-import { useSucursalesStore } from "../../../store/SucursalesStore";
-import { useDashboardStore } from "../../../store/DashboardStore";
+import { useEmpresaStore } from "../../../store/EmpresaStore";
+import { useReportesFiltrosStore } from "../../../store/ReportesFiltrosStore";
 
 const ReportVentas = () => {
   const { reportVentasPorSucursal } = useReportStore();
-  const { sucursalesItemSelect } = useSucursalesStore();
-  const { fechaInicio, fechaFin } = useDashboardStore();
+  const { dataempresa } = useEmpresaStore();
+  const { sucursalSel, fechaInicio, fechaFin } = useReportesFiltrosStore();
+
+  const params = {
+    _id_empresa: dataempresa?.id,
+    sucursal_id: sucursalSel?.id ?? null,
+    fecha_inicio: fechaInicio,
+    fecha_fin: fechaFin,
+  };
 
   const { data, isLoading, error } = useQuery({
-    queryKey: [
-      "report Ventas Por Sucursal",
-      {
-        sucursal_id: sucursalesItemSelect?.id,
-        fecha_inicio: fechaInicio,
-        fecha_fin: fechaFin,
-      },
-    ],
-    queryFn: () =>
-      reportVentasPorSucursal({
-        sucursal_id: sucursalesItemSelect?.id,
-        fecha_inicio: fechaInicio,
-        fecha_fin: fechaFin,
-      }),
+    queryKey: ["report Ventas Por Sucursal", params],
+    queryFn: () => reportVentasPorSucursal(params),
+    enabled: !!dataempresa?.id,
     refetchOnWindowFocus: false,
   });
 
+  const money = dataempresa?.simbolo_moneda || "$";
+
   if (isLoading) return <div>Cargando...</div>;
-  if (error) return <span>Error {(error)?.message}</span>;
+  if (error) return <span>Error {error?.message}</span>;
 
   // --------- helpers (JS puro) ----------
   const n = (v) =>
-    new Intl.NumberFormat("es-PE", {
+    new Intl.NumberFormat("es-MX", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(Number(v || 0));
 
-  const d = (iso) => {
-    if (!iso) return "-";
-    const dt = new Date(iso);
-    return `${dt.toLocaleDateString("es-PE")} ${dt
-      .toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" })
-      .replace(".", "")}`;
-  };
+  // `fecha` viene como `timestamp without time zone`; dayjs lo parsea sin
+  // corrimiento de zona horaria (a diferencia de `new Date(iso)`).
+  const d = (iso) => (iso && dayjs(iso).isValid() ? dayjs(iso).format("DD/MM/YYYY HH:mm") : "-");
+  const soloFecha = (iso) =>
+    iso && dayjs(iso).isValid() ? dayjs(iso).format("DD/MM/YYYY") : "Todas";
 
   const rows = Array.isArray(data) ? data : [];
 
-  const totalVentas = rows.reduce((a, x) => a + (x.monto_total || 0), 0);
-  const totalImpuestos = rows.reduce((a, x) => a + (x.total_impuestos || 0), 0);
+  const totalVentas = rows.reduce((a, x) => a + Number(x.monto_total || 0), 0);
+  const totalImpuestos = rows.reduce(
+    (a, x) => a + Number(x.total_impuestos || 0),
+    0
+  );
   const totalProductos = rows.reduce(
-    (a, x) => a + (x.cantidad_productos || 0),
+    (a, x) => a + Number(x.cantidad_productos || 0),
     0
   );
 
-  const generatedAt = new Date();
+  const generatedAt = dayjs().format("DD/MM/YYYY HH:mm");
 
   // --------- styles ----------
   const C = {
@@ -190,25 +189,23 @@ const ReportVentas = () => {
             <View style={styles.headerWrap}>
               <View style={styles.brandBar} />
               <Text style={styles.title}>Reporte de Ventas</Text>
-              <Text style={styles.subtitle}>
-                Generado: {generatedAt.toLocaleString("es-PE", { hour12: false })}
-              </Text>
+              <Text style={styles.subtitle}>Generado: {generatedAt}</Text>
 
               <View style={styles.meta}>
                 <View style={styles.metaRow}>
                   <View style={[styles.metaItem, styles.metaItemPad]}>
                     <Text style={styles.metaLabel}>Sucursal</Text>
                     <Text style={styles.metaValue}>
-                      {sucursalesItemSelect?.nombre || "Genérica"}
+                      {sucursalSel?.nombre || "Todas"}
                     </Text>
                   </View>
                   <View style={[styles.metaItem, styles.metaItemPad]}>
                     <Text style={styles.metaLabel}>Desde</Text>
-                    <Text style={styles.metaValue}>{d(fechaInicio)}</Text>
+                    <Text style={styles.metaValue}>{soloFecha(fechaInicio)}</Text>
                   </View>
                   <View style={styles.metaItem}>
                     <Text style={styles.metaLabel}>Hasta</Text>
-                    <Text style={styles.metaValue}>{d(fechaFin)}</Text>
+                    <Text style={styles.metaValue}>{soloFecha(fechaFin)}</Text>
                   </View>
                 </View>
               </View>
@@ -217,11 +214,15 @@ const ReportVentas = () => {
               <View style={styles.kpis}>
                 <View style={styles.kpi}>
                   <Text style={styles.kpiLabel}>Monto total de ventas</Text>
-                  <Text style={styles.kpiValue}>S/ {n(totalVentas)}</Text>
+                  <Text style={styles.kpiValue}>
+                    {money} {n(totalVentas)}
+                  </Text>
                 </View>
                 <View style={styles.kpi}>
                   <Text style={styles.kpiLabel}>Total impuestos</Text>
-                  <Text style={styles.kpiValue}>S/ {n(totalImpuestos)}</Text>
+                  <Text style={styles.kpiValue}>
+                    {money} {n(totalImpuestos)}
+                  </Text>
                 </View>
                 <View style={[styles.kpi, styles.kpiLast]}>
                   <Text style={styles.kpiLabel}>Cantidad de productos</Text>
@@ -279,7 +280,7 @@ const ReportVentas = () => {
 
             {/* Footer: dos Text fijos */}
             <Text style={styles.footerLeft} fixed>
-              {`Generado: ${generatedAt.toLocaleString("es-PE", { hour12: false })}`}
+              {`Generado: ${generatedAt}`}
             </Text>
             <Text
               style={styles.footerRight}
