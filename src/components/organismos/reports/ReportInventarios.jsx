@@ -5,29 +5,28 @@ import {
   Page,
   View,
   StyleSheet,
-  Font,
   Text,
 } from "@react-pdf/renderer";
 import { useReporteInventarioValoradoQuery } from "../../../tanstack/ReportesStack";
-import { useSucursalesStore } from "../../../store/SucursalesStore";
-import { useAlmacenesStore } from "../../../store/AlmacenesStore";
+import { useReportesFiltrosStore } from "../../../store/ReportesFiltrosStore";
+
+// Formatea números; deja pasar strings/null sin romper con .toFixed.
+const num = (v) => (typeof v === "number" ? v.toFixed(2) : v ?? "-");
+
 export const ReportInventarios = () => {
-  const { data: dataReporteInventarioValorado } =
-    useReporteInventarioValoradoQuery();
-  const { sucursalesItemSelect } = useSucursalesStore();
-  const { almacenSelectItem } = useAlmacenesStore();
+  const {
+    data: dataReporteInventarioValorado,
+    isLoading,
+    error,
+  } = useReporteInventarioValoradoQuery();
+  const { sucursalSel, almacenSel } = useReportesFiltrosStore();
   //Calcular totales del inventario
-  const totalStock =
-    dataReporteInventarioValorado?.reduce(
-      (acc, item) => acc + (item.stock || 0),
-      0
-    ) || 0;
+  const rows = dataReporteInventarioValorado ?? [];
+  const totalStock = rows.reduce((acc, item) => acc + Number(item.stock || 0), 0);
+  const totalValor = rows.reduce((acc, item) => acc + Number(item.total || 0), 0);
   const currentDate = new Date();
   const formattedDate = `${currentDate.toLocaleDateString()} ${currentDate.toLocaleTimeString()}`;
-  Font.register({
-    family: "Inconsolata",
-    src: "http://fonts.gstatic.com/s/inconsolata/v15/7bMKuoy6Nh0ft0SHnIGMuaCWcynf_cDxXwCLxiixG1c.ttf",
-  });
+
   const styles = StyleSheet.create({
     page: {
       flexDirection: "row",
@@ -61,7 +60,7 @@ export const ReportInventarios = () => {
     cell: {
       flex: 1,
       textAlign: "center",
-      fontFamily: "Inconsolata",
+      fontFamily: "Courier",
       fontSize: 9,
       padding: 3,
       borderRightColor: "#000",
@@ -71,7 +70,7 @@ export const ReportInventarios = () => {
       flex: 1,
 
       fontWeight: "bold",
-      fontFamily: "Inconsolata",
+      fontFamily: "Courier",
       textAlign: "center",
       fontSize: 9,
       padding: 3,
@@ -80,7 +79,7 @@ export const ReportInventarios = () => {
     },
     reportInfo: {
       fontSize: 12,
-      fontFamily: "Inconsolata",
+      fontFamily: "Courier",
       marginBottom: 5,
     },
     title: {
@@ -88,11 +87,11 @@ export const ReportInventarios = () => {
       fontWeight: "bold",
       textAlign: "left",
       marginBottom: 10,
-      fontFamily: "Inconsolata",
+      fontFamily: "Courier",
     },
     subTitle: {
       fontSize: 12,
-      fontFamily: "Inconsolata",
+      fontFamily: "Courier",
       marginBottom: 5,
       textAlign: "left",
     },
@@ -101,19 +100,19 @@ export const ReportInventarios = () => {
       textAlign: "right",
       fontSize: 12,
       marginTop: 10,
-      fontFamily: "Inconsolata",
+      fontFamily: "Courier",
     },
     codeCell: {
       flex: 0.8,
       textAlign: "center",
-      fontFamily: "Inconsolata",
+      fontFamily: "Courier",
       fontSize: 9,
       padding: 3,
     },
     descriptionCell: {
       flex: 2,
       textAlign: "left",
-      fontFamily: "Inconsolata",
+      fontFamily: "Courier",
       fontSize: 9,
       padding: 3,
       paddingLeft: 5,
@@ -121,7 +120,7 @@ export const ReportInventarios = () => {
     numberCell: {
       flex: 0.8,
       textAlign: "right",
-      fontFamily: "Inconsolata",
+      fontFamily: "Courier",
       fontSize: 9,
       padding: 3,
       paddingRight: 5,
@@ -130,7 +129,7 @@ export const ReportInventarios = () => {
       flex: 0.8,
 
       fontWeight: "bold",
-      fontFamily: "Inconsolata",
+      fontFamily: "Courier",
       textAlign: "center",
       fontSize: 9,
       padding: 3,
@@ -139,7 +138,7 @@ export const ReportInventarios = () => {
       flex: 2,
 
       fontWeight: "bold",
-      fontFamily: "Inconsolata",
+      fontFamily: "Courier",
       textAlign: "center",
       fontSize: 9,
       padding: 3,
@@ -148,7 +147,7 @@ export const ReportInventarios = () => {
       flex: 0.8,
 
       fontWeight: "bold",
-      fontFamily: "Inconsolata",
+      fontFamily: "Courier",
       textAlign: "center",
       fontSize: 9,
       padding: 3,
@@ -156,7 +155,7 @@ export const ReportInventarios = () => {
     totalLabelCell: {
       flex: 2.8,
       textAlign: "right",
-      fontFamily: "Inconsolata",
+      fontFamily: "Courier",
       fontWeight: "bold",
       fontSize: 9,
       padding: 3,
@@ -172,30 +171,18 @@ export const ReportInventarios = () => {
       <Text style={styles.headerNumberCell}>TOTAL</Text>
     </View>
   );
-  const renderTableRow = (rowData) => (
-    <View style={styles.row}>
+  const renderTableRow = (rowData, i) => (
+    <View style={styles.row} key={rowData.codigo_articulo ?? i}>
       <Text style={styles.codeCell}> {rowData.codigo_articulo} </Text>
       <Text style={styles.descriptionCell}>{rowData.descripcion_articulo}</Text>
-      <Text style={styles.numberCell}>
-        {" "}
-        {typeof rowData.stock === "number"
-          ? rowData.stock.toFixed(2)
-          : rowData.stock}{" "}
-      </Text>
-      <Text style={styles.numberCell}>
-        {" "}
-        {typeof rowData.precio_costo === "number"
-          ? rowData.precio_costo.toFixed(2)
-          : rowData.precio_costo}{" "}
-      </Text>
-      <Text style={styles.numberCell}>
-        {" "}
-        {typeof rowData.total === "number"
-          ? rowData.total.toFixed(2)
-          : rowData.total}{" "}
-      </Text>
+      <Text style={styles.numberCell}> {num(rowData.stock)} </Text>
+      <Text style={styles.numberCell}> {num(rowData.precio_costo)} </Text>
+      <Text style={styles.numberCell}> {num(rowData.total)} </Text>
     </View>
   );
+
+  if (isLoading) return <div>Cargando...</div>;
+  if (error) return <span>Error {error.message}</span>;
 
   return (
     <Container className="main">
@@ -209,20 +196,29 @@ export const ReportInventarios = () => {
                   Fecha y Hora del reporte: {formattedDate}{" "}
                 </Text>
                 <Text style={styles.subTitle}>
-                  Sucursal: {sucursalesItemSelect?.nombre}{" "}
+                  Sucursal: {sucursalSel?.nombre || "Todas"}{" "}
                 </Text>
                 <Text style={styles.subTitle}>
-                  Almacén: {almacenSelectItem?.nombre}{" "}
+                  Almacén: {almacenSel?.nombre || "Todos"}{" "}
                 </Text>
                 <View>
                   {renderTableHeader()}
-                  {dataReporteInventarioValorado?.map((item) =>
-                    renderTableRow(item)
+                  {rows.length === 0 && (
+                    <View style={styles.row}>
+                      <Text style={styles.descriptionCell}>
+                        Sin datos para el filtro seleccionado.
+                      </Text>
+                    </View>
                   )}
+                  {rows.map((item, i) => renderTableRow(item, i))}
                   <View style={styles.row}>
                     <Text style={styles.totalLabelCell}>TOTAL</Text>
                     <Text style={styles.numberCell}>
                       {totalStock.toFixed(2)}{" "}
+                    </Text>
+                    <Text style={styles.numberCell}></Text>
+                    <Text style={styles.numberCell}>
+                      {totalValor.toFixed(2)}{" "}
                     </Text>
                   </View>
                 </View>

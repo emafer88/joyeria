@@ -1,61 +1,63 @@
-import { NavLink, Outlet, useLocation, useMatch } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import styled from "styled-components";
-import { useMostrarSucursalesQuery } from "../tanstack/SucursalesStack";
-import {
-  useMostrarAlmacenesXSucursalQuery,
-  useMostrarAlmacenesXSucursalSelectQuery,
-} from "../tanstack/AlmacenesStack";
+import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { SelectList } from "../components/ui/lists/SelectList";
-import { useSucursalesStore } from "../store/SucursalesStore";
-import { useAlmacenesStore } from "../store/AlmacenesStore";
-import { useState } from "react";
+import { useEmpresaStore } from "../store/EmpresaStore";
+import { useReportesFiltrosStore } from "../store/ReportesFiltrosStore";
+import { MostrarSucursales, MostrarAlmacenesXEmpresaPlano } from "../index";
 import { Device } from "../styles/breakpoints";
-import { DashboardHeader } from "../components/organismos/DashboardDesign/DashboardHeader";
+import { ReportesDateRange } from "../components/organismos/reports/ReportesDateRange";
+
+const TODAS_SUCURSALES = { id: null, nombre: "Todas las sucursales" };
+const TODOS_ALMACENES = { id: null, nombre: "Todos los almacenes" };
 
 export const Reportes = () => {
-  const [reporteSeleccionado, setReporteSeleccionado] = useState(1);
-  const { data: dataSucursales } = useMostrarSucursalesQuery();
-  const { data: dataAlmacenes } = useMostrarAlmacenesXSucursalSelectQuery();
-  const { sucursalesItemSelect, selectSucursal } = useSucursalesStore();
-  const { almacenSelectItem, setAlmacenSelectItem } = useAlmacenesStore();
+  const { dataempresa } = useEmpresaStore();
+  const { sucursalSel, almacenSel, setSucursalSel, setAlmacenSel } =
+    useReportesFiltrosStore();
+
+  const { data: sucursales = [] } = useQuery({
+    queryKey: ["reportes sucursales", dataempresa?.id],
+    queryFn: () => MostrarSucursales({ id_empresa: dataempresa.id }),
+    enabled: !!dataempresa?.id,
+    refetchOnWindowFocus: false,
+  });
+  const { data: almacenes = [] } = useQuery({
+    queryKey: ["reportes almacenes", dataempresa?.id],
+    queryFn: () => MostrarAlmacenesXEmpresaPlano({ id_empresa: dataempresa.id }),
+    enabled: !!dataempresa?.id,
+    refetchOnWindowFocus: false,
+  });
+
+  const opcionesSucursal = [TODAS_SUCURSALES, ...sucursales];
+  const opcionesAlmacen = useMemo(() => {
+    const base = sucursalSel?.id
+      ? almacenes.filter((a) => a.id_sucursal === sucursalSel.id)
+      : almacenes;
+    return [TODOS_ALMACENES, ...base];
+  }, [almacenes, sucursalSel]);
 
   const tiposReporte = [
-    {
-      id: 1,
-      nombre: "Inventario valorado",
-      icono: "mdi:file-document-outline",
-      to: "inventario_valorado",
-    },
-    {
-      id: 2,
-      nombre: "Productos con Stock Bajo",
-      icono: "mdi:file-alert-outline",
-
-      to: "report_stock_bajo_minimo",
-    },
-    {
-      id: 3,
-      nombre: "Reporte de Ventas",
-      icono: "mdi:file-chart-outline",
-
-      to: "report_ventas",
-    },
+    { nombre: "Inventario valorado", to: "inventario_valorado" },
+    { nombre: "Productos con Stock Bajo", to: "report_stock_bajo_minimo" },
+    { nombre: "Reporte de Ventas", to: "report_ventas" },
   ];
-    // ✅ ¿Estamos en /reportes/report_ventas ?
- const location = useLocation();
-  const isReportVentas = location.pathname.includes("report_ventas");  return (
+
+  const location = useLocation();
+  const rutaActual = location.pathname.split("/").pop();
+  const reporteActual = tiposReporte.find((r) => r.to === rutaActual);
+  const isReportVentas = rutaActual === "report_ventas";
+
+  return (
     <Container>
       <section className="barra-lateral">
         <div className="titulo-barra">
           <h1>Reportes</h1>
         </div>
         <nav className="navegacion">
-          {tiposReporte.map((reporte, index) => (
-            <SidebarItem
-              key={index}
-              to={reporte.to}
-              className={reporteSeleccionado === reporte.id ? "activo" : ""}
-            >
+          {tiposReporte.map((reporte) => (
+            <SidebarItem key={reporte.to} to={reporte.to}>
               <span>{reporte.nombre} </span>
             </SidebarItem>
           ))}
@@ -64,7 +66,7 @@ export const Reportes = () => {
       <section className="contenido-principal">
         <div className="barra-superior">
           <div className="contenedor-barra-superior">
-            <h2>{reporteSeleccionado?.nombre}</h2>
+            <h2>{reporteActual?.nombre ?? "Reportes"}</h2>
           </div>
           <div className="panel-filtros">
             <div className="grid-filtros">
@@ -72,23 +74,23 @@ export const Reportes = () => {
                 <div className="filtro">
                   <label>Sucursal</label>
                   <SelectList
-                    data={dataSucursales}
-                    itemSelect={sucursalesItemSelect}
-                    onSelect={selectSucursal}
+                    data={opcionesSucursal}
+                    itemSelect={sucursalSel ?? TODAS_SUCURSALES}
+                    onSelect={(s) => setSucursalSel(s?.id == null ? null : s)}
                     displayField="nombre"
                   />
                 </div>
                 <div className="filtro">
                   <label>Almacen</label>
                   <SelectList
-                    data={dataAlmacenes}
-                    itemSelect={almacenSelectItem}
-                    onSelect={setAlmacenSelectItem}
+                    data={opcionesAlmacen}
+                    itemSelect={almacenSel ?? TODOS_ALMACENES}
+                    onSelect={(a) => setAlmacenSel(a?.id == null ? null : a)}
                     displayField="nombre"
                   />
                 </div>
               </div>
-               {isReportVentas && <DashboardHeader />}
+              {isReportVentas && <ReportesDateRange />}
             </div>
           </div>
         </div>
@@ -151,7 +153,7 @@ const Container = styled.main`
 
     .navegacion {
       padding: 0.5rem;
-    
+
       button {
         display: flex;
         align-items: center;
@@ -202,7 +204,7 @@ const Container = styled.main`
           font-weight: 600;
         }
 
-       
+
       }
     }
 
@@ -229,10 +231,10 @@ const Container = styled.main`
           grid-template-columns: repeat(4, minmax(0, 1fr));
         }
 
-       
+
       }
 
-    
+
     }
 
     .visor-pdf {

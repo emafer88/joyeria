@@ -113,6 +113,7 @@ export function MyRoutes() {
           </Layout>
         }
       >
+        <Route index element={<Navigate to="inventario_valorado" replace />} />
         <Route path="inventario_valorado" element={<ReportInventarios/>}  />
         <Route path="report_ventas" element={<ReportVentas/>}  />
          <Route path="report_stock_bajo_minimo" element={<ReportStockBajoMinimo />} />

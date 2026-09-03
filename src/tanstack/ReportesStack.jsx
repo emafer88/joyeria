@@ -3,9 +3,8 @@ import { useEmpresaStore } from "../store/EmpresaStore";
 
 import { useDashboardStore } from "../store/DashboardStore";
 import { useReportesStore } from "../store/ReportesStore";
-import { useSucursalesStore } from "../store/SucursalesStore";
 import { useReportStore } from "../store/ReportStore";
-import { useAlmacenesStore } from "../store/AlmacenesStore";
+import { useReportesFiltrosStore } from "../store/ReportesFiltrosStore";
 export const useMostrarVentasDashboardQuery = () => {
   const { dataempresa } = useEmpresaStore();
   const { fechaInicio, fechaFin } = useDashboardStore();
@@ -127,23 +126,19 @@ export const useGananciasDetalleVentaQuery = () => {
   });
 };
 export const useReporteInventarioValoradoQuery = () => {
-  const { sucursalesItemSelect } = useSucursalesStore();
+  const { dataempresa } = useEmpresaStore();
   const { reportStockPorAlmacenSucursal } = useReportStore();
-  const { almacenSelectItem } = useAlmacenesStore();
+  const { sucursalSel, almacenSel } = useReportesFiltrosStore();
+  const params = {
+    _id_empresa: dataempresa?.id,
+    sucursal_id: sucursalSel?.id ?? null,
+    almacen_id: almacenSel?.id ?? null,
+  };
 
   return useQuery({
-    queryKey: [
-      "reporte de inventario valorado",
-      {
-        sucursal_id: sucursalesItemSelect?.id,
-        almacen_id: almacenSelectItem?.id,
-      },
-    ],
-    queryFn: () =>
-      reportStockPorAlmacenSucursal({
-        sucursal_id: sucursalesItemSelect?.id,
-        almacen_id: almacenSelectItem?.id,
-      }),
+    queryKey: ["reporte de inventario valorado", params],
+    queryFn: () => reportStockPorAlmacenSucursal(params),
+    enabled: !!dataempresa?.id,
     refetchOnWindowFocus: false,
   });
 };
