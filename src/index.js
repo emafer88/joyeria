@@ -5,6 +5,7 @@ export * from "./components/atomos/Linea";
 export * from "./components/atomos/Lottieanimacion";
 export * from "./components/atomos/Title";
 export * from "./components/moleculas/Btn1";
+export * from "./components/moleculas/FondoPublico";
 export * from "./components/moleculas/Btngenerarcodigo";
 export * from "./components/moleculas/ImagenContent";
 export * from "./components/moleculas/Spinner1";
