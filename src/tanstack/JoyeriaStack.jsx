@@ -174,6 +174,7 @@ export const useGuardarDisenoMutation = () => {
           descripcion: values.descripcion || null,
           id_categoria: num(values.id_categoria),
           id_marca: num(values.id_marca),
+          destacado: !!values.destacado,
         });
         return values.id;
       }
@@ -183,6 +184,7 @@ export const useGuardarDisenoMutation = () => {
         _id_categoria: num(values.id_categoria),
         _id_marca: num(values.id_marca),
         _id_empresa: dataempresa.id,
+        _destacado: !!values.destacado,
       });
     },
     onError: (e) => toast.error(e.message),

@@ -12,6 +12,7 @@ import { useState } from "react";
 import ConfettiExplosion from "react-confetti-explosion";
 import { Toaster } from "sonner";
 import { JoyeriaTemplate } from "./JoyeriaTemplate";
+import { BannersTemplate } from "./BannersTemplate";
 import { InventarioProductos } from "../organismos/productos/InventarioProductos";
 export function ProductosTemplate() {
   const [openRegistro, SetopenRegistro] = useState(false);
@@ -48,10 +49,18 @@ export function ProductosTemplate() {
         >
           Joyería
         </button>
+        <button
+          className={tab === "banners" ? "on" : ""}
+          onClick={() => setTab("banners")}
+        >
+          Banners
+        </button>
       </nav>
 
       {tab === "joyeria" ? (
         <JoyeriaTemplate />
+      ) : tab === "banners" ? (
+        <BannersTemplate />
       ) : (
         <>
           <div className="subtabs">

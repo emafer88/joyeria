@@ -1,6 +1,7 @@
+import { useState } from "react";
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
-import { InputText, Btn1 } from "../../../index";
+import { InputText, Btn1, Switch1 } from "../../../index";
 import { v } from "../../../styles/variables";
 import { useJoyeriaStore } from "../../../store/JoyeriaStore";
 import {
@@ -20,6 +21,9 @@ export function FormProductoJoyeria({ onClose }) {
   const { data: categorias = [] } = useCategoriasJoyeriaQuery();
   const { data: marcas = [] } = useMarcasJoyeriaQuery();
   const { mutate, isPending } = useGuardarDisenoMutation();
+  const [destacado, setDestacado] = useState(
+    esEditar ? !!disenoSelect?.destacado : false
+  );
 
   const {
     register,
@@ -36,7 +40,7 @@ export function FormProductoJoyeria({ onClose }) {
 
   const onSubmit = (values) => {
     mutate(
-      { accion, values: { ...values, id: disenoSelect?.id } },
+      { accion, values: { ...values, id: disenoSelect?.id, destacado } },
       { onSuccess: onClose }
     );
   };
@@ -100,6 +104,11 @@ export function FormProductoJoyeria({ onClose }) {
             </>
           )}
 
+          <div className="fila-switch">
+            <label>Destacado (home ecommerce)</label>
+            <Switch1 state={destacado} setState={() => setDestacado((d) => !d)} />
+          </div>
+
           <Btn1
             icono={<v.iconoguardar />}
             titulo={isPending ? "Guardando..." : "Guardar"}
@@ -156,6 +165,13 @@ const Container = styled.div`
       }
       .err {
         font-size: 13px;
+      }
+      .fila-switch {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 14px;
       }
       .sel-label {
         font-size: 14px;
