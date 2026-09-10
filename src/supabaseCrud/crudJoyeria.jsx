@@ -59,6 +59,7 @@ export async function EditarProductoJoyeria(p) {
       descripcion: p.descripcion,
       id_categoria: p.id_categoria,
       id_marca: p.id_marca,
+      destacado: p.destacado,
     })
     .eq("id", p.id);
   if (error) throw new Error(error.message);

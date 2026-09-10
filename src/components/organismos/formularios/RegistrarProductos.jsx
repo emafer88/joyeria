@@ -28,6 +28,17 @@ import { useStockStore } from "../../../store/StockStore";
 import { toast } from "sonner";
 import { BtnClose } from "../../ui/buttons/BtnClose";
 
+// ISO (con offset) -> "YYYY-MM-DDTHH:mm" que espera un <input type="datetime-local">.
+function aDatetimeLocal(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
+    d.getHours()
+  )}:${pad(d.getMinutes())}`;
+}
+
 export function RegistrarProductos({
   onClose,
   dataSelect,
@@ -43,6 +54,7 @@ export function RegistrarProductos({
   const [stock, setStock] = useState("");
   const [stockMinimo, setStockMinimo] = useState("");
   const [ubicacion, setUbicacion] = useState("");
+  const [destacado, setDestacado] = useState(false);
   const handleCheckboxChange = (checkboxNumber) => {
     if (checkboxNumber === 1) {
       setIsChecked1(true);
@@ -179,6 +191,16 @@ export function RegistrarProductos({
   };
   async function insertar(data) {
     validarVacios(data);
+    const precioOferta =
+      data.precio_oferta && data.precio_oferta.trim() !== ""
+        ? parseFloat(data.precio_oferta)
+        : null;
+    const ofertaDesde = data.oferta_desde
+      ? new Date(data.oferta_desde).toISOString()
+      : null;
+    const ofertaHasta = data.oferta_hasta
+      ? new Date(data.oferta_hasta).toISOString()
+      : null;
     if (accion === "Editar") {
       const p = {
         _id: dataSelect.id,
@@ -191,6 +213,10 @@ export function RegistrarProductos({
         _id_empresa: dataempresa.id,
         _sevende_por: sevendepor,
         _maneja_inventarios: stateInventarios,
+        _destacado: destacado,
+        _precio_oferta: precioOferta,
+        _oferta_desde: ofertaDesde,
+        _oferta_hasta: ofertaHasta,
       };
       console.log(p);
       await editarProductos(p);
@@ -225,6 +251,10 @@ export function RegistrarProductos({
         _sevende_por: sevendepor,
         _maneja_inventarios: stateInventarios,
         _maneja_multiprecios: false,
+        _destacado: destacado,
+        _precio_oferta: precioOferta,
+        _oferta_desde: ofertaDesde,
+        _oferta_hasta: ofertaHasta,
       };
 
       const id_producto_nuevo = await insertarProductos(p);
@@ -341,6 +371,7 @@ export function RegistrarProductos({
       dataSelect.maneja_inventarios
         ? setStateEnabledStock(true)
         : setStateEnabledStock(false);
+      setDestacado(!!dataSelect.destacado);
     }
   }, []);
   //#endregion validar_accion
@@ -488,6 +519,55 @@ export function RegistrarProductos({
                   setState={checkUseInventarios}
                 />
               </ContainerSelector>
+              <ContainerSelector>
+                <label>Destacado (home ecommerce): </label>
+                <Switch1
+                  state={destacado}
+                  setState={() => setDestacado((d) => !d)}
+                />
+              </ContainerSelector>
+              <ContainerOferta>
+                <span className="titulo">Oferta (opcional)</span>
+                <article>
+                  <InputText icono={<v.iconoflechaderecha />}>
+                    <input
+                      step="0.01"
+                      className="form__field"
+                      defaultValue={dataSelect.precio_oferta ?? ""}
+                      type="number"
+                      placeholder="precio oferta"
+                      {...register("precio_oferta")}
+                    />
+                    <label className="form__label">Precio de oferta</label>
+                  </InputText>
+                </article>
+                <article>
+                  <InputText icono={<v.iconoflechaderecha />}>
+                    <input
+                      className="form__field"
+                      defaultValue={aDatetimeLocal(dataSelect.oferta_desde)}
+                      type="datetime-local"
+                      {...register("oferta_desde")}
+                    />
+                    <label className="form__label">Vigente desde</label>
+                  </InputText>
+                </article>
+                <article>
+                  <InputText icono={<v.iconoflechaderecha />}>
+                    <input
+                      className="form__field"
+                      defaultValue={aDatetimeLocal(dataSelect.oferta_hasta)}
+                      type="datetime-local"
+                      {...register("oferta_hasta")}
+                    />
+                    <label className="form__label">Vigente hasta</label>
+                  </InputText>
+                </article>
+                <span className="ayuda">
+                  Dejar vacío = sin oferta. Con fechas vacías la oferta queda
+                  activa siempre que haya precio de oferta cargado.
+                </span>
+              </ContainerOferta>
               {stateInventarios && (
                 <ContainerStock>
                   <ContainerSelector>
@@ -664,6 +744,23 @@ const ContainerStock = styled.div`
   padding: 12px;
   flex-direction: column;
   background-color: rgba(240, 127, 46, 0.05);
+`;
+const ContainerOferta = styled.div`
+  border: 1px solid rgba(249, 215, 11, 0.6);
+  display: flex;
+  border-radius: 15px;
+  padding: 12px;
+  gap: 10px;
+  flex-direction: column;
+  background-color: rgba(249, 215, 11, 0.05);
+  .titulo {
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .ayuda {
+    font-size: 12px;
+    opacity: 0.7;
+  }
 `;
 const ContainerBtngenerar = styled.div`
   position: absolute;
