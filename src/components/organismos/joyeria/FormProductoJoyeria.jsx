@@ -1,8 +1,16 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { InputText, Btn1, Switch1, InsertarMarca } from "../../../index";
+import Swal from "sweetalert2";
+import {
+  InputText,
+  Btn1,
+  Switch1,
+  InsertarMarca,
+  SubidorImagenes,
+} from "../../../index";
 import { v } from "../../../styles/variables";
 import { useJoyeriaStore } from "../../../store/JoyeriaStore";
 import { useEmpresaStore } from "../../../store/EmpresaStore";
@@ -30,6 +38,10 @@ export function FormProductoJoyeria({ onClose }) {
     mostrarEtiquetas,
     insertarEtiqueta,
     etiquetasDeProducto,
+    mostrarImagenesProducto,
+    subirImagenesProducto,
+    eliminarImagenProducto,
+    reordenarImagenesProducto,
   } = useProductosStore();
   const [destacado, setDestacado] = useState(
     esEditar ? !!disenoSelect?.destacado : false
@@ -37,6 +49,8 @@ export function FormProductoJoyeria({ onClose }) {
   const [nuevaMarca, setNuevaMarca] = useState("");
   const [etiquetasSel, setEtiquetasSel] = useState([]);
   const [nuevaEtiqueta, setNuevaEtiqueta] = useState("");
+  const [files, setFiles] = useState([]); // File[] nuevos, aún no subidos
+  const [imagenesExistentes, setImagenesExistentes] = useState([]);
 
   const {
     register,
@@ -64,6 +78,42 @@ export function FormProductoJoyeria({ onClose }) {
     }
   }, [esEditar, disenoSelect?.id]);
 
+  const { data: dataImagenesDiseno } = useQuery({
+    queryKey: ["mostrar imagenes producto", disenoSelect?.id],
+    queryFn: () => mostrarImagenesProducto(disenoSelect.id),
+    enabled: esEditar && !!disenoSelect?.id,
+  });
+  useEffect(() => {
+    if (dataImagenesDiseno) setImagenesExistentes(dataImagenesDiseno);
+  }, [dataImagenesDiseno]);
+
+  async function reordenarImagenes(imagenesConOrden) {
+    await reordenarImagenesProducto(imagenesConOrden);
+    const mapa = new Map(imagenesConOrden.map((x) => [x.id, x.orden]));
+    setImagenesExistentes((prev) =>
+      [...prev]
+        .map((img) => ({ ...img, orden: mapa.get(img.id) ?? img.orden }))
+        .sort((a, b) => a.orden - b.orden)
+    );
+  }
+
+  function quitarImagenExistente(imagen) {
+    Swal.fire({
+      title: "¿Eliminar esta imagen?",
+      text: "Se borrará de inmediato, no espera a que guardes el formulario.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Si, eliminar",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        await eliminarImagenProducto(imagen);
+        setImagenesExistentes((prev) => prev.filter((img) => img.id !== imagen.id));
+      }
+    });
+  }
+
   function toggleEtiqueta(id) {
     setEtiquetasSel((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
@@ -88,7 +138,18 @@ export function FormProductoJoyeria({ onClose }) {
         accion,
         values: { ...values, id: disenoSelect?.id, destacado, etiquetasSel },
       },
-      { onSuccess: onClose }
+      {
+        onSuccess: async (idDiseno) => {
+          if (files.length > 0) {
+            await subirImagenesProducto(
+              idDiseno,
+              files,
+              imagenesExistentes.length + 1
+            );
+          }
+          onClose();
+        },
+      }
     );
   };
 
@@ -114,6 +175,15 @@ export function FormProductoJoyeria({ onClose }) {
         </div>
 
         <form className="formulario" onSubmit={handleSubmit(onSubmit)}>
+          <SubidorImagenes
+            label="Imágenes del diseño (se ven en el catálogo del ecommerce)"
+            imagenesExistentes={imagenesExistentes}
+            pendientes={files}
+            onPendientesChange={setFiles}
+            onEliminarExistente={quitarImagenExistente}
+            onReordenar={reordenarImagenes}
+          />
+
           <InputText icono={<v.icononombre />}>
             <input
               className="form__field"
