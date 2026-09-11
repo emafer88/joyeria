@@ -1,9 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
-import { InputText, Btn1, Switch1 } from "../../../index";
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
+import Swal from "sweetalert2";
+import {
+  InputText,
+  Btn1,
+  Switch1,
+  InsertarMarca,
+  SubidorImagenes,
+} from "../../../index";
 import { v } from "../../../styles/variables";
 import { useJoyeriaStore } from "../../../store/JoyeriaStore";
+import { useEmpresaStore } from "../../../store/EmpresaStore";
+import { useProductosStore } from "../../../store/ProductosStore";
 import {
   useGuardarDisenoMutation,
   useCategoriasJoyeriaQuery,
@@ -18,16 +29,33 @@ import {
 export function FormProductoJoyeria({ onClose }) {
   const { accion, disenoSelect } = useJoyeriaStore();
   const esEditar = accion === "Editar";
+  const { dataempresa } = useEmpresaStore();
   const { data: categorias = [] } = useCategoriasJoyeriaQuery();
-  const { data: marcas = [] } = useMarcasJoyeriaQuery();
+  const { data: marcas = [], refetch: refetchMarcas } = useMarcasJoyeriaQuery();
   const { mutate, isPending } = useGuardarDisenoMutation();
+  const {
+    etiquetas,
+    mostrarEtiquetas,
+    insertarEtiqueta,
+    etiquetasDeProducto,
+    mostrarImagenesProducto,
+    subirImagenesProducto,
+    eliminarImagenProducto,
+    reordenarImagenesProducto,
+  } = useProductosStore();
   const [destacado, setDestacado] = useState(
     esEditar ? !!disenoSelect?.destacado : false
   );
+  const [nuevaMarca, setNuevaMarca] = useState("");
+  const [etiquetasSel, setEtiquetasSel] = useState([]);
+  const [nuevaEtiqueta, setNuevaEtiqueta] = useState("");
+  const [files, setFiles] = useState([]); // File[] nuevos, aún no subidos
+  const [imagenesExistentes, setImagenesExistentes] = useState([]);
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -38,12 +66,105 @@ export function FormProductoJoyeria({ onClose }) {
     },
   });
 
+  useEffect(() => {
+    if (dataempresa?.id) mostrarEtiquetas({ id_empresa: dataempresa.id });
+  }, [dataempresa?.id]);
+
+  useEffect(() => {
+    if (esEditar && disenoSelect?.id) {
+      etiquetasDeProducto(disenoSelect.id).then((rows) =>
+        setEtiquetasSel(rows.map((r) => r.id))
+      );
+    }
+  }, [esEditar, disenoSelect?.id]);
+
+  const { data: dataImagenesDiseno } = useQuery({
+    queryKey: ["mostrar imagenes producto", disenoSelect?.id],
+    queryFn: () => mostrarImagenesProducto(disenoSelect.id),
+    enabled: esEditar && !!disenoSelect?.id,
+  });
+  useEffect(() => {
+    if (dataImagenesDiseno) setImagenesExistentes(dataImagenesDiseno);
+  }, [dataImagenesDiseno]);
+
+  async function reordenarImagenes(imagenesConOrden) {
+    await reordenarImagenesProducto(imagenesConOrden);
+    const mapa = new Map(imagenesConOrden.map((x) => [x.id, x.orden]));
+    setImagenesExistentes((prev) =>
+      [...prev]
+        .map((img) => ({ ...img, orden: mapa.get(img.id) ?? img.orden }))
+        .sort((a, b) => a.orden - b.orden)
+    );
+  }
+
+  function quitarImagenExistente(imagen) {
+    Swal.fire({
+      title: "¿Eliminar esta imagen?",
+      text: "Se borrará de inmediato, no espera a que guardes el formulario.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Si, eliminar",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        await eliminarImagenProducto(imagen);
+        setImagenesExistentes((prev) => prev.filter((img) => img.id !== imagen.id));
+      }
+    });
+  }
+
+  function toggleEtiqueta(id) {
+    setEtiquetasSel((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  }
+
+  async function crearEtiqueta() {
+    const nombre = nuevaEtiqueta.trim();
+    if (!nombre) return;
+    try {
+      const id = await insertarEtiqueta({ nombre, id_empresa: dataempresa.id });
+      setEtiquetasSel((prev) => (prev.includes(id) ? prev : [...prev, id]));
+      setNuevaEtiqueta("");
+    } catch (e) {
+      toast.error(e.message);
+    }
+  }
+
   const onSubmit = (values) => {
     mutate(
-      { accion, values: { ...values, id: disenoSelect?.id, destacado } },
-      { onSuccess: onClose }
+      {
+        accion,
+        values: { ...values, id: disenoSelect?.id, destacado, etiquetasSel },
+      },
+      {
+        onSuccess: async (idDiseno) => {
+          if (files.length > 0) {
+            await subirImagenesProducto(
+              idDiseno,
+              files,
+              imagenesExistentes.length + 1
+            );
+          }
+          onClose();
+        },
+      }
     );
   };
+
+  async function crearMarca() {
+    const nombre = nuevaMarca.trim();
+    if (!nombre) return;
+    try {
+      const id = await InsertarMarca({ nombre, id_empresa: dataempresa.id });
+      await refetchMarcas();
+      setValue("id_marca", String(id));
+      setNuevaMarca("");
+    } catch (e) {
+      toast.error(e.message);
+    }
+  }
 
   return (
     <Container>
@@ -54,6 +175,15 @@ export function FormProductoJoyeria({ onClose }) {
         </div>
 
         <form className="formulario" onSubmit={handleSubmit(onSubmit)}>
+          <SubidorImagenes
+            label="Imágenes del diseño (se ven en el catálogo del ecommerce)"
+            imagenesExistentes={imagenesExistentes}
+            pendientes={files}
+            onPendientesChange={setFiles}
+            onEliminarExistente={quitarImagenExistente}
+            onReordenar={reordenarImagenes}
+          />
+
           <InputText icono={<v.icononombre />}>
             <input
               className="form__field"
@@ -90,19 +220,72 @@ export function FormProductoJoyeria({ onClose }) {
           </select>
           {errors.id_categoria && <p className="err">Elegí una categoría</p>}
 
-          {marcas.length > 0 && (
-            <>
-              <label className="sel-label">Marca (opcional)</label>
-              <select className="select" {...register("id_marca")}>
-                <option value="">— sin marca —</option>
-                {marcas.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.nombre}
-                  </option>
-                ))}
-              </select>
-            </>
-          )}
+          <label className="sel-label">Marca / colección (opcional)</label>
+          <select className="select" {...register("id_marca")}>
+            <option value="">— sin marca —</option>
+            {marcas.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.nombre}
+              </option>
+            ))}
+          </select>
+          <div className="alta-marca">
+            <input
+              type="text"
+              placeholder="+ nueva marca"
+              value={nuevaMarca}
+              onChange={(e) => setNuevaMarca(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  crearMarca();
+                }
+              }}
+            />
+            <button type="button" onClick={crearMarca}>
+              Crear
+            </button>
+          </div>
+
+          <span className="ayuda">
+            Medidas y talla se cargan por pieza física, no acá: al generar
+            piezas (alta masiva) o al ajustar una pieza puntual.
+          </span>
+
+          <label className="sel-label">Etiquetas</label>
+          <div className="etiquetas-lista">
+            {etiquetas?.length ? (
+              etiquetas.map((et) => (
+                <label key={et.id} className="etiqueta-check">
+                  <input
+                    type="checkbox"
+                    checked={etiquetasSel.includes(et.id)}
+                    onChange={() => toggleEtiqueta(et.id)}
+                  />
+                  {et.nombre}
+                </label>
+              ))
+            ) : (
+              <span className="ayuda">Todavía no hay etiquetas.</span>
+            )}
+          </div>
+          <div className="alta-marca">
+            <input
+              type="text"
+              placeholder="+ nueva etiqueta"
+              value={nuevaEtiqueta}
+              onChange={(e) => setNuevaEtiqueta(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  crearEtiqueta();
+                }
+              }}
+            />
+            <button type="button" onClick={crearEtiqueta}>
+              Crear
+            </button>
+          </div>
 
           <div className="fila-switch">
             <label>Destacado (home ecommerce)</label>
@@ -191,6 +374,46 @@ const Container = styled.div`
       }
       .select option {
         color: #222;
+      }
+      .alta-marca {
+        display: flex;
+        gap: 8px;
+        margin-top: -6px;
+        input {
+          flex: 1;
+          font-family: inherit;
+          border: none;
+          border-bottom: 2px solid #9b9b9b;
+          outline: 0;
+          font-size: 14px;
+          color: ${(props) => props.theme.text};
+          padding: 6px 0;
+          background: transparent;
+        }
+        button {
+          padding: 6px 12px;
+          border-radius: 6px;
+          border: none;
+          cursor: pointer;
+          background-color: #f9d70b;
+          font-weight: 600;
+        }
+      }
+      .etiquetas-lista {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: -6px;
+      }
+      .etiqueta-check {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 13px;
+      }
+      .ayuda {
+        font-size: 12px;
+        opacity: 0.7;
       }
     }
   }

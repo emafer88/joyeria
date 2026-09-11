@@ -51,6 +51,8 @@ export async function MostrarProductosJoyeria(p) {
   return data;
 }
 
+// Medidas/talla NO van acá: son de la pieza física (piezas_inventario), no
+// del diseño -- dos piezas del mismo diseño pueden pesar/medir distinto.
 export async function EditarProductoJoyeria(p) {
   const { error } = await supabase
     .from("productos")
@@ -300,7 +302,11 @@ export async function MostrarCategoriasJoyeria(p) {
 // Movimientos manuales (ajuste / marcar / devolver) + historial de la pieza
 // ---------------------------------------------------------------------------
 
-/** Corrige peso / costo / precio de una pieza no vendida (deja kardex 'ajuste'). */
+/**
+ * Corrige peso / costo / precio / talla de una pieza no vendida (deja kardex
+ * 'ajuste'). `precio_oferta`: dejar undefined/null no toca la oferta actual;
+ * `quitar_oferta: true` la borra (coalesce no alcanza para "borrar" un valor).
+ */
 export async function AjustarPieza(p) {
   const { error } = await supabase.rpc("ajustar_pieza", {
     _id_pieza: p.id_pieza,
@@ -310,6 +316,10 @@ export async function AjustarPieza(p) {
     _costo: p.costo ?? null,
     _precio_venta: p.precio_venta ?? null,
     _nota: p.nota ?? null,
+    _talla: p.talla ?? null,
+    _precio_oferta: p.precio_oferta ?? null,
+    _quitar_oferta: !!p.quitar_oferta,
+    _medidas: p.medidas ?? null,
   });
   if (error) throw new Error(error.message);
 }

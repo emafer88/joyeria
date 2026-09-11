@@ -5,6 +5,7 @@ import { Btn1 } from "../../../index";
 import { v } from "../../../styles/variables";
 import { useJoyeriaStore } from "../../../store/JoyeriaStore";
 import { useMovimientoPiezaMutation } from "../../../tanstack/JoyeriaStack";
+import { parseMedidas, formatMedidas } from "../../../utils/Medidas";
 
 const ESTADO_LABEL = {
   disponible: "Disponible",
@@ -38,25 +39,38 @@ export function FormMovimientoPieza({ onClose }) {
     [pieza?.estado],
   );
 
+  const medidasIniciales = parseMedidas(pieza?.medidas);
+
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm({
     defaultValues: {
       peso: pieza?.peso ?? "",
       costo: pieza?.costo ?? "",
       precio_venta: pieza?.precio_venta ?? "",
+      talla: pieza?.talla ?? "",
+      medidasLargo: medidasIniciales.largo,
+      medidasAncho: medidasIniciales.ancho,
+      precio_oferta: pieza?.precio_oferta ?? "",
+      quitar_oferta: false,
       estado: marcaOpciones[0]?.value ?? "danada",
       destino: "disponible",
       nota: "",
     },
   });
+  const quitarOferta = watch("quitar_oferta");
 
   if (!pieza) return null;
 
   const onSubmit = (values) => {
-    mutate({ tipo: tab, pieza, values }, { onSuccess: onClose });
+    const payload = {
+      ...values,
+      medidas: formatMedidas(values.medidasLargo, values.medidasAncho),
+    };
+    mutate({ tipo: tab, pieza, values: payload }, { onSuccess: onClose });
   };
 
   const tabs = esVendida
@@ -127,6 +141,50 @@ export function FormMovimientoPieza({ onClose }) {
                     min="0"
                     {...register("precio_venta")}
                   />
+                </label>
+                <label>
+                  Talla
+                  <input type="text" placeholder="7" {...register("talla")} />
+                </label>
+              </div>
+
+              <div className="fila">
+                <label>
+                  Largo (cm)
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    placeholder="45"
+                    {...register("medidasLargo")}
+                  />
+                </label>
+                <label>
+                  Ancho (cm, opcional)
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    placeholder="3"
+                    {...register("medidasAncho")}
+                  />
+                </label>
+              </div>
+
+              <div className="fila">
+                <label>
+                  Precio de oferta
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    disabled={quitarOferta}
+                    {...register("precio_oferta")}
+                  />
+                </label>
+                <label className="chk">
+                  <input type="checkbox" {...register("quitar_oferta")} />
+                  Quitar oferta
                 </label>
               </div>
             </>
@@ -312,5 +370,14 @@ const Container = styled.div`
   }
   .formulario .fila label {
     flex: 1;
+  }
+  .formulario .fila label.chk {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    justify-content: flex-start;
+  }
+  .formulario .fila label.chk input {
+    width: auto;
   }
 `;

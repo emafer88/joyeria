@@ -51,6 +51,81 @@ export async function EditarProductos(p) {
   }
 }
 
+// ---- Marcas / colecciones (tabla marca) ----
+
+export async function MostrarMarcas(p) {
+  const { data, error } = await supabase
+    .from("marca")
+    .select("id, nombre")
+    .eq("id_empresa", p.id_empresa)
+    .order("nombre", { ascending: true });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+export async function InsertarMarca(p) {
+  const { data, error } = await supabase.rpc("insertar_marca", {
+    _nombre: p.nombre,
+    _id_empresa: p.id_empresa,
+  });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function EditarMarca(p) {
+  const { error } = await supabase.rpc("editar_marca", {
+    _id: p.id,
+    _nombre: p.nombre,
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function EliminarMarca(p) {
+  const { error } = await supabase.rpc("eliminar_marca", { _id: p.id });
+  if (error) throw new Error(error.message);
+}
+
+// ---- Etiquetas / tags de producto (tabla etiquetas + producto_etiquetas) ----
+
+export async function MostrarEtiquetas(p) {
+  const { data, error } = await supabase.rpc("listar_etiquetas", {
+    _id_empresa: p.id_empresa,
+  });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+export async function InsertarEtiqueta(p) {
+  const { data, error } = await supabase.rpc("insertar_etiqueta", {
+    _nombre: p.nombre,
+    _id_empresa: p.id_empresa,
+  });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function EliminarEtiqueta(p) {
+  const { error } = await supabase.rpc("eliminar_etiqueta", { _id: p.id });
+  if (error) throw new Error(error.message);
+}
+
+export async function EtiquetasDeProducto(idProducto) {
+  const { data, error } = await supabase.rpc("etiquetas_de_producto", {
+    _id_producto: idProducto,
+  });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+// ids: array de bigint. Reemplaza el set completo de etiquetas del producto.
+export async function SetEtiquetasProducto(idProducto, ids) {
+  const { error } = await supabase.rpc("set_etiquetas_producto", {
+    _id_producto: idProducto,
+    _ids_etiquetas: ids,
+  });
+  if (error) throw new Error(error.message);
+}
+
 export async function MostrarUltimoProducto(p) {
   const { data } = await supabase
     .from(tabla)

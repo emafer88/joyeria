@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import {
+  AdminMarcas,
   Btn1,
   Buscador,
   RegistrarProductos,
@@ -16,6 +17,7 @@ import { BannersTemplate } from "./BannersTemplate";
 import { InventarioProductos } from "../organismos/productos/InventarioProductos";
 export function ProductosTemplate() {
   const [openRegistro, SetopenRegistro] = useState(false);
+  const [openMarcas, setOpenMarcas] = useState(false);
   const { dataProductos, setBuscador, generarCodigo } = useProductosStore();
   const [accion, setAccion] = useState("");
   const [dataSelect, setdataSelect] = useState([]);
@@ -92,8 +94,17 @@ export function ProductosTemplate() {
                 />
               )}
 
+              {openMarcas && (
+                <AdminMarcas onClose={() => setOpenMarcas(false)} />
+              )}
+
               <section className="area1">
                 <Title>Productos</Title>
+                <Btn1
+                  funcion={() => setOpenMarcas(true)}
+                  bgcolor={v.colorSecundario}
+                  titulo="Marcas / colecciones"
+                />
                 <Btn1
                   funcion={nuevoRegistro}
                   bgcolor={v.colorPrincipal}
