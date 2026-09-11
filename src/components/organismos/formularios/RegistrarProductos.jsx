@@ -18,6 +18,7 @@ import {
 } from "../../../index";
 import { useForm } from "react-hook-form";
 import { useEmpresaStore } from "../../../store/EmpresaStore";
+import { useMarcasJoyeriaQuery } from "../../../tanstack/JoyeriaStack";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Device } from "../../../styles/breakpoints";
 import { useEffect, useRef, useState } from "react";
@@ -55,6 +56,9 @@ export function RegistrarProductos({
   const [stockMinimo, setStockMinimo] = useState("");
   const [ubicacion, setUbicacion] = useState("");
   const [destacado, setDestacado] = useState(false);
+  const [idMarca, setIdMarca] = useState(null);
+  const [etiquetasSel, setEtiquetasSel] = useState([]); // ids de etiquetas
+  const [nuevaEtiqueta, setNuevaEtiqueta] = useState("");
   const handleCheckboxChange = (checkboxNumber) => {
     if (checkboxNumber === 1) {
       setIsChecked1(true);
@@ -78,7 +82,13 @@ export function RegistrarProductos({
     subirImagenesProducto,
     eliminarImagenProducto,
     reordenarImagenesProducto,
+    etiquetas,
+    mostrarEtiquetas,
+    insertarEtiqueta,
+    etiquetasDeProducto,
+    setEtiquetasProducto,
   } = useProductosStore();
+  const { data: marcas = [] } = useMarcasJoyeriaQuery();
   //#region imagenes producto
   const [files, setFiles] = useState([]); // File[] nuevos, aún no subidos
   const [imagenesExistentes, setImagenesExistentes] = useState([]);
@@ -201,6 +211,8 @@ export function RegistrarProductos({
     const ofertaHasta = data.oferta_hasta
       ? new Date(data.oferta_hasta).toISOString()
       : null;
+    const medidas = data.medidas && data.medidas.trim() !== "" ? data.medidas.trim() : null;
+    const tallas = data.tallas && data.tallas.trim() !== "" ? data.tallas.trim() : null;
     if (accion === "Editar") {
       const p = {
         _id: dataSelect.id,
@@ -217,9 +229,13 @@ export function RegistrarProductos({
         _precio_oferta: precioOferta,
         _oferta_desde: ofertaDesde,
         _oferta_hasta: ofertaHasta,
+        _id_marca: idMarca,
+        _medidas: medidas,
+        _tallas: tallas,
       };
       console.log(p);
       await editarProductos(p);
+      await setEtiquetasProducto(dataSelect.id, etiquetasSel);
       if (stateInventarios) {
         if (!dataStockXAlmacenYProducto) {
           const pStock = {
@@ -255,9 +271,13 @@ export function RegistrarProductos({
         _precio_oferta: precioOferta,
         _oferta_desde: ofertaDesde,
         _oferta_hasta: ofertaHasta,
+        _id_marca: idMarca,
+        _medidas: medidas,
+        _tallas: tallas,
       };
 
       const id_producto_nuevo = await insertarProductos(p);
+      await setEtiquetasProducto(id_producto_nuevo, etiquetasSel);
       if (stateInventarios) {
         const pStock = {
           id_almacen: almacenSelectItem?.id,
@@ -372,9 +392,43 @@ export function RegistrarProductos({
         ? setStateEnabledStock(true)
         : setStateEnabledStock(false);
       setDestacado(!!dataSelect.destacado);
+      setIdMarca(dataSelect.id_marca ?? null);
     }
   }, []);
+
+  // Lista de etiquetas de la empresa + las ya asignadas al producto en edición.
+  useEffect(() => {
+    if (dataempresa?.id) {
+      mostrarEtiquetas({ id_empresa: dataempresa.id });
+    }
+  }, [dataempresa?.id]);
+
+  useEffect(() => {
+    if (accion === "Editar" && dataSelect?.id) {
+      etiquetasDeProducto(dataSelect.id).then((rows) =>
+        setEtiquetasSel(rows.map((r) => r.id))
+      );
+    }
+  }, [accion, dataSelect?.id]);
   //#endregion validar_accion
+
+  function toggleEtiqueta(id) {
+    setEtiquetasSel((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  }
+
+  async function agregarNuevaEtiqueta() {
+    const nombre = nuevaEtiqueta.trim();
+    if (!nombre) return;
+    try {
+      const id = await insertarEtiqueta({ nombre, id_empresa: dataempresa.id });
+      setEtiquetasSel((prev) => (prev.includes(id) ? prev : [...prev, id]));
+      setNuevaEtiqueta("");
+    } catch (e) {
+      toast.error(e.message);
+    }
+  }
 
   return (
     <Container>
@@ -526,6 +580,86 @@ export function RegistrarProductos({
                   setState={() => setDestacado((d) => !d)}
                 />
               </ContainerSelector>
+
+              <ContainerSelector>
+                <label>Marca / colección: </label>
+                <SelectList
+                  data={[{ id: null, nombre: "Sin marca" }, ...marcas]}
+                  itemSelect={
+                    marcas.find((m) => m.id === idMarca) ?? { nombre: "Sin marca" }
+                  }
+                  onSelect={(m) => setIdMarca(m.id ?? null)}
+                  displayField="nombre"
+                />
+              </ContainerSelector>
+
+              <ContainerCatalogo>
+                <span className="titulo">Ficha técnica (ecommerce)</span>
+                <article>
+                  <InputText icono={<v.iconoflechaderecha />}>
+                    <input
+                      className="form__field"
+                      defaultValue={dataSelect.medidas ?? ""}
+                      type="text"
+                      placeholder="medidas"
+                      {...register("medidas")}
+                    />
+                    <label className="form__label">
+                      Medidas (ej. 45 cm largo / 3 mm ancho)
+                    </label>
+                  </InputText>
+                </article>
+                <article>
+                  <InputText icono={<v.iconoflechaderecha />}>
+                    <input
+                      className="form__field"
+                      defaultValue={dataSelect.tallas ?? ""}
+                      type="text"
+                      placeholder="tallas"
+                      {...register("tallas")}
+                    />
+                    <label className="form__label">
+                      Tallas (texto libre, ej. 6, 7, 8, 9)
+                    </label>
+                  </InputText>
+                </article>
+
+                <span className="titulo">Etiquetas</span>
+                <div className="etiquetas-lista">
+                  {etiquetas?.length ? (
+                    etiquetas.map((et) => (
+                      <label key={et.id} className="etiqueta-check">
+                        <input
+                          type="checkbox"
+                          checked={etiquetasSel.includes(et.id)}
+                          onChange={() => toggleEtiqueta(et.id)}
+                        />
+                        {et.nombre}
+                      </label>
+                    ))
+                  ) : (
+                    <span className="ayuda">Todavía no hay etiquetas.</span>
+                  )}
+                </div>
+                <div className="etiqueta-nueva">
+                  <input
+                    type="text"
+                    placeholder="Nueva etiqueta"
+                    value={nuevaEtiqueta}
+                    onChange={(e) => setNuevaEtiqueta(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        agregarNuevaEtiqueta();
+                      }
+                    }}
+                  />
+                  <button type="button" onClick={agregarNuevaEtiqueta}>
+                    Agregar
+                  </button>
+                </div>
+              </ContainerCatalogo>
+
               <ContainerOferta>
                 <span className="titulo">Oferta (opcional)</span>
                 <article>
@@ -760,6 +894,54 @@ const ContainerOferta = styled.div`
   .ayuda {
     font-size: 12px;
     opacity: 0.7;
+  }
+`;
+const ContainerCatalogo = styled.div`
+  border: 1px solid rgba(120, 180, 255, 0.5);
+  display: flex;
+  border-radius: 15px;
+  padding: 12px;
+  gap: 10px;
+  flex-direction: column;
+  background-color: rgba(120, 180, 255, 0.05);
+  .titulo {
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .ayuda {
+    font-size: 12px;
+    opacity: 0.7;
+  }
+  .etiquetas-lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .etiqueta-check {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+  }
+  .etiqueta-nueva {
+    display: flex;
+    gap: 8px;
+    input {
+      flex: 1;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #333;
+      background-color: ${({ theme }) => theme.body};
+      color: ${({ theme }) => theme.text};
+    }
+    button {
+      padding: 6px 14px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      background-color: #F9D70B;
+      font-weight: 600;
+    }
   }
 `;
 const ContainerBtngenerar = styled.div`
