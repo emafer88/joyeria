@@ -35,6 +35,7 @@ export * from "./components/organismos/formularios/InputText2";
 export * from "./components/organismos/formularios/RegistrarCategorias";
 export * from "./components/organismos/formularios/RegistrarClientesProveedores";
 export * from "./components/organismos/formularios/RegistrarProductos";
+export * from "./components/organismos/AdminMarcas";
 export * from "./components/organismos/imagenes/SubidorImagenes";
 export * from "./components/organismos/sidebar/MenuMovil";
 export * from "./components/organismos/sidebar/Sidebar";

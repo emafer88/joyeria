@@ -18,7 +18,6 @@ import {
 } from "../../../index";
 import { useForm } from "react-hook-form";
 import { useEmpresaStore } from "../../../store/EmpresaStore";
-import { useMarcasJoyeriaQuery } from "../../../tanstack/JoyeriaStack";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Device } from "../../../styles/breakpoints";
 import { useEffect, useRef, useState } from "react";
@@ -57,6 +56,7 @@ export function RegistrarProductos({
   const [ubicacion, setUbicacion] = useState("");
   const [destacado, setDestacado] = useState(false);
   const [idMarca, setIdMarca] = useState(null);
+  const [nuevaMarca, setNuevaMarca] = useState("");
   const [etiquetasSel, setEtiquetasSel] = useState([]); // ids de etiquetas
   const [nuevaEtiqueta, setNuevaEtiqueta] = useState("");
   const handleCheckboxChange = (checkboxNumber) => {
@@ -87,8 +87,10 @@ export function RegistrarProductos({
     insertarEtiqueta,
     etiquetasDeProducto,
     setEtiquetasProducto,
+    marcas,
+    mostrarMarcas,
+    insertarMarca,
   } = useProductosStore();
-  const { data: marcas = [] } = useMarcasJoyeriaQuery();
   //#region imagenes producto
   const [files, setFiles] = useState([]); // File[] nuevos, aún no subidos
   const [imagenesExistentes, setImagenesExistentes] = useState([]);
@@ -396,9 +398,10 @@ export function RegistrarProductos({
     }
   }, []);
 
-  // Lista de etiquetas de la empresa + las ya asignadas al producto en edición.
+  // Catálogos de la empresa (marcas + etiquetas) para los selectores.
   useEffect(() => {
     if (dataempresa?.id) {
+      mostrarMarcas({ id_empresa: dataempresa.id });
       mostrarEtiquetas({ id_empresa: dataempresa.id });
     }
   }, [dataempresa?.id]);
@@ -411,6 +414,18 @@ export function RegistrarProductos({
     }
   }, [accion, dataSelect?.id]);
   //#endregion validar_accion
+
+  async function crearMarca() {
+    const nombre = nuevaMarca.trim();
+    if (!nombre) return;
+    try {
+      const id = await insertarMarca({ nombre, id_empresa: dataempresa.id });
+      setIdMarca(id);
+      setNuevaMarca("");
+    } catch (e) {
+      toast.error(e.message);
+    }
+  }
 
   function toggleEtiqueta(id) {
     setEtiquetasSel((prev) =>
@@ -584,13 +599,32 @@ export function RegistrarProductos({
               <ContainerSelector>
                 <label>Marca / colección: </label>
                 <SelectList
-                  data={[{ id: null, nombre: "Sin marca" }, ...marcas]}
+                  data={[{ id: null, nombre: "Sin marca" }, ...(marcas ?? [])]}
                   itemSelect={
-                    marcas.find((m) => m.id === idMarca) ?? { nombre: "Sin marca" }
+                    (marcas ?? []).find((m) => m.id === idMarca) ?? {
+                      nombre: "Sin marca",
+                    }
                   }
                   onSelect={(m) => setIdMarca(m.id ?? null)}
                   displayField="nombre"
                 />
+                <ContainerAltaRapida>
+                  <input
+                    type="text"
+                    placeholder="+ nueva marca"
+                    value={nuevaMarca}
+                    onChange={(e) => setNuevaMarca(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        crearMarca();
+                      }
+                    }}
+                  />
+                  <button type="button" onClick={crearMarca}>
+                    Crear
+                  </button>
+                </ContainerAltaRapida>
               </ContainerSelector>
 
               <ContainerCatalogo>
@@ -942,6 +976,25 @@ const ContainerCatalogo = styled.div`
       background-color: #F9D70B;
       font-weight: 600;
     }
+  }
+`;
+const ContainerAltaRapida = styled.div`
+  display: flex;
+  gap: 8px;
+  input {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #333;
+    background-color: ${({ theme }) => theme.body};
+    color: ${({ theme }) => theme.text};
+  }
+  button {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    background-color: #F9D70B;
+    font-weight: 600;
   }
 `;
 const ContainerBtngenerar = styled.div`

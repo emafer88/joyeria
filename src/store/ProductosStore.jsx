@@ -3,6 +3,7 @@ import {
   BuscarProductos,MostrarProductos,EliminarProductos,InsertarProductos,EditarProductos, Generarcodigo,
   MostrarImagenesProducto,SubirImagenesProducto,EliminarImagenProducto,ReordenarImagenesProducto,
   MostrarEtiquetas,InsertarEtiqueta,EliminarEtiqueta,EtiquetasDeProducto,SetEtiquetasProducto,
+  MostrarMarcas,InsertarMarca,EditarMarca,EliminarMarca,
   supabase
 } from "../index";
 const tabla ="productos"
@@ -69,6 +70,28 @@ export const useProductosStore = create((set, get) => ({
     if (error) {
       throw new Error(error.message);
     }
+  },
+  marcas: [],
+  mostrarMarcas: async (p) => {
+    const response = await MostrarMarcas(p);
+    set({ marcas: response });
+    return response;
+  },
+  insertarMarca: async (p) => {
+    const id = await InsertarMarca(p);
+    const { mostrarMarcas } = get();
+    await mostrarMarcas({ id_empresa: p.id_empresa });
+    return id;
+  },
+  editarMarca: async (p) => {
+    await EditarMarca(p);
+    const { mostrarMarcas } = get();
+    await mostrarMarcas({ id_empresa: p.id_empresa });
+  },
+  eliminarMarca: async (p) => {
+    await EliminarMarca(p);
+    const { mostrarMarcas } = get();
+    await mostrarMarcas({ id_empresa: p.id_empresa });
   },
   etiquetas: [],
   mostrarEtiquetas: async (p) => {

@@ -51,6 +51,40 @@ export async function EditarProductos(p) {
   }
 }
 
+// ---- Marcas / colecciones (tabla marca) ----
+
+export async function MostrarMarcas(p) {
+  const { data, error } = await supabase
+    .from("marca")
+    .select("id, nombre")
+    .eq("id_empresa", p.id_empresa)
+    .order("nombre", { ascending: true });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+export async function InsertarMarca(p) {
+  const { data, error } = await supabase.rpc("insertar_marca", {
+    _nombre: p.nombre,
+    _id_empresa: p.id_empresa,
+  });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function EditarMarca(p) {
+  const { error } = await supabase.rpc("editar_marca", {
+    _id: p.id,
+    _nombre: p.nombre,
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function EliminarMarca(p) {
+  const { error } = await supabase.rpc("eliminar_marca", { _id: p.id });
+  if (error) throw new Error(error.message);
+}
+
 // ---- Etiquetas / tags de producto (tabla etiquetas + producto_etiquetas) ----
 
 export async function MostrarEtiquetas(p) {
