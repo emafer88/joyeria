@@ -167,6 +167,9 @@ export const useGuardarDisenoMutation = () => {
   const { dataempresa } = useEmpresaStore();
   return useMutation({
     mutationFn: async ({ accion, values }) => {
+      const { setEtiquetasProducto } = useProductosStore.getState();
+      const etiquetasSel = values.etiquetasSel ?? [];
+      let idDiseno;
       if (accion === "Editar") {
         await EditarProductoJoyeria({
           id: values.id,
@@ -175,17 +178,24 @@ export const useGuardarDisenoMutation = () => {
           id_categoria: num(values.id_categoria),
           id_marca: num(values.id_marca),
           destacado: !!values.destacado,
+          medidas: values.medidas?.trim() || null,
+          tallas: values.tallas?.trim() || null,
         });
-        return values.id;
+        idDiseno = values.id;
+      } else {
+        idDiseno = await CrearProductoJoyeria({
+          _nombre: values.nombre,
+          _descripcion: values.descripcion || null,
+          _id_categoria: num(values.id_categoria),
+          _id_marca: num(values.id_marca),
+          _id_empresa: dataempresa.id,
+          _destacado: !!values.destacado,
+          _medidas: values.medidas?.trim() || null,
+          _tallas: values.tallas?.trim() || null,
+        });
       }
-      return CrearProductoJoyeria({
-        _nombre: values.nombre,
-        _descripcion: values.descripcion || null,
-        _id_categoria: num(values.id_categoria),
-        _id_marca: num(values.id_marca),
-        _id_empresa: dataempresa.id,
-        _destacado: !!values.destacado,
-      });
+      await setEtiquetasProducto(idDiseno, etiquetasSel);
+      return idDiseno;
     },
     onError: (e) => toast.error(e.message),
     onSuccess: () => {
@@ -352,6 +362,9 @@ export const useMovimientoPiezaMutation = () => {
           costo: num(values.costo),
           precio_venta: num(values.precio_venta),
           nota: values.nota || null,
+          talla: values.talla?.trim() || null,
+          precio_oferta: values.quitar_oferta ? null : num(values.precio_oferta),
+          quitar_oferta: !!values.quitar_oferta,
         });
       }
       if (tipo === "marcar") {

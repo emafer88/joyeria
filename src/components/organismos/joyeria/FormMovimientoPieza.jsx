@@ -41,17 +41,22 @@ export function FormMovimientoPieza({ onClose }) {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm({
     defaultValues: {
       peso: pieza?.peso ?? "",
       costo: pieza?.costo ?? "",
       precio_venta: pieza?.precio_venta ?? "",
+      talla: pieza?.talla ?? "",
+      precio_oferta: pieza?.precio_oferta ?? "",
+      quitar_oferta: false,
       estado: marcaOpciones[0]?.value ?? "danada",
       destino: "disponible",
       nota: "",
     },
   });
+  const quitarOferta = watch("quitar_oferta");
 
   if (!pieza) return null;
 
@@ -127,6 +132,27 @@ export function FormMovimientoPieza({ onClose }) {
                     min="0"
                     {...register("precio_venta")}
                   />
+                </label>
+                <label>
+                  Talla
+                  <input type="text" placeholder="7" {...register("talla")} />
+                </label>
+              </div>
+
+              <div className="fila">
+                <label>
+                  Precio de oferta
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    disabled={quitarOferta}
+                    {...register("precio_oferta")}
+                  />
+                </label>
+                <label className="chk">
+                  <input type="checkbox" {...register("quitar_oferta")} />
+                  Quitar oferta
                 </label>
               </div>
             </>
@@ -312,5 +338,14 @@ const Container = styled.div`
   }
   .formulario .fila label {
     flex: 1;
+  }
+  .formulario .fila label.chk {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    justify-content: flex-start;
+  }
+  .formulario .fila label.chk input {
+    width: auto;
   }
 `;

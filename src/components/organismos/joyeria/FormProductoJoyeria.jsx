@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -6,6 +6,7 @@ import { InputText, Btn1, Switch1, InsertarMarca } from "../../../index";
 import { v } from "../../../styles/variables";
 import { useJoyeriaStore } from "../../../store/JoyeriaStore";
 import { useEmpresaStore } from "../../../store/EmpresaStore";
+import { useProductosStore } from "../../../store/ProductosStore";
 import {
   useGuardarDisenoMutation,
   useCategoriasJoyeriaQuery,
@@ -24,10 +25,18 @@ export function FormProductoJoyeria({ onClose }) {
   const { data: categorias = [] } = useCategoriasJoyeriaQuery();
   const { data: marcas = [], refetch: refetchMarcas } = useMarcasJoyeriaQuery();
   const { mutate, isPending } = useGuardarDisenoMutation();
+  const {
+    etiquetas,
+    mostrarEtiquetas,
+    insertarEtiqueta,
+    etiquetasDeProducto,
+  } = useProductosStore();
   const [destacado, setDestacado] = useState(
     esEditar ? !!disenoSelect?.destacado : false
   );
   const [nuevaMarca, setNuevaMarca] = useState("");
+  const [etiquetasSel, setEtiquetasSel] = useState([]);
+  const [nuevaEtiqueta, setNuevaEtiqueta] = useState("");
 
   const {
     register,
@@ -40,12 +49,47 @@ export function FormProductoJoyeria({ onClose }) {
       descripcion: esEditar ? disenoSelect?.descripcion ?? "" : "",
       id_categoria: esEditar ? disenoSelect?.id_categoria ?? "" : "",
       id_marca: esEditar ? disenoSelect?.id_marca ?? "" : "",
+      medidas: esEditar ? disenoSelect?.medidas ?? "" : "",
+      tallas: esEditar ? disenoSelect?.tallas ?? "" : "",
     },
   });
 
+  useEffect(() => {
+    if (dataempresa?.id) mostrarEtiquetas({ id_empresa: dataempresa.id });
+  }, [dataempresa?.id]);
+
+  useEffect(() => {
+    if (esEditar && disenoSelect?.id) {
+      etiquetasDeProducto(disenoSelect.id).then((rows) =>
+        setEtiquetasSel(rows.map((r) => r.id))
+      );
+    }
+  }, [esEditar, disenoSelect?.id]);
+
+  function toggleEtiqueta(id) {
+    setEtiquetasSel((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  }
+
+  async function crearEtiqueta() {
+    const nombre = nuevaEtiqueta.trim();
+    if (!nombre) return;
+    try {
+      const id = await insertarEtiqueta({ nombre, id_empresa: dataempresa.id });
+      setEtiquetasSel((prev) => (prev.includes(id) ? prev : [...prev, id]));
+      setNuevaEtiqueta("");
+    } catch (e) {
+      toast.error(e.message);
+    }
+  }
+
   const onSubmit = (values) => {
     mutate(
-      { accion, values: { ...values, id: disenoSelect?.id, destacado } },
+      {
+        accion,
+        values: { ...values, id: disenoSelect?.id, destacado, etiquetasSel },
+      },
       { onSuccess: onClose }
     );
   };
@@ -131,6 +175,66 @@ export function FormProductoJoyeria({ onClose }) {
               }}
             />
             <button type="button" onClick={crearMarca}>
+              Crear
+            </button>
+          </div>
+
+          <InputText icono={<v.iconoflechaderecha />}>
+            <input
+              className="form__field"
+              type="text"
+              placeholder="medidas"
+              {...register("medidas")}
+            />
+            <label className="form__label">
+              Medidas (opcional, ej. 45 cm largo)
+            </label>
+          </InputText>
+
+          <InputText icono={<v.iconoflechaderecha />}>
+            <input
+              className="form__field"
+              type="text"
+              placeholder="tallas"
+              {...register("tallas")}
+            />
+            <label className="form__label">
+              Tallas (opcional, ej. 6, 7, 8 — la talla real de cada pieza se
+              carga al generarla)
+            </label>
+          </InputText>
+
+          <label className="sel-label">Etiquetas</label>
+          <div className="etiquetas-lista">
+            {etiquetas?.length ? (
+              etiquetas.map((et) => (
+                <label key={et.id} className="etiqueta-check">
+                  <input
+                    type="checkbox"
+                    checked={etiquetasSel.includes(et.id)}
+                    onChange={() => toggleEtiqueta(et.id)}
+                  />
+                  {et.nombre}
+                </label>
+              ))
+            ) : (
+              <span className="ayuda">Todavía no hay etiquetas.</span>
+            )}
+          </div>
+          <div className="alta-marca">
+            <input
+              type="text"
+              placeholder="+ nueva etiqueta"
+              value={nuevaEtiqueta}
+              onChange={(e) => setNuevaEtiqueta(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  crearEtiqueta();
+                }
+              }}
+            />
+            <button type="button" onClick={crearEtiqueta}>
               Crear
             </button>
           </div>
@@ -246,6 +350,22 @@ const Container = styled.div`
           background-color: #f9d70b;
           font-weight: 600;
         }
+      }
+      .etiquetas-lista {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: -6px;
+      }
+      .etiqueta-check {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 13px;
+      }
+      .ayuda {
+        font-size: 12px;
+        opacity: 0.7;
       }
     }
   }
