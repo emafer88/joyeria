@@ -49,8 +49,6 @@ export function FormProductoJoyeria({ onClose }) {
       descripcion: esEditar ? disenoSelect?.descripcion ?? "" : "",
       id_categoria: esEditar ? disenoSelect?.id_categoria ?? "" : "",
       id_marca: esEditar ? disenoSelect?.id_marca ?? "" : "",
-      medidas: esEditar ? disenoSelect?.medidas ?? "" : "",
-      tallas: esEditar ? disenoSelect?.tallas ?? "" : "",
     },
   });
 
@@ -179,30 +177,10 @@ export function FormProductoJoyeria({ onClose }) {
             </button>
           </div>
 
-          <InputText icono={<v.iconoflechaderecha />}>
-            <input
-              className="form__field"
-              type="text"
-              placeholder="medidas"
-              {...register("medidas")}
-            />
-            <label className="form__label">
-              Medidas (opcional, ej. 45 cm largo)
-            </label>
-          </InputText>
-
-          <InputText icono={<v.iconoflechaderecha />}>
-            <input
-              className="form__field"
-              type="text"
-              placeholder="tallas"
-              {...register("tallas")}
-            />
-            <label className="form__label">
-              Tallas (opcional, ej. 6, 7, 8 — la talla real de cada pieza se
-              carga al generarla)
-            </label>
-          </InputText>
+          <span className="ayuda">
+            Medidas y talla se cargan por pieza física, no acá: al generar
+            piezas (alta masiva) o al ajustar una pieza puntual.
+          </span>
 
           <label className="sel-label">Etiquetas</label>
           <div className="etiquetas-lista">

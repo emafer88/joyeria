@@ -49,6 +49,7 @@ export function FormMovimientoPieza({ onClose }) {
       costo: pieza?.costo ?? "",
       precio_venta: pieza?.precio_venta ?? "",
       talla: pieza?.talla ?? "",
+      medidas: pieza?.medidas ?? "",
       precio_oferta: pieza?.precio_oferta ?? "",
       quitar_oferta: false,
       estado: marcaOpciones[0]?.value ?? "danada",
@@ -136,6 +137,17 @@ export function FormMovimientoPieza({ onClose }) {
                 <label>
                   Talla
                   <input type="text" placeholder="7" {...register("talla")} />
+                </label>
+              </div>
+
+              <div className="fila">
+                <label>
+                  Medidas
+                  <input
+                    type="text"
+                    placeholder="45 cm"
+                    {...register("medidas")}
+                  />
                 </label>
               </div>
 

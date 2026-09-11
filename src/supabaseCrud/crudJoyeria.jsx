@@ -51,6 +51,8 @@ export async function MostrarProductosJoyeria(p) {
   return data;
 }
 
+// Medidas/talla NO van acá: son de la pieza física (piezas_inventario), no
+// del diseño -- dos piezas del mismo diseño pueden pesar/medir distinto.
 export async function EditarProductoJoyeria(p) {
   const { error } = await supabase
     .from("productos")
@@ -60,8 +62,6 @@ export async function EditarProductoJoyeria(p) {
       id_categoria: p.id_categoria,
       id_marca: p.id_marca,
       destacado: p.destacado,
-      medidas: p.medidas,
-      tallas: p.tallas,
     })
     .eq("id", p.id);
   if (error) throw new Error(error.message);
@@ -319,6 +319,7 @@ export async function AjustarPieza(p) {
     _talla: p.talla ?? null,
     _precio_oferta: p.precio_oferta ?? null,
     _quitar_oferta: !!p.quitar_oferta,
+    _medidas: p.medidas ?? null,
   });
   if (error) throw new Error(error.message);
 }

@@ -171,6 +171,8 @@ export const useGuardarDisenoMutation = () => {
       const etiquetasSel = values.etiquetasSel ?? [];
       let idDiseno;
       if (accion === "Editar") {
+        // Medidas/talla NO se editan acá: son de la pieza física, ver
+        // ajustar_pieza / useMovimientoPiezaMutation.
         await EditarProductoJoyeria({
           id: values.id,
           nombre: values.nombre,
@@ -178,8 +180,6 @@ export const useGuardarDisenoMutation = () => {
           id_categoria: num(values.id_categoria),
           id_marca: num(values.id_marca),
           destacado: !!values.destacado,
-          medidas: values.medidas?.trim() || null,
-          tallas: values.tallas?.trim() || null,
         });
         idDiseno = values.id;
       } else {
@@ -190,8 +190,6 @@ export const useGuardarDisenoMutation = () => {
           _id_marca: num(values.id_marca),
           _id_empresa: dataempresa.id,
           _destacado: !!values.destacado,
-          _medidas: values.medidas?.trim() || null,
-          _tallas: values.tallas?.trim() || null,
         });
       }
       await setEtiquetasProducto(idDiseno, etiquetasSel);
@@ -363,6 +361,7 @@ export const useMovimientoPiezaMutation = () => {
           precio_venta: num(values.precio_venta),
           nota: values.nota || null,
           talla: values.talla?.trim() || null,
+          medidas: values.medidas?.trim() || null,
           precio_oferta: values.quitar_oferta ? null : num(values.precio_oferta),
           quitar_oferta: !!values.quitar_oferta,
         });

@@ -127,6 +127,7 @@ export function TablaInventarioJoyeria() {
         accessorFn: (r) => (r.precio_oferta == null ? "-" : Number(r.precio_oferta)),
       },
       { accessorKey: "talla", header: "Talla", enableGrouping: false },
+      { accessorKey: "medidas", header: "Medidas", enableGrouping: false },
       { accessorKey: "estado", header: "Estado", enableGrouping: false },
       { accessorKey: "almacen", header: "Almacén", enableGrouping: false },
     ],

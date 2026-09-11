@@ -11,7 +11,14 @@ import {
 import { imprimirEtiquetas } from "../../../utils/codigoBarras";
 import { EtiquetaPieza } from "./EtiquetaPieza";
 
-const FILA_VACIA = { peso: "", costo: "", precio_venta: "", cantidad: 1, talla: "" };
+const FILA_VACIA = {
+  peso: "",
+  costo: "",
+  precio_venta: "",
+  cantidad: 1,
+  talla: "",
+  medidas: "",
+};
 
 /**
  * Alta masiva de piezas físicas para una variante. El usuario carga N líneas
@@ -51,6 +58,7 @@ export function FormAltaMasivaPiezas({ onClose }) {
         precio_venta: Number(l.precio_venta),
         cantidad: Number(l.cantidad),
         talla: l.talla?.trim() || null,
+        medidas: l.medidas?.trim() || null,
       }))
       .filter((l) => l.peso > 0 && l.cantidad >= 1);
 
@@ -111,6 +119,7 @@ export function FormAltaMasivaPiezas({ onClose }) {
                   <th>Precio</th>
                   <th>Cantidad</th>
                   <th>Talla</th>
+                  <th>Medidas</th>
                   <th />
                 </tr>
               </thead>
@@ -163,6 +172,13 @@ export function FormAltaMasivaPiezas({ onClose }) {
                         type="text"
                         placeholder="7 (opcional)"
                         {...register(`lineas.${i}.talla`)}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="text"
+                        placeholder="45 cm (opcional)"
+                        {...register(`lineas.${i}.medidas`)}
                       />
                     </td>
                     <td>
