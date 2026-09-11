@@ -9,6 +9,7 @@ import {
   useCrearPiezasMasivoMutation,
 } from "../../../tanstack/JoyeriaStack";
 import { imprimirEtiquetas } from "../../../utils/codigoBarras";
+import { formatMedidas } from "../../../utils/Medidas";
 import { EtiquetaPieza } from "./EtiquetaPieza";
 
 const FILA_VACIA = {
@@ -17,7 +18,8 @@ const FILA_VACIA = {
   precio_venta: "",
   cantidad: 1,
   talla: "",
-  medidas: "",
+  medidasLargo: "",
+  medidasAncho: "",
 };
 
 /**
@@ -58,7 +60,7 @@ export function FormAltaMasivaPiezas({ onClose }) {
         precio_venta: Number(l.precio_venta),
         cantidad: Number(l.cantidad),
         talla: l.talla?.trim() || null,
-        medidas: l.medidas?.trim() || null,
+        medidas: formatMedidas(l.medidasLargo, l.medidasAncho),
       }))
       .filter((l) => l.peso > 0 && l.cantidad >= 1);
 
@@ -175,11 +177,24 @@ export function FormAltaMasivaPiezas({ onClose }) {
                       />
                     </td>
                     <td>
-                      <input
-                        type="text"
-                        placeholder="45 cm (opcional)"
-                        {...register(`lineas.${i}.medidas`)}
-                      />
+                      <div className="medidas-cm">
+                        <input
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          placeholder="largo"
+                          {...register(`lineas.${i}.medidasLargo`)}
+                        />
+                        <span>x</span>
+                        <input
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          placeholder="ancho (opc.)"
+                          {...register(`lineas.${i}.medidasAncho`)}
+                        />
+                        <span>cm</span>
+                      </div>
                     </td>
                     <td>
                       <button
@@ -371,6 +386,19 @@ const Container = styled.div`
       color: #d33;
       cursor: pointer;
       font-size: 17px;
+    }
+    .medidas-cm {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      span {
+        font-size: 12px;
+        opacity: 0.7;
+        white-space: nowrap;
+      }
+      input {
+        min-width: 0;
+      }
     }
     .tabla .del:disabled {
       opacity: 0.3;

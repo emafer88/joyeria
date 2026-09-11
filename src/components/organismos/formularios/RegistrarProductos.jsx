@@ -15,6 +15,8 @@ import {
   useAlmacenesStore,
   ConvertirMinusculas,
   SubidorImagenes,
+  parseMedidas,
+  formatMedidas,
 } from "../../../index";
 import { useForm } from "react-hook-form";
 import { useEmpresaStore } from "../../../store/EmpresaStore";
@@ -59,6 +61,9 @@ export function RegistrarProductos({
   const [nuevaMarca, setNuevaMarca] = useState("");
   const [etiquetasSel, setEtiquetasSel] = useState([]); // ids de etiquetas
   const [nuevaEtiqueta, setNuevaEtiqueta] = useState("");
+  // "medidas" se guarda como un solo texto ("45 x 3 cm") pero se carga como
+  // dos inputs numéricos (largo/ancho); esto prellena esos dos inputs al editar.
+  const medidasIniciales = parseMedidas(dataSelect?.medidas);
   const handleCheckboxChange = (checkboxNumber) => {
     if (checkboxNumber === 1) {
       setIsChecked1(true);
@@ -213,7 +218,7 @@ export function RegistrarProductos({
     const ofertaHasta = data.oferta_hasta
       ? new Date(data.oferta_hasta).toISOString()
       : null;
-    const medidas = data.medidas && data.medidas.trim() !== "" ? data.medidas.trim() : null;
+    const medidas = formatMedidas(data.medidas_largo, data.medidas_ancho);
     const tallas = data.tallas && data.tallas.trim() !== "" ? data.tallas.trim() : null;
     if (accion === "Editar") {
       const p = {
@@ -629,18 +634,30 @@ export function RegistrarProductos({
 
               <ContainerCatalogo>
                 <span className="titulo">Ficha técnica (ecommerce)</span>
-                <article>
+                <article className="fila-medidas">
                   <InputText icono={<v.iconoflechaderecha />}>
                     <input
                       className="form__field"
-                      defaultValue={dataSelect.medidas ?? ""}
-                      type="text"
-                      placeholder="medidas"
-                      {...register("medidas")}
+                      defaultValue={medidasIniciales.largo}
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      placeholder="largo"
+                      {...register("medidas_largo")}
                     />
-                    <label className="form__label">
-                      Medidas (ej. 45 cm largo / 3 mm ancho)
-                    </label>
+                    <label className="form__label">Largo (cm)</label>
+                  </InputText>
+                  <InputText icono={<v.iconoflechaderecha />}>
+                    <input
+                      className="form__field"
+                      defaultValue={medidasIniciales.ancho}
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      placeholder="ancho (opcional)"
+                      {...register("medidas_ancho")}
+                    />
+                    <label className="form__label">Ancho (cm, opcional)</label>
                   </InputText>
                 </article>
                 <article>
@@ -945,6 +962,13 @@ const ContainerCatalogo = styled.div`
   .ayuda {
     font-size: 12px;
     opacity: 0.7;
+  }
+  .fila-medidas {
+    display: flex;
+    gap: 16px;
+    > div {
+      flex: 1;
+    }
   }
   .etiquetas-lista {
     display: flex;

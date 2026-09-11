@@ -5,6 +5,7 @@ import { Btn1 } from "../../../index";
 import { v } from "../../../styles/variables";
 import { useJoyeriaStore } from "../../../store/JoyeriaStore";
 import { useMovimientoPiezaMutation } from "../../../tanstack/JoyeriaStack";
+import { parseMedidas, formatMedidas } from "../../../utils/Medidas";
 
 const ESTADO_LABEL = {
   disponible: "Disponible",
@@ -38,6 +39,8 @@ export function FormMovimientoPieza({ onClose }) {
     [pieza?.estado],
   );
 
+  const medidasIniciales = parseMedidas(pieza?.medidas);
+
   const {
     register,
     handleSubmit,
@@ -49,7 +52,8 @@ export function FormMovimientoPieza({ onClose }) {
       costo: pieza?.costo ?? "",
       precio_venta: pieza?.precio_venta ?? "",
       talla: pieza?.talla ?? "",
-      medidas: pieza?.medidas ?? "",
+      medidasLargo: medidasIniciales.largo,
+      medidasAncho: medidasIniciales.ancho,
       precio_oferta: pieza?.precio_oferta ?? "",
       quitar_oferta: false,
       estado: marcaOpciones[0]?.value ?? "danada",
@@ -62,7 +66,11 @@ export function FormMovimientoPieza({ onClose }) {
   if (!pieza) return null;
 
   const onSubmit = (values) => {
-    mutate({ tipo: tab, pieza, values }, { onSuccess: onClose });
+    const payload = {
+      ...values,
+      medidas: formatMedidas(values.medidasLargo, values.medidasAncho),
+    };
+    mutate({ tipo: tab, pieza, values: payload }, { onSuccess: onClose });
   };
 
   const tabs = esVendida
@@ -142,11 +150,23 @@ export function FormMovimientoPieza({ onClose }) {
 
               <div className="fila">
                 <label>
-                  Medidas
+                  Largo (cm)
                   <input
-                    type="text"
-                    placeholder="45 cm"
-                    {...register("medidas")}
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    placeholder="45"
+                    {...register("medidasLargo")}
+                  />
+                </label>
+                <label>
+                  Ancho (cm, opcional)
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    placeholder="3"
+                    {...register("medidasAncho")}
                   />
                 </label>
               </div>

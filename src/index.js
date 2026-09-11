@@ -109,3 +109,4 @@ export * from "./utils/codigoBarras";
 export * from "./utils/Conversiones";
 export * from "./utils/dataEstatica";
 export * from "./utils/ValidarImagenes";
+export * from "./utils/Medidas";
