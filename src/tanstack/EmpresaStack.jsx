@@ -27,6 +27,26 @@ export const useUpdateEmpresaMutation = ( ) => {
     },
   });
 };
+export const useUpdateEmpresaEnvioMutation = () => {
+  const {file} = useGlobalStore()
+  const queyClient = useQueryClient();
+  const { dataempresa, editarEmpresa } = useEmpresaStore();
+  return useMutation({
+    mutationKey: ["editar empresa"],
+    mutationFn: async (data) => {
+      const p = {
+        id: dataempresa?.id,
+        costo_envio: parseFloat(data.costo_envio),
+      };
+      await editarEmpresa(p, dataempresa?.logo, file);
+    },
+    onError: (error) => toast.error(error.message),
+    onSuccess: () => {
+      toast.success("Datos guardados");
+      queyClient.invalidateQueries(["mostrar empresa"]);
+    },
+  });
+};
 export const useUpdateEmpresaTicketMutation = () => {
   const {file} = useGlobalStore()
     const queyClient = useQueryClient();
