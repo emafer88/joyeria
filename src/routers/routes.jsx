@@ -24,6 +24,7 @@ import { Impresoras } from "../pages/Impresoras";
 import { Usuarios } from "../pages/Usuarios";
 import { Almacenes } from "../pages/Almacenes";
 import { ConfiguracionTicket } from "../pages/ConfiguracionTicket";
+import { ConfiguracionEnvio } from "../pages/ConfiguracionEnvio";
 import { MiPerfil } from "../pages/MiPerfil";
 import { SerializacionComprobantes } from "../pages/SerializacionComprobantes";
 import { Reportes } from "../pages/Reportes";
@@ -144,6 +145,16 @@ export function MyRoutes() {
           <Layout>
             <ProtectedRoute accessBy="authenticated">
               <ConfiguracionTicket />
+            </ProtectedRoute>
+          </Layout>
+        }
+      />
+      <Route
+        path="/configuracion/envio"
+        element={
+          <Layout>
+            <ProtectedRoute accessBy="authenticated">
+              <ConfiguracionEnvio />
             </ProtectedRoute>
           </Layout>
         }
