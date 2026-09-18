@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { Paginacion } from "../../../index";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import {
   flexRender,
@@ -35,6 +36,19 @@ export function TablaPedidosEcommerce({ data }) {
   const [columnFilters, setColumnFilters] = useState([]);
   const [pedidoDetalle, setPedidoDetalle] = useState(null);
   const { mutate } = useActualizarEstadoEnvioMutation();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Deep link desde la campanita de notificaciones (?pedido=<id>): abre el
+  // detalle de ese pedido solo, apenas están los datos disponibles.
+  useEffect(() => {
+    const idPedido = searchParams.get("pedido");
+    if (!idPedido || !data) return;
+    const encontrado = data.find((p) => String(p.id) === idPedido);
+    if (encontrado) {
+      setPedidoDetalle(encontrado);
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, data, setSearchParams]);
 
   if (data == null) return null;
 

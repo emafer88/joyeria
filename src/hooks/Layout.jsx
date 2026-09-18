@@ -16,6 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAsignacionCajaSucursalStore } from "../store/AsignacionCajaSucursalStore";
 import { usePermisosStore } from "../store/PermisosStore";
 import { useMostrarSucursalAsignadasQuery } from "../tanstack/AsignacionesSucursalStack";
+import { NotificacionesPedidos } from "../components/organismos/NotificacionesPedidos";
 export function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [stateMenu, setStateMenu] = useState(false);
@@ -86,7 +87,12 @@ export function Layout({ children }) {
         {stateMenu ? <MenuMovil setState={() => setStateMenu(false)} /> : null}
       </section>
 
-      <Containerbody>{children}</Containerbody>
+      <Containerbody>
+        <Topbar>
+          <NotificacionesPedidos />
+        </Topbar>
+        {children}
+      </Containerbody>
     </Container>
   );
 }
@@ -115,6 +121,11 @@ const Container = styled.main`
       display: none;
     }
   }
+`;
+const Topbar = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 20px 0;
 `;
 const Containerbody = styled.section`
   /* background-color: rgba(231, 13, 136, 0.5); */
