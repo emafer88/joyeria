@@ -38,10 +38,15 @@ export const getLinksArray = (esSuperAdmin) => {
     icon: "flat-ui:graph",
     to: "/reportes",
   };
+  const pedidos = {
+    label: "Pedidos",
+    icon: "solar:box-bold",
+    to: "/pedidos",
+  };
 
   return esSuperAdmin
-    ? [dashboard, vender, reportes]
-    : [vender, dashboard, reportes];
+    ? [dashboard, vender, reportes, pedidos]
+    : [vender, dashboard, reportes, pedidos];
 };
 export const SecondarylinksArray = [
   {
