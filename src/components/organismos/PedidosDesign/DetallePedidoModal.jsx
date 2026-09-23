@@ -1,3 +1,4 @@
+import { useState } from "react";
 import styled from "styled-components";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import { BtnClose } from "../../ui/buttons/BtnClose";
@@ -23,6 +24,7 @@ function lineaDireccion(d) {
 
 export function DetallePedidoModal({ pedido, onClose }) {
   const { data, isLoading } = useDetallePedidoEcommerceQuery(pedido?.id);
+  const [imagenAmpliada, setImagenAmpliada] = useState(null);
 
   return (
     <Overlay onClick={onClose}>
@@ -88,7 +90,12 @@ export function DetallePedidoModal({ pedido, onClose }) {
                 {data.items?.map((item, i) => (
                   <li key={i}>
                     {item.imagen ? (
-                      <img className="miniatura" src={item.imagen} alt={item.nombre} />
+                      <img
+                        className="miniatura"
+                        src={item.imagen}
+                        alt={item.nombre}
+                        onClick={() => setImagenAmpliada(item.imagen)}
+                      />
                     ) : (
                       <div className="miniatura miniatura--vacia">
                         <Icon icon="solar:bag-4-bold" width="32" />
@@ -111,6 +118,17 @@ export function DetallePedidoModal({ pedido, onClose }) {
           </>
         )}
       </Card>
+
+      {imagenAmpliada && (
+        <ImagenOverlay
+          onClick={(e) => {
+            e.stopPropagation();
+            setImagenAmpliada(null);
+          }}
+        >
+          <img src={imagenAmpliada} alt="" />
+        </ImagenOverlay>
+      )}
     </Overlay>
   );
 }
@@ -210,6 +228,13 @@ const Card = styled.div`
       flex-shrink: 0;
       border: 1px solid ${({ theme }) => theme.color2};
     }
+    img.miniatura {
+      cursor: pointer;
+      transition: transform 0.15s;
+      &:hover {
+        transform: scale(1.05);
+      }
+    }
     .miniatura--vacia {
       display: flex;
       align-items: center;
@@ -245,5 +270,26 @@ const Card = styled.div`
     text-align: right;
     font-weight: 700;
     font-size: 16px;
+  }
+`;
+
+const ImagenOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 15, 20, 0.8);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  cursor: zoom-out;
+
+  img {
+    width: 250px;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 14px;
+    border: 1px solid ${({ theme }) => theme.color2};
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   }
 `;
