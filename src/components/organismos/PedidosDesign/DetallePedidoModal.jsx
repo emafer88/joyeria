@@ -91,7 +91,7 @@ export function DetallePedidoModal({ pedido, onClose }) {
                       <img className="miniatura" src={item.imagen} alt={item.nombre} />
                     ) : (
                       <div className="miniatura miniatura--vacia">
-                        <Icon icon="solar:bag-4-bold" width="18" />
+                        <Icon icon="solar:bag-4-bold" width="32" />
                       </div>
                     )}
                     <div className="info">
@@ -130,7 +130,7 @@ const Overlay = styled.div`
 const Card = styled.div`
   position: relative;
   width: 100%;
-  max-width: 460px;
+  max-width: 520px;
   max-height: 85vh;
   overflow-y: auto;
   background: ${({ theme }) => theme.bgtotal};
@@ -203,9 +203,9 @@ const Card = styled.div`
     }
 
     .miniatura {
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
+      width: 72px;
+      height: 72px;
+      border-radius: 10px;
       object-fit: cover;
       flex-shrink: 0;
       border: 1px solid ${({ theme }) => theme.color2};
