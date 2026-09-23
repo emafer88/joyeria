@@ -1,3 +1,4 @@
+import { useState } from "react";
 import styled from "styled-components";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import { BtnClose } from "../../ui/buttons/BtnClose";
@@ -23,6 +24,7 @@ function lineaDireccion(d) {
 
 export function DetallePedidoModal({ pedido, onClose }) {
   const { data, isLoading } = useDetallePedidoEcommerceQuery(pedido?.id);
+  const [imagenAmpliada, setImagenAmpliada] = useState(null);
 
   return (
     <Overlay onClick={onClose}>
@@ -87,10 +89,25 @@ export function DetallePedidoModal({ pedido, onClose }) {
               <ul className="items">
                 {data.items?.map((item, i) => (
                   <li key={i}>
-                    <span>
-                      {item.nombre} x{item.cantidad}
-                    </span>
-                    <span>$ {Number(item.total).toLocaleString()}</span>
+                    {item.imagen ? (
+                      <img
+                        className="miniatura"
+                        src={item.imagen}
+                        alt={item.nombre}
+                        onClick={() => setImagenAmpliada(item.imagen)}
+                      />
+                    ) : (
+                      <div className="miniatura miniatura--vacia">
+                        <Icon icon="solar:bag-4-bold" width="32" />
+                      </div>
+                    )}
+                    <div className="info">
+                      <span className="nombre">
+                        {item.nombre} x{item.cantidad}
+                      </span>
+                      {item.sku && <span className="sku">SKU: {item.sku}</span>}
+                    </div>
+                    <span className="precio">$ {Number(item.total).toLocaleString()}</span>
                   </li>
                 ))}
               </ul>
@@ -101,6 +118,17 @@ export function DetallePedidoModal({ pedido, onClose }) {
           </>
         )}
       </Card>
+
+      {imagenAmpliada && (
+        <ImagenOverlay
+          onClick={(e) => {
+            e.stopPropagation();
+            setImagenAmpliada(null);
+          }}
+        >
+          <img src={imagenAmpliada} alt="" />
+        </ImagenOverlay>
+      )}
     </Overlay>
   );
 }
@@ -120,7 +148,7 @@ const Overlay = styled.div`
 const Card = styled.div`
   position: relative;
   width: 100%;
-  max-width: 460px;
+  max-width: 520px;
   max-height: 85vh;
   overflow-y: auto;
   background: ${({ theme }) => theme.bgtotal};
@@ -182,13 +210,56 @@ const Card = styled.div`
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 10px;
 
     li {
       display: flex;
-      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
       font-size: 13.5px;
       opacity: 0.85;
+    }
+
+    .miniatura {
+      width: 72px;
+      height: 72px;
+      border-radius: 10px;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 1px solid ${({ theme }) => theme.color2};
+    }
+    img.miniatura {
+      cursor: pointer;
+      transition: transform 0.15s;
+      &:hover {
+        transform: scale(1.05);
+      }
+    }
+    .miniatura--vacia {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.5;
+    }
+
+    .info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .nombre {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .sku {
+      font-size: 11.5px;
+      opacity: 0.6;
+    }
+    .precio {
+      flex-shrink: 0;
     }
   }
 
@@ -199,5 +270,28 @@ const Card = styled.div`
     text-align: right;
     font-weight: 700;
     font-size: 16px;
+  }
+`;
+
+const ImagenOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 15, 20, 0.8);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  cursor: zoom-out;
+
+  img {
+    width: 500px;
+    height: 500px;
+    max-width: 90vw;
+    max-height: 90vw;
+    object-fit: cover;
+    border-radius: 14px;
+    border: 1px solid ${({ theme }) => theme.color2};
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   }
 `;
