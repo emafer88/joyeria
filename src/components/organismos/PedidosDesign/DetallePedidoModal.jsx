@@ -285,8 +285,10 @@ const ImagenOverlay = styled.div`
   cursor: zoom-out;
 
   img {
-    width: 250px;
-    height: 250px;
+    width: 500px;
+    height: 500px;
+    max-width: 90vw;
+    max-height: 90vw;
     object-fit: cover;
     border-radius: 14px;
     border: 1px solid ${({ theme }) => theme.color2};
