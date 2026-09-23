@@ -87,10 +87,20 @@ export function DetallePedidoModal({ pedido, onClose }) {
               <ul className="items">
                 {data.items?.map((item, i) => (
                   <li key={i}>
-                    <span>
-                      {item.nombre} x{item.cantidad}
-                    </span>
-                    <span>$ {Number(item.total).toLocaleString()}</span>
+                    {item.imagen ? (
+                      <img className="miniatura" src={item.imagen} alt={item.nombre} />
+                    ) : (
+                      <div className="miniatura miniatura--vacia">
+                        <Icon icon="solar:bag-4-bold" width="18" />
+                      </div>
+                    )}
+                    <div className="info">
+                      <span className="nombre">
+                        {item.nombre} x{item.cantidad}
+                      </span>
+                      {item.sku && <span className="sku">SKU: {item.sku}</span>}
+                    </div>
+                    <span className="precio">$ {Number(item.total).toLocaleString()}</span>
                   </li>
                 ))}
               </ul>
@@ -182,13 +192,49 @@ const Card = styled.div`
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 10px;
 
     li {
       display: flex;
-      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
       font-size: 13.5px;
       opacity: 0.85;
+    }
+
+    .miniatura {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 1px solid ${({ theme }) => theme.color2};
+    }
+    .miniatura--vacia {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.5;
+    }
+
+    .info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .nombre {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .sku {
+      font-size: 11.5px;
+      opacity: 0.6;
+    }
+    .precio {
+      flex-shrink: 0;
     }
   }
 
