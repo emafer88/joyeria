@@ -39,14 +39,21 @@ export const getLinksArray = (esSuperAdmin) => {
     to: "/reportes",
   };
   const pedidos = {
-    label: "Pedidos",
+    label: "E-commerce",
     icon: "solar:box-bold",
     to: "/pedidos",
   };
+  // Los empleados lo ven solo si se les da el permiso del módulo
+  // (usePermisosDeMenu), como el resto del menú.
+  const mercadolibre = {
+    label: "Mercado Libre",
+    icon: "fluent-emoji-flat:handshake",
+    to: "/mercadolibre",
+  };
 
   return esSuperAdmin
-    ? [dashboard, vender, reportes, pedidos]
-    : [vender, dashboard, reportes, pedidos];
+    ? [dashboard, vender, reportes, pedidos, mercadolibre]
+    : [vender, dashboard, reportes, pedidos, mercadolibre];
 };
 export const SecondarylinksArray = [
   {
