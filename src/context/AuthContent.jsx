@@ -1,12 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "../supabaseCrud/supabase.config";
-import {
-  MostrarUsuarios,
-  InsertarEmpresa,
-  InsertarAdmin,
-  MostrarTipoDocumentos,
-  MostrarRolesXnombre,
-} from "../index";
+import { MostrarUsuarios } from "../index";
 import Swal from "sweetalert2";
 
 const AuthContext = createContext();
@@ -22,20 +16,27 @@ export const AuthContextProvider = ({ children }) => {
       } else {
         setUser(session?.user);
 
-        insertarDatos(session?.user.id, session?.user.email);
+        verificarAcceso(session?.user.id);
       }
     });
     return () => {
       data.subscription.unsubscribe();
     };
   }, []);
-  const insertarDatos = async (id_auth, correo) => {
+  // Solo entra el personal dado de alta (fila ACTIVA en `usuarios`; RLS no
+  // le deja ver la fila a nadie más). Antes acá se creaba una empresa nueva y
+  // el trigger insertpordefecto hacía superadmin a cualquier cuenta que
+  // entrara; ahora las empresas las da de alta solo el dueño de la plataforma.
+  const verificarAcceso = async (id_auth) => {
     const response = await MostrarUsuarios({ id_auth: id_auth });
-    if (response) {
-      return;
-    } else {
-      await InsertarEmpresa({ id_auth: id_auth, correo: correo });
-    }
+    // undefined = falló la consulta (red, etc.): no se cierra la sesión por eso.
+    if (response !== null) return;
+    await supabase.auth.signOut();
+    Swal.fire({
+      icon: "error",
+      title: "Sin acceso",
+      text: "Tu cuenta no tiene acceso al panel. Pide al administrador que te dé de alta.",
+    });
   };
 
   return (
