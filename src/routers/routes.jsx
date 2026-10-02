@@ -26,6 +26,7 @@ import { Almacenes } from "../pages/Almacenes";
 import { ConfiguracionTicket } from "../pages/ConfiguracionTicket";
 import { ConfiguracionEnvio } from "../pages/ConfiguracionEnvio";
 import { PedidosEcommerce } from "../pages/PedidosEcommerce";
+import { MercadoLibre } from "../pages/MercadoLibre";
 import { MiPerfil } from "../pages/MiPerfil";
 import { SerializacionComprobantes } from "../pages/SerializacionComprobantes";
 import { Reportes } from "../pages/Reportes";
@@ -166,6 +167,16 @@ export function MyRoutes() {
           <Layout>
             <ProtectedRoute accessBy="authenticated">
               <PedidosEcommerce />
+            </ProtectedRoute>
+          </Layout>
+        }
+      />
+      <Route
+        path="/mercadolibre"
+        element={
+          <Layout>
+            <ProtectedRoute accessBy="authenticated">
+              <MercadoLibre />
             </ProtectedRoute>
           </Layout>
         }
