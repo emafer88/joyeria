@@ -12,6 +12,7 @@ import {
   usePiezasVarianteQuery,
 } from "../../../tanstack/JoyeriaStack";
 import { imprimirEtiquetas } from "../../../utils/codigoBarras";
+import { usePermisosDeMenu } from "../../../hooks/usePermisosDeMenu";
 
 const ESTADO_LABEL = {
   disponible: "Disponible",
@@ -25,6 +26,7 @@ const ESTADO_LABEL = {
 function PiezasDeVariante({ idVariante, producto, material, pureza }) {
   const { data: piezas = [], isLoading } = usePiezasVarianteQuery(idVariante);
   const { abrirModalPieza } = useJoyeriaStore();
+  const { veCostos } = usePermisosDeMenu();
   const [sel, setSel] = useState(() => new Set());
 
   const abrir = (modal, p) =>
@@ -85,7 +87,7 @@ function PiezasDeVariante({ idVariante, producto, material, pureza }) {
               <th>SKU</th>
               <th>Código de barras</th>
               <th>Peso</th>
-              <th>Costo</th>
+              {veCostos && <th>Costo</th>}
               <th>Precio</th>
               <th>Estado</th>
               <th></th>
@@ -104,7 +106,7 @@ function PiezasDeVariante({ idVariante, producto, material, pureza }) {
                 <td className="mono">{p.sku}</td>
                 <td className="mono">{p.barcode}</td>
                 <td>{p.peso} g</td>
-                <td>{p.costo}</td>
+                {veCostos && <td>{p.costo}</td>}
                 <td>{p.precio_venta}</td>
                 <td>{ESTADO_LABEL[p.estado] ?? p.estado}</td>
                 <td className="acc-pieza">

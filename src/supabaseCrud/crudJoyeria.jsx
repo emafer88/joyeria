@@ -6,6 +6,9 @@ import { supabase } from "../index";
  * Diseño  = fila de `productos` con es_joyeria = true (maneja_inventarios = false).
  * Variante = fila de `producto_variantes` (material + pureza).
  * Pieza    = fila de `piezas_inventario` (se maneja en etapas posteriores).
+ * Las lecturas van por las vistas *_v (mismas columnas, costo en null para
+ * quien no tiene el módulo "Ver costos"); la base no deja leer el costo
+ * directo de las tablas.
  *
  * @typedef {Object} DisenoJoyeria
  * @property {number} id
@@ -42,7 +45,7 @@ export async function CrearProductoJoyeria(p) {
 /** @returns {Promise<DisenoJoyeria[]>} */
 export async function MostrarProductosJoyeria(p) {
   const { data, error } = await supabase
-    .from("productos")
+    .from("productos_v")
     .select("*, categorias(nombre)")
     .eq("id_empresa", p.id_empresa)
     .eq("es_joyeria", true)
@@ -91,7 +94,7 @@ export async function CrearVariante(p) {
  */
 export async function MostrarVariantes(p) {
   const { data, error } = await supabase
-    .from("producto_variantes")
+    .from("producto_variantes_v")
     .select("*, producto_variante_imagenes(id, url, path, orden)")
     .eq("id_producto", p.id_producto)
     .order("material", { ascending: true })
@@ -148,7 +151,7 @@ export async function CrearPiezaIndividual(p) {
 /** @returns {Promise<any[]>} piezas de una variante */
 export async function MostrarPiezasVariante(p) {
   const { data, error } = await supabase
-    .from("piezas_inventario")
+    .from("piezas_inventario_v")
     .select("*")
     .eq("id_variante", p.id_variante)
     .order("id", { ascending: true });

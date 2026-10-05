@@ -13,6 +13,7 @@ import { useAlmacenesStore } from "../store/AlmacenesStore";
 import { useFormattedDate } from "../hooks/useFormattedDate";
 import { useStockStore } from "../store/StockStore";
 import { useGlobalStore } from "../store/GlobalStore";
+import { usePermisosDeMenu } from "../hooks/usePermisosDeMenu";
 
 // export const useBuscarProductosQuery = () => {
 //   const { buscador, buscarProductos } = useProductosStore();
@@ -38,6 +39,7 @@ export const useInsertarMovStockMutation = () => {
     useAlmacenesStore();
    
   const { editarPreciosProductos } = useProductosStore();
+  const { veCostos } = usePermisosDeMenu();
   const fechaActual = useFormattedDate();
   console.log("dataStock",dataStock)
   return useMutation({
@@ -65,6 +67,8 @@ export const useInsertarMovStockMutation = () => {
           (productosItemSelect?.precio_venta + data.precio_venta) / 2
         ),
       };
+      // Sin "Ver costos" no se conoce el costo actual: no se recalcula.
+      if (!veCostos) delete pProductos.precio_compra;
       console.log("pMovimientoStock",pMovimientoStock)
       console.log("pStock",pStock)
       console.log("pProductos",pProductos)

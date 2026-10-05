@@ -29,6 +29,7 @@ import { SelectList } from "../../ui/lists/SelectList";
 import { useStockStore } from "../../../store/StockStore";
 import { toast } from "sonner";
 import { BtnClose } from "../../ui/buttons/BtnClose";
+import { usePermisosDeMenu } from "../../../hooks/usePermisosDeMenu";
 
 // ISO (con offset) -> "YYYY-MM-DDTHH:mm" que espera un <input type="datetime-local">.
 function aDatetimeLocal(iso) {
@@ -49,6 +50,10 @@ export function RegistrarProductos({
   state,
 }) {
   if (!state) return;
+  // Sin "Ver costos": el precio de compra se captura al crear, pero al editar
+  // no se muestra (la base lo deja como estaba).
+  const { veCostos } = usePermisosDeMenu();
+  const mostrarCosto = veCostos || accion !== "Editar";
   //validar checkboxs
   const [isChecked1, setIsChecked1] = useState(true);
   const [isChecked2, setIsChecked2] = useState(false);
@@ -343,7 +348,7 @@ export function RegistrarProductos({
     if (data.precio_venta.trim() === "") {
       data.precio_venta = 0;
     }
-    if (data.precio_compra.trim() === "") {
+    if (!data.precio_compra || String(data.precio_compra).trim() === "") {
       data.precio_compra = 0;
     }
     if (stateInventarios) {
@@ -515,19 +520,21 @@ export function RegistrarProductos({
                   <label className="form__label">precio venta</label>
                 </InputText>
               </article>
-              <article>
-                <InputText icono={<v.iconoflechaderecha />}>
-                  <input
-                    step="0.01"
-                    className="form__field"
-                    defaultValue={dataSelect.precio_compra}
-                    type="number"
-                    placeholder="precio compra"
-                    {...register("precio_compra")}
-                  />
-                  <label className="form__label">precio compra</label>
-                </InputText>
-              </article>
+              {mostrarCosto && (
+                <article>
+                  <InputText icono={<v.iconoflechaderecha />}>
+                    <input
+                      step="0.01"
+                      className="form__field"
+                      defaultValue={dataSelect.precio_compra}
+                      type="number"
+                      placeholder="precio compra"
+                      {...register("precio_compra")}
+                    />
+                    <label className="form__label">precio compra</label>
+                  </InputText>
+                </article>
+              )}
               <article className="contentPadregenerar">
                 <InputText icono={<v.iconoflechaderecha />}>
                   <input

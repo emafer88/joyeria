@@ -7,8 +7,11 @@ import {ChartProductosTop5} from "../organismos/DashboardDesign/ChartProductosTo
 import { CardMovimientosCajaLive } from "../organismos/DashboardDesign/CardMovimientosCajaLive";
 import {CardProductosTopMonto} from "../organismos/DashboardDesign/CardProductosTopMonto"
 import { useReportesStore } from "../../store/ReportesStore";
+import { usePermisosDeMenu } from "../../hooks/usePermisosDeMenu";
 export const DashboardTemplate = () => {
   const {totalventas,porcentajeCambio,totalCantidadDetalleVentas,totalGanancias} = useReportesStore() 
+  // La ganancia sale del costo: sin "Ver costos" la base la devuelve en null.
+  const { veCostos } = usePermisosDeMenu();
    return (
     <Container>
       <DashboardHeader />
@@ -30,14 +33,15 @@ export const DashboardTemplate = () => {
               icon={"fluent-mdl2:product-variant"}
             />
           </ContentTotales>
-          <ContentTotales>
-            <CardTotales
-             
-              value={totalGanancias}
-              title="Ganancias"
-              icon={"hugeicons:money-send-circle"}
-            />
-          </ContentTotales>
+          {veCostos && (
+            <ContentTotales>
+              <CardTotales
+                value={totalGanancias}
+                title="Ganancias"
+                icon={"hugeicons:money-send-circle"}
+              />
+            </ContentTotales>
+          )}
         </Area1>
         <Area2>
           <ChartVentas />

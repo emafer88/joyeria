@@ -26,5 +26,11 @@ export function usePermisosDeMenu() {
     RUTAS_SIN_PERMISO.includes(to) ||
     !!dataPermisosGlobales?.some((item) => item.modulos?.link === to);
 
-  return { esSuperAdmin, puedeVer };
+  // Mismo criterio que admin_ve_costos() en la base: gerente o módulo
+  // "Ver costos". Sin él, la base devuelve el costo en null.
+  const veCostos =
+    ["superadmin", "admin"].includes(datausuarios?.roles?.nombre) ||
+    !!dataPermisosGlobales?.some((item) => item.modulos?.nombre === "Ver costos");
+
+  return { esSuperAdmin, puedeVer, veCostos };
 }

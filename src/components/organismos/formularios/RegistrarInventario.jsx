@@ -31,8 +31,11 @@ import {
 import { useMostrarStockXAlmacenYProductoQuery } from "../../../tanstack/StockStack";
 import { MessageComponent } from "../../ui/messages/MessageComponent";
 import { useEffect } from "react";
+import { usePermisosDeMenu } from "../../../hooks/usePermisosDeMenu";
 export function RegistrarInventario() {
   const { setStateClose } = useGlobalStore();
+  // Sin "Ver costos" el costo actual llega en null: no se muestra ni se pide.
+  const { veCostos } = usePermisosDeMenu();
 
   const { tipo, setTipo } = useMovStockStore();
   const {
@@ -168,21 +171,23 @@ export function RegistrarInventario() {
                     )}
                   </InputText>
                 </article>
-                <article>
-                  <InputText icono={<v.iconoflechaderecha />}>
-                    <input
-                      className="form__field"
-                      type="number"
-                      {...register("precio_compra", {
-                        required: true,
-                      })}
-                    />
-                    <label className="form__label">Precio costo</label>
-                    {errors.precio_compra?.type === "required" && (
-                      <p>Campo requerido</p>
-                    )}
-                  </InputText>
-                </article>
+                {veCostos && (
+                  <article>
+                    <InputText icono={<v.iconoflechaderecha />}>
+                      <input
+                        className="form__field"
+                        type="number"
+                        {...register("precio_compra", {
+                          required: true,
+                        })}
+                      />
+                      <label className="form__label">Precio costo</label>
+                      {errors.precio_compra?.type === "required" && (
+                        <p>Campo requerido</p>
+                      )}
+                    </InputText>
+                  </article>
+                )}
                 <article>
                   <InputText icono={<v.iconoflechaderecha />}>
                     <input
