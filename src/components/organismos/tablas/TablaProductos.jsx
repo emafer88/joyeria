@@ -10,6 +10,7 @@ import {
 import Swal from "sweetalert2";
 import { v } from "../../../styles/variables";
 import { useState } from "react";
+import { usePermisosDeMenu } from "../../../hooks/usePermisosDeMenu";
 import {
   flexRender,
   getCoreRowModel,
@@ -25,6 +26,7 @@ export function TablaProductos({
   setAccion,
 }) {
   if (data == null) return;
+  const { veCostos } = usePermisosDeMenu();
   const [pagina, setPagina] = useState(1);
   const [datas, setData] = useState(data);
   const [columnFilters, setColumnFilters] = useState([]);
@@ -182,9 +184,13 @@ export function TablaProductos({
       },
     },
   ];
+  // Sin "Ver costos" el precio de compra llega en null: fuera la columna.
+  const columnasVisibles = veCostos
+    ? columns
+    : columns.filter((c) => c.accessorKey !== "p_compra");
   const table = useReactTable({
     data,
-    columns,
+    columns: columnasVisibles,
     state: {
       columnFilters,
     },

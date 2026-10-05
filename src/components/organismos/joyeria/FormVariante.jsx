@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import { InputText, Btn1, SubidorImagenes } from "../../../index";
 import { v } from "../../../styles/variables";
 import { useJoyeriaStore } from "../../../store/JoyeriaStore";
+import { usePermisosDeMenu } from "../../../hooks/usePermisosDeMenu";
 import {
   useGuardarVarianteMutation,
   useImagenesVarianteQuery,
@@ -22,6 +23,9 @@ export function FormVariante({ onClose }) {
   const { accion, disenoSelect, varianteSelect } = useJoyeriaStore();
   const esEditar = accion === "Editar";
   const { mutate, isPending } = useGuardarVarianteMutation();
+  // Sin "Ver costos" se puede capturar el costo al crear, pero no verlo ni
+  // cambiarlo al editar (la base lo deja como estaba).
+  const { veCostos } = usePermisosDeMenu();
 
   // --- imágenes de la variante ---
   const idVariante = esEditar ? varianteSelect?.id : null;
@@ -144,16 +148,18 @@ export function FormVariante({ onClose }) {
               />
               <label className="form__label">Precio venta sugerido</label>
             </InputText>
-            <InputText icono={<v.iconopreciocompra />}>
-              <input
-                className="form__field"
-                type="number"
-                step="0.01"
-                placeholder="costo"
-                {...register("precio_compra_sugerido")}
-              />
-              <label className="form__label">Costo sugerido</label>
-            </InputText>
+            {(veCostos || !esEditar) && (
+              <InputText icono={<v.iconopreciocompra />}>
+                <input
+                  className="form__field"
+                  type="number"
+                  step="0.01"
+                  placeholder="costo"
+                  {...register("precio_compra_sugerido")}
+                />
+                <label className="form__label">Costo sugerido</label>
+              </InputText>
+            )}
           </div>
 
           <InputText icono={<v.iconoflechaderecha />}>

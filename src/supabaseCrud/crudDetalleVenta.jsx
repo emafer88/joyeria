@@ -15,8 +15,8 @@ export async function EditarCantidadDetalleVenta(p) {
 }
 export async function MostrarDetalleVenta(p) {
   const { data, error } = await supabase
-    .from(tabla)
-    .select(`*, ventas(*),productos(*)`)
+    .from("detalle_venta_v")
+    .select(`*, ventas(*), productos:productos_v(*)`)
     .eq("id_venta", p.id_venta);
   if (error) {
     throw new Error(error.message);

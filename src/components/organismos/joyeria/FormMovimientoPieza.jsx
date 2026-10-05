@@ -6,6 +6,7 @@ import { v } from "../../../styles/variables";
 import { useJoyeriaStore } from "../../../store/JoyeriaStore";
 import { useMovimientoPiezaMutation } from "../../../tanstack/JoyeriaStack";
 import { parseMedidas, formatMedidas } from "../../../utils/Medidas";
+import { usePermisosDeMenu } from "../../../hooks/usePermisosDeMenu";
 
 const ESTADO_LABEL = {
   disponible: "Disponible",
@@ -30,6 +31,8 @@ const MARCA_OPCIONES = [
 export function FormMovimientoPieza({ onClose }) {
   const { piezaSelect: pieza } = useJoyeriaStore();
   const { mutate, isPending } = useMovimientoPiezaMutation();
+  // Sin "Ver costos" no se muestra el costo; vacío = la base no lo toca.
+  const { veCostos } = usePermisosDeMenu();
 
   const esVendida = pieza?.estado === "vendida";
   const [tab, setTab] = useState(esVendida ? "devolver" : "ajuste");
@@ -129,10 +132,12 @@ export function FormMovimientoPieza({ onClose }) {
                     {...register("peso")}
                   />
                 </label>
-                <label>
-                  Costo
-                  <input type="number" step="0.01" min="0" {...register("costo")} />
-                </label>
+                {veCostos && (
+                  <label>
+                    Costo
+                    <input type="number" step="0.01" min="0" {...register("costo")} />
+                  </label>
+                )}
                 <label>
                   Precio
                   <input

@@ -14,6 +14,7 @@ import { useJoyeriaStore } from "../../../store/JoyeriaStore";
 import { useInventarioListadoQuery } from "../../../tanstack/JoyeriaStack";
 import { imprimirEtiquetas } from "../../../utils/codigoBarras";
 import { FiltrosInventario } from "./FiltrosInventario";
+import { usePermisosDeMenu } from "../../../hooks/usePermisosDeMenu";
 
 const GRUPOS = ["categoria", "producto", "variante"];
 const COLS = 8;
@@ -47,6 +48,10 @@ const uniq = (arr) => [...new Set(arr.filter(Boolean))].sort();
 export function TablaInventarioJoyeria() {
   const { buscador, abrirModalPieza } = useJoyeriaStore();
   const { data: rows = [], isLoading, error } = useInventarioListadoQuery();
+  // Sin "Ver costos" el costo llega en null: se oculta la columna.
+  const { veCostos } = usePermisosDeMenu();
+  const head = veCostos ? HEAD : HEAD.filter(([id]) => id !== "costo");
+  const cols = veCostos ? COLS : COLS - 1;
 
   const [filtros, setFiltros] = useState({
     categoria: "",
@@ -195,7 +200,7 @@ export function TablaInventarioJoyeria() {
         <table>
           <thead>
             <tr>
-              {HEAD.map(([id, label]) => {
+              {head.map(([id, label]) => {
                 const col = table.getColumn(id);
                 const sortable = ["sku", "peso", "costo", "precio_venta", "estado", "barcode"].includes(id);
                 return (
@@ -215,7 +220,7 @@ export function TablaInventarioJoyeria() {
           <tbody>
             {table.getRowModel().rows.length === 0 && (
               <tr>
-                <td colSpan={COLS} className="vacio">
+                <td colSpan={cols} className="vacio">
                   Sin piezas en inventario para estos filtros.
                 </td>
               </tr>
@@ -228,7 +233,7 @@ export function TablaInventarioJoyeria() {
                 ).length;
                 return (
                   <tr key={row.id} className={`grp d${row.depth}`}>
-                    <td colSpan={COLS}>
+                    <td colSpan={cols}>
                       <span style={{ paddingLeft: row.depth * 22 }} />
                       <button
                         className="tg"
@@ -262,7 +267,7 @@ export function TablaInventarioJoyeria() {
                   </td>
                   <td className="mono">{p.barcode}</td>
                   <td>{gramos(p.peso)}</td>
-                  <td>{money(p.costo)}</td>
+                  {veCostos && <td>{money(p.costo)}</td>}
                   <td>{money(p.precio_venta)}</td>
                   <td>
                     <span className={`badge ${p.estado}`}>

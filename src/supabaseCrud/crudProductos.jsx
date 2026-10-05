@@ -128,7 +128,7 @@ export async function SetEtiquetasProducto(idProducto, ids) {
 
 export async function MostrarUltimoProducto(p) {
   const { data } = await supabase
-    .from(tabla)
+    .from("productos_v")
     .select()
     .eq("id_empresa", p.id_empresa)
     .order("id", { ascending: false })
