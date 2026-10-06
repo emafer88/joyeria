@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Datos de clientes del instalador (llaves y contraseñas)
+clientes/
