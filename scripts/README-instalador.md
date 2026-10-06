@@ -65,13 +65,22 @@ series que falten).
 
 ## Actualizar a todos los clientes
 
-Cada migración nueva hay que aplicarla en cada proyecto:
+Cuando hay una migración nueva:
 
-```
-npx supabase db push --db-url "<db_url del cliente>"
-```
+1. Aplicarla primero en tu joyería, como siempre (`npx supabase db push`) y
+   copiarla a `joyeria-ecommerce`.
+2. Ver qué le falta a cada cliente (no cambia nada):
+   `node scripts/actualizar-clientes.mjs --ver`
+3. Aplicarla a todos: `node scripts/actualizar-clientes.mjs`
+   (o solo a algunos: `node scripts/actualizar-clientes.mjs clientes/a.json`).
 
-(Más adelante: un script que lo haga para todos los JSON de `clientes/`.)
+Si un cliente falla, el script sigue con los demás y al final muestra el
+error de cada uno. Un JSON con `"actualizar": false` se salta (el de prueba
+local, o un cliente dado de baja).
+
+Ojo al escribir migraciones: tienen que funcionar también en la base de un
+cliente, que no tiene los datos de tu joyería. Nada de ids fijos de usuarios,
+sucursales, ventas, etc. sin un `WHERE EXISTS` que lo proteja.
 
 ## Probar el instalador en local
 
