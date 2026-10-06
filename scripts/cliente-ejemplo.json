@@ -1,0 +1,17 @@
+{
+  "supabase_url": "https://<ref>.supabase.co",
+  "anon_key": "<anon key: Project Settings > API>",
+  "service_role_key": "<service_role key: Project Settings > API>",
+  "db_url": "postgresql://postgres.<ref>:<contraseña de la base, percent-encoded>@aws-0-<region>.pooler.supabase.com:5432/postgres",
+  "plan": "basico",
+  "empresa": {
+    "nombre": "Joyería Ejemplo",
+    "direccion_fiscal": "-",
+    "id_fiscal": "-"
+  },
+  "superadmin": {
+    "correo": "dueno@joyeriaejemplo.com",
+    "password": "<contraseña inicial, que la cambie al entrar>",
+    "nombres": "Nombre del dueño"
+  }
+}
