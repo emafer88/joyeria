@@ -63,6 +63,18 @@ Si sube a tienda o completo, haz también los pasos de la sección 3 que le
 falten (funciones, secretos y series: volver a correr el instalador crea las
 series que falten).
 
+## Suspender o reactivar una cuenta
+
+```
+node scripts/suspender-cliente.mjs clientes/<cliente>.json --mensaje "Tu pago de octubre está pendiente."
+node scripts/suspender-cliente.mjs clientes/<cliente>.json --reactivar
+```
+
+Suspendida: el admin muestra "Cuenta suspendida" con el mensaje, la base no
+deja leer ni escribir al personal, la tienda muestra "Tienda no disponible" y
+no cobra, y no corren los crons. Los datos no se tocan; al reactivar todo
+vuelve como estaba (el admin lo nota en máximo 5 minutos, o al recargar).
+
 ## Actualizar a todos los clientes
 
 Cuando hay una migración nueva:
