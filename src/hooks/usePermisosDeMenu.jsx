@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { usePermisosStore } from "../store/PermisosStore";
 import { useUsuariosStore } from "../store/UsuariosStore";
+import { useLicencia } from "./useLicencia";
 
 // Rutas que cualquier usuario logueado puede ver sin necesitar un permiso
 // específico (son de su propia cuenta, no de un módulo de negocio).
@@ -14,6 +15,7 @@ export function usePermisosDeMenu() {
   const { datausuarios } = useUsuariosStore();
   const { mostrarPermisosGlobales } = usePermisosStore();
   const esSuperAdmin = datausuarios?.roles?.nombre === "superadmin";
+  const { rutaPermitida } = useLicencia();
 
   const { data: dataPermisosGlobales } = useQuery({
     queryKey: ["mostrar permisos globales", datausuarios?.id],
@@ -21,10 +23,12 @@ export function usePermisosDeMenu() {
     enabled: !!datausuarios?.id,
   });
 
+  // Lo que el plan de la joyería no incluye no lo ve nadie, ni el superadmin.
   const puedeVer = (to) =>
-    esSuperAdmin ||
-    RUTAS_SIN_PERMISO.includes(to) ||
-    !!dataPermisosGlobales?.some((item) => item.modulos?.link === to);
+    rutaPermitida(to) &&
+    (esSuperAdmin ||
+      RUTAS_SIN_PERMISO.includes(to) ||
+      !!dataPermisosGlobales?.some((item) => item.modulos?.link === to));
 
   // Mismo criterio que admin_ve_costos() en la base: gerente o módulo
   // "Ver costos". Sin él, la base devuelve el costo en null.

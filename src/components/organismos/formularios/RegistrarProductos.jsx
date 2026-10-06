@@ -30,6 +30,7 @@ import { useStockStore } from "../../../store/StockStore";
 import { toast } from "sonner";
 import { BtnClose } from "../../ui/buttons/BtnClose";
 import { usePermisosDeMenu } from "../../../hooks/usePermisosDeMenu";
+import { useLicencia } from "../../../hooks/useLicencia";
 
 // ISO (con offset) -> "YYYY-MM-DDTHH:mm" que espera un <input type="datetime-local">.
 function aDatetimeLocal(iso) {
@@ -53,6 +54,7 @@ export function RegistrarProductos({
   // Sin "Ver costos": el precio de compra se captura al crear, pero al editar
   // no se muestra (la base lo deja como estaba).
   const { veCostos } = usePermisosDeMenu();
+  const { tiene } = useLicencia();
   const mostrarCosto = veCostos || accion !== "Editar";
   //validar checkboxs
   const [isChecked1, setIsChecked1] = useState(true);
@@ -600,13 +602,15 @@ export function RegistrarProductos({
                   setState={checkUseInventarios}
                 />
               </ContainerSelector>
-              <ContainerSelector>
-                <label>Destacado (home ecommerce): </label>
-                <Switch1
-                  state={destacado}
-                  setState={() => setDestacado((d) => !d)}
-                />
-              </ContainerSelector>
+              {tiene("tienda") && (
+                <ContainerSelector>
+                  <label>Destacado (home ecommerce): </label>
+                  <Switch1
+                    state={destacado}
+                    setState={() => setDestacado((d) => !d)}
+                  />
+                </ContainerSelector>
+              )}
 
               <ContainerSelector>
                 <label>Marca / colección: </label>

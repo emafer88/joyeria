@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import { useAsignacionCajaSucursalStore } from "../../../store/AsignacionCajaSucursalStore";
 import { BarLoader } from "react-spinners";
 import { useUsuariosStore } from "../../../store/UsuariosStore";
+import { useLicencia } from "../../../hooks/useLicencia";
 export const PermisosUser = () => {
   const {
     mostrarPermisos,
@@ -24,6 +25,8 @@ export const PermisosUser = () => {
   const { mostrarModulos } = useModulosStore();
   const { mostrarRoles, rolesItemSelect, setRolesItemSelect,dataroles } = useRolesStore();
   const { itemSelect } = useUsuariosStore();
+  // Los módulos que el plan no incluye no se asignan.
+  const { rutaPermitida } = useLicencia();
 
   const { data: datamodulos, isLoading: isLoadingModulos } = useQuery({
     queryKey: ["mostrar modulos"],
@@ -84,7 +87,7 @@ export const PermisosUser = () => {
         itemSelect={rolesItemSelect}
       />
       <List>
-        {datamodulos?.map((module, index) => {
+        {datamodulos?.filter((module) => rutaPermitida(module.link)).map((module, index) => {
           const isChecked = itemSelect
             ? datapermisos?.some(
                 (p) => String(p.idmodulo) === String(module.id)

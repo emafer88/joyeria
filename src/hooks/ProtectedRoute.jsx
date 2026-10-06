@@ -4,12 +4,14 @@ import { usePermisosStore } from "../store/PermisosStore";
 import { useQuery } from "@tanstack/react-query";
 import { useUsuariosStore } from "../store/UsuariosStore";
 import { RUTAS_SIN_PERMISO } from "./usePermisosDeMenu";
+import { useLicencia } from "./useLicencia";
 
 export const ProtectedRoute = ({ children, accessBy }) => {
   const { user } = UserAuth();
   const { mostrarPermisosGlobales } = usePermisosStore();
   const location = useLocation();
   const { datausuarios } = useUsuariosStore();
+  const { rutaPermitida, isLoading: isLoadingLicencia } = useLicencia();
 
   const {
     data: dataPermisosGlobales,
@@ -25,23 +27,25 @@ export const ProtectedRoute = ({ children, accessBy }) => {
     // no decidir ninguna redirección todavía para no rebotar de más.
     return <span>cargando...</span>;
   }
-  if (isLoadingPermisosGlobales) {
+  if (isLoadingPermisosGlobales || isLoadingLicencia) {
     return <span>cargando permisos...</span>;
   }
   const esSuperAdmin = datausuarios?.roles?.nombre === "superadmin";
+  // Lo que el plan de la joyería no incluye no lo ve nadie, ni el superadmin.
   const hasPermission =
-    esSuperAdmin ||
-    RUTAS_SIN_PERMISO.includes(location.pathname) ||
-    dataPermisosGlobales?.some((item) => {
-      const link = item.modulos?.link;
-      if (!link) return false;
-      // "/reportes" tiene subpáginas (/reportes/report_ventas, etc.) que
-      // comparten el mismo permiso del módulo padre.
-      return (
-        location.pathname === link ||
-        (link === "/reportes" && location.pathname.startsWith("/reportes/"))
-      );
-    });
+    rutaPermitida(location.pathname) &&
+    (esSuperAdmin ||
+      RUTAS_SIN_PERMISO.includes(location.pathname) ||
+      dataPermisosGlobales?.some((item) => {
+        const link = item.modulos?.link;
+        if (!link) return false;
+        // "/reportes" tiene subpáginas (/reportes/report_ventas, etc.) que
+        // comparten el mismo permiso del módulo padre.
+        return (
+          location.pathname === link ||
+          (link === "/reportes" && location.pathname.startsWith("/reportes/"))
+        );
+      }));
 
   if (accessBy === "non-authenticated") {
     if (!user) {
