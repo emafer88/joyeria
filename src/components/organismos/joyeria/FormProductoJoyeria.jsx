@@ -15,6 +15,7 @@ import { v } from "../../../styles/variables";
 import { useJoyeriaStore } from "../../../store/JoyeriaStore";
 import { useEmpresaStore } from "../../../store/EmpresaStore";
 import { useProductosStore } from "../../../store/ProductosStore";
+import { useLicencia } from "../../../hooks/useLicencia";
 import {
   useGuardarDisenoMutation,
   useCategoriasJoyeriaQuery,
@@ -27,6 +28,7 @@ import {
  * las piezas físicas que cuelgan de sus variantes.
  */
 export function FormProductoJoyeria({ onClose }) {
+  const { tiene } = useLicencia();
   const { accion, disenoSelect } = useJoyeriaStore();
   const esEditar = accion === "Editar";
   const { dataempresa } = useEmpresaStore();
@@ -287,10 +289,12 @@ export function FormProductoJoyeria({ onClose }) {
             </button>
           </div>
 
-          <div className="fila-switch">
-            <label>Destacado (home ecommerce)</label>
-            <Switch1 state={destacado} setState={() => setDestacado((d) => !d)} />
-          </div>
+          {tiene("tienda") && (
+            <div className="fila-switch">
+              <label>Destacado (home ecommerce)</label>
+              <Switch1 state={destacado} setState={() => setDestacado((d) => !d)} />
+            </div>
+          )}
 
           <Btn1
             icono={<v.iconoguardar />}

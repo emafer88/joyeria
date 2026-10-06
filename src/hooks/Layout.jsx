@@ -17,12 +17,15 @@ import { useAsignacionCajaSucursalStore } from "../store/AsignacionCajaSucursalS
 import { usePermisosStore } from "../store/PermisosStore";
 import { useMostrarSucursalAsignadasQuery } from "../tanstack/AsignacionesSucursalStack";
 import { NotificacionesPedidos } from "../components/organismos/NotificacionesPedidos";
+import { useLicencia } from "./useLicencia";
 export function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [stateMenu, setStateMenu] = useState(false);
 
   const { mostrarusuarios } = useUsuariosStore();
   const { mostrarempresa } = useEmpresaStore();
+  // La campanita de pedidos es de la tienda en línea.
+  const { tiene } = useLicencia();
     const { user } = UserAuth(); // Accedemos al contexto
   const id_auth = user?.id; // Obtenemos el id_auth del usuario autenticado
   const { mostrarSucursalCajaAsignada } = useAsignacionCajaSucursalStore();
@@ -89,7 +92,7 @@ export function Layout({ children }) {
 
       <Containerbody>
         <Topbar>
-          <NotificacionesPedidos />
+          {tiene("tienda") && <NotificacionesPedidos />}
         </Topbar>
         {children}
       </Containerbody>

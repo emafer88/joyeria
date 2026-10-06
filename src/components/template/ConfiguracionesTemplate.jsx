@@ -4,8 +4,10 @@ import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import { useModulosStore } from "../../index";
 import { usePermisosStore } from "../../store/PermisosStore";
+import { useLicencia } from "../../hooks/useLicencia";
 export function ConfiguracionesTemplate() {
   const { dataPermisosConfiguracion } = usePermisosStore();
+  const { rutaPermitida } = useLicencia();
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -28,7 +30,9 @@ export function ConfiguracionesTemplate() {
   return (
     <Container>
       <div id="cards">
-        {dataPermisosConfiguracion.map((item, index) => {
+        {dataPermisosConfiguracion
+          .filter((item) => rutaPermitida(item.modulos?.link))
+          .map((item, index) => {
           return (
             <Link
               to={item.modulos.link}
