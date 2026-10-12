@@ -1,4 +1,6 @@
 import styled from "styled-components";
+import { useState } from "react";
+import { CambiarContrasena } from "../formularios/CambiarContrasena";
 import {
   getLinksArray,
   SecondarylinksArray,
@@ -13,6 +15,7 @@ import { usePermisosDeMenu } from "../../../hooks/usePermisosDeMenu";
 
 export function Sidebar({ state, setState }) {
   const { cerrarSesion } = useAuthStore();
+  const [cambiarContrasena, setCambiarContrasena] = useState(false);
   const queryClient = useQueryClient();
   const { esSuperAdmin, puedeVer } = usePermisosDeMenu();
   const LinksArray = getLinksArray(esSuperAdmin).filter((l) => puedeVer(l.to));
@@ -71,6 +74,20 @@ export function Sidebar({ state, setState }) {
           </div>
         ))}
         <div className={state ? "LinkContainer active" : "LinkContainer"}>
+          <div className="Links" onClick={() => setCambiarContrasena(true)}>
+            <section className={state ? "content open" : "content"}>
+              <Icon
+                color="#CE82FF"
+                className="Linkicon"
+                icon="heroicons:key-20-solid"
+              />
+              <span className={state ? "label_ver" : "label_oculto"}>
+                CONTRASEÑA
+              </span>
+            </section>
+          </div>
+        </div>
+        <div className={state ? "LinkContainer active" : "LinkContainer"}>
           <div className="Links" onClick={cerrarSesion}>
             <section className={state ? "content open" : "content"}>
               <Icon
@@ -86,6 +103,9 @@ export function Sidebar({ state, setState }) {
         </div>
 
         <ToggleTema />
+        {cambiarContrasena && (
+          <CambiarContrasena cerrar={() => setCambiarContrasena(false)} />
+        )}
       </Container>
     </Main>
   );
