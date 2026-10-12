@@ -23,7 +23,7 @@ export const ImageSelector = ({ fileUrl }) => {
       <ImageWrapper>
         <Avatar
           src={
-            fileUrl !== "-" ? fileUrl : "https://i.ibb.co/39y0kysq/subir.png"
+            fileUrl !== "-" ? fileUrl : "/iconos/subir.png"
           }
           alt="Selected"
         />

@@ -18,7 +18,7 @@ export function PageNot() {
           </div>
 
           <div className="home__img">
-            <img src="https://i.ibb.co/J3ScNtK/roshi.png" alt="" />
+            <img src="/iconos/roshi.png" alt="" />
           </div>
         </div>
       </section>
