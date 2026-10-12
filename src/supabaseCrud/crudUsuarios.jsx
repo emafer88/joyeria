@@ -90,3 +90,14 @@ export async function EditarPerfilUsuario(p) {
     throw new Error(error.message);
   }
 }
+// Un gerente le pone una contraseña nueva a un empleado (ver
+// 20261012140000_restablecer_contrasena.sql para las reglas).
+export async function RestablecerContrasenaUsuario({ id_usuario, pass }) {
+  const { error } = await supabase.rpc("admin_restablecer_contrasena", {
+    _id_usuario: id_usuario,
+    _pass: pass,
+  });
+  if (error) {
+    throw new Error(error.message);
+  }
+}
