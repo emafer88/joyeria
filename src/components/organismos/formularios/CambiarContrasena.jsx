@@ -54,7 +54,7 @@ export function CambiarContrasena({ cerrar }) {
 
   // Portal: el sidebar es position:fixed con z-index propio y taparía el modal.
   return createPortal(
-    <Container>
+    <ModalContrasena>
       <div className="sub-contenedor">
         <div className="headers">
           <h1>Cambiar contraseña</h1>
@@ -128,7 +128,7 @@ export function CambiarContrasena({ cerrar }) {
           </form>
         )}
       </div>
-    </Container>,
+    </ModalContrasena>,
     document.body,
   );
 }
@@ -159,7 +159,7 @@ async function cambiar({ actual, nueva }) {
   }
 }
 
-const Container = styled.div`
+export const ModalContrasena = styled.div`
   position: fixed;
   top: 0;
   left: 0;
@@ -202,6 +202,10 @@ const Container = styled.div`
     }
     .ok {
       font-size: 17px;
+    }
+    .usuario {
+      margin: -10px 0 15px;
+      opacity: 0.8;
     }
   }
 `;

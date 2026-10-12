@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { AccionTabla } from "../../../index";
 import { v } from "../../../styles/variables";
 import { Icon } from "@iconify/react";
-export function ContentAccionesTabla({ funcionEditar, funcionEliminar }) {
+export function ContentAccionesTabla({ funcionEditar, funcionEliminar, funcionContrasena }) {
   return (
     <Container>
       {funcionEditar && (
@@ -11,6 +11,14 @@ export function ContentAccionesTabla({ funcionEditar, funcionEliminar }) {
           fontSize="18px"
           color="#7d7d7d"
           icono={<v.iconeditarTabla />}
+        />
+      )}
+      {funcionContrasena && (
+        <AccionTabla
+          funcion={funcionContrasena}
+          fontSize="20px"
+          color="#CE82FF"
+          icono={<Icon icon="heroicons:key-20-solid" />}
         />
       )}
       {funcionEliminar && (

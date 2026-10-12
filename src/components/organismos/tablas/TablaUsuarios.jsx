@@ -19,6 +19,7 @@ import {
 import { FaArrowsAltV } from "react-icons/fa";
 import { useAsignacionCajaSucursalStore } from "../../../store/AsignacionCajaSucursalStore";
 import { useQueryClient } from "@tanstack/react-query";
+import { RestablecerContrasena } from "../formularios/RestablecerContrasena";
 export function TablaUsuarios({
   data,
   SetopenRegistro,
@@ -29,6 +30,7 @@ export function TablaUsuarios({
   const [pagina, setPagina] = useState(1);
   const [datas, setData] = useState(data);
   const [columnFilters, setColumnFilters] = useState([]);
+  const [restablecer, setRestablecer] = useState(null);
    const queryClient = useQueryClient()
   const { eliminarUsuarioAsignado } = useUsuariosStore();
   function eliminar(p) {
@@ -141,6 +143,7 @@ export function TablaUsuarios({
           <ContentAccionesTabla
             funcionEditar={() => editar(info.row.original)}
             funcionEliminar={() => eliminar(info.row.original)}
+            funcionContrasena={() => setRestablecer(info.row.original)}
           />
         </td>
       ),
@@ -179,6 +182,12 @@ export function TablaUsuarios({
   });
   return (
     <>
+      {restablecer && (
+        <RestablecerContrasena
+          usuario={restablecer}
+          cerrar={() => setRestablecer(null)}
+        />
+      )}
       <Container>
         <table className="responsive-table">
           <thead>
