@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
@@ -8,6 +8,32 @@ import { InputText, Btn1, supabase } from "../../../index";
 import { BtnClose } from "../../ui/buttons/BtnClose";
 
 const LARGO_MINIMO = 8;
+
+// true si la sesión actual se abrió con correo y contraseña. Quien entra con
+// Google no tiene contraseña propia que cambiar (la maneja Google). Se lee el
+// claim `amr` del token: dice cómo se abrió ESTA sesión.
+export function useEntroConContrasena() {
+  const [conContrasena, setConContrasena] = useState(false);
+  useEffect(() => {
+    const revisar = (session) => setConContrasena(metodoSesion(session) === "password");
+    supabase.auth.getSession().then(({ data }) => revisar(data.session));
+    const { data } = supabase.auth.onAuthStateChange((_evento, session) => revisar(session));
+    return () => data.subscription.unsubscribe();
+  }, []);
+  return conContrasena;
+}
+
+function metodoSesion(session) {
+  try {
+    const base64 = session.access_token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const amr = JSON.parse(atob(base64)).amr ?? [];
+    // Manda el método más reciente.
+    const ultimo = amr.reduce((a, b) => (b.timestamp > (a?.timestamp ?? -1) ? b : a), null);
+    return ultimo?.method ?? null;
+  } catch {
+    return null;
+  }
+}
 
 // El usuario logueado cambia su propia contraseña. Pide la actual para que
 // nadie pueda cambiarla desde una sesión abierta (p. ej. una caja del POS).
