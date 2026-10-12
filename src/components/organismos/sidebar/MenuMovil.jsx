@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { CambiarContrasena } from "../formularios/CambiarContrasena";
 import { useState } from "react";
 import { getLinksArray, SecondarylinksArray, ToggleTema } from "../../../index";
 import { v } from "../../../styles/variables";
@@ -9,6 +10,7 @@ import { usePermisosDeMenu } from "../../../hooks/usePermisosDeMenu";
 export const MenuMovil = ({ setState }) => {
   const [state, setstate] = useState(true);
   const { cerrarSesion } = useAuthStore();
+  const [cambiarContrasena, setCambiarContrasena] = useState(false);
   const { esSuperAdmin, puedeVer } = usePermisosDeMenu();
   const LinksArray = getLinksArray(esSuperAdmin).filter((l) => puedeVer(l.to));
   const linksSecundarios = SecondarylinksArray.filter((l) => puedeVer(l.to));
@@ -84,6 +86,20 @@ export const MenuMovil = ({ setState }) => {
             </div>
           </div>
           <div className={state ? "LinkContainer active" : "LinkContainer"}>
+            <div className="Links" onClick={() => setCambiarContrasena(true)}>
+              <section className={state ? "content open" : "content"}>
+                <Icon
+                  color="#CE82FF"
+                  className="Linkicon"
+                  icon="heroicons:key-20-solid"
+                />
+                <span className={state ? "label_ver" : "label_oculto"}>
+                  CONTRASEÑA
+                </span>
+              </section>
+            </div>
+          </div>
+          <div className={state ? "LinkContainer active" : "LinkContainer"}>
             <div className="Links" onClick={cerrarSesion}>
               <section className={state ? "content open" : "content"}>
                 <Icon
@@ -99,6 +115,9 @@ export const MenuMovil = ({ setState }) => {
           </div>
 
           <ToggleTema />
+          {cambiarContrasena && (
+            <CambiarContrasena cerrar={() => setCambiarContrasena(false)} />
+          )}
         </Container>
       </Main>
     </Container>
