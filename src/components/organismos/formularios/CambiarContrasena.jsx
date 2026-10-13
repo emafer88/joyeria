@@ -23,7 +23,7 @@ export function useEntroConContrasena() {
   return conContrasena;
 }
 
-function metodoSesion(session) {
+export function metodoSesion(session) {
   try {
     const base64 = session.access_token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
     const amr = JSON.parse(atob(base64)).amr ?? [];

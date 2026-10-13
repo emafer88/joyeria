@@ -28,6 +28,7 @@ import { ConfiguracionEnvio } from "../pages/ConfiguracionEnvio";
 import { PedidosEcommerce } from "../pages/PedidosEcommerce";
 import { MercadoLibre } from "../pages/MercadoLibre";
 import { MiPerfil } from "../pages/MiPerfil";
+import { NuevaContrasena } from "../pages/NuevaContrasena";
 import { SerializacionComprobantes } from "../pages/SerializacionComprobantes";
 import { Reportes } from "../pages/Reportes";
 import { ReportInventarios } from "../components/organismos/reports/ReportInventarios";
@@ -63,6 +64,9 @@ function RedirigirSegunRol() {
 export function MyRoutes() {
   return (
     <Routes>
+      {/* Sin ProtectedRoute: el enlace del correo abre una sesión y la página
+          decide si sirve (solo sesiones de recuperación). */}
+      <Route path="/restablecer-contrasena" element={<NuevaContrasena />} />
       <Route
         path="/login"
         element={

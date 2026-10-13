@@ -11,10 +11,13 @@ import { Device } from "../../styles/breakpoints";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { toast, Toaster } from "sonner";
+import { useState } from "react";
+import { OlvideContrasena } from "../organismos/formularios/OlvideContrasena";
 
 export function LoginTemplate({ modo = "empleado" }) {
   const { loginGoogle, loginEmail } = useAuthStore();
 
+  const [recuperar, setRecuperar] = useState(false);
   const { register, handleSubmit } = useForm();
   const { mutate } = useMutation({
     mutationKey: ["iniciar con email"],
@@ -45,6 +48,8 @@ export function LoginTemplate({ modo = "empleado" }) {
               icono={<v.iconogoogle />}
             />
           </PanelModo>
+        ) : recuperar ? (
+          <OlvideContrasena volver={() => setRecuperar(false)} />
         ) : (
           <PanelModo>
             <Title $paddingbottom="40px">Ingresar</Title>
@@ -73,6 +78,9 @@ export function LoginTemplate({ modo = "empleado" }) {
                 width="100%"
               />
             </form>
+            <button type="button" className="enlace" onClick={() => setRecuperar(true)}>
+              ¿Olvidaste tu contraseña?
+            </button>
           </PanelModo>
         )}
       </div>
@@ -122,4 +130,12 @@ const PanelModo = styled.div`
   display: flex;
   flex-direction: column;
   gap: 10px;
+  .enlace {
+    background: none;
+    border: none;
+    color: #1cb0f6;
+    cursor: pointer;
+    font-size: 15px;
+    margin-top: 10px;
+  }
 `;
