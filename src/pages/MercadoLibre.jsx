@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Toaster } from "sonner";
+import { Toaster, toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import { Title } from "../components/atomos/Title";
 import { useCuentaMLQuery, useSincronizarMLMutation } from "../tanstack/MercadoLibreStack";
 import { DisenosML, OrdenesML, PublicacionesML } from "../components/organismos/MercadoLibreDesign/TablasML";
 import { BtnPastilla } from "../components/organismos/MercadoLibreDesign/comunes";
+import { ConectarCuentaML } from "../supabaseCrud/crudMercadoLibre";
 
 const PESTANAS = {
   disenos: { label: "Diseños", Componente: DisenosML },
@@ -18,21 +20,65 @@ const PESTANAS = {
 function EstadoCuenta() {
   const { data: cuenta, isLoading } = useCuentaMLQuery();
   if (isLoading) return null;
-  if (!cuenta) return <span className="cuenta mal">No hay cuenta de Mercado Libre conectada</span>;
+  if (!cuenta) {
+    return (
+      <div className="estado">
+        <span className="cuenta mal">No hay cuenta de Mercado Libre conectada</span>
+        <BotonConectar texto="Conectar Mercado Libre" />
+      </div>
+    );
+  }
   const vigente = new Date(cuenta.expira_en) > new Date();
   return (
-    <span className={`cuenta ${vigente ? "" : "mal"}`}>
-      <Icon icon={vigente ? "solar:check-circle-bold" : "solar:danger-triangle-bold"} />
-      Vendedor {cuenta.ml_user_id} ·{" "}
-      {vigente ? "conectado" : "token vencido: revisar el cron ml-sincronizar"}
-    </span>
+    <div className="estado">
+      <span className={`cuenta ${vigente ? "" : "mal"}`}>
+        <Icon icon={vigente ? "solar:check-circle-bold" : "solar:danger-triangle-bold"} />
+        Vendedor {cuenta.ml_user_id} ·{" "}
+        {vigente ? "conectado" : "la conexión venció, vuelve a conectar la cuenta"}
+      </span>
+      {!vigente && <BotonConectar texto="Volver a conectar" />}
+    </div>
   );
+}
+
+function BotonConectar({ texto }) {
+  const [abriendo, setAbriendo] = useState(false);
+  const conectar = async () => {
+    setAbriendo(true);
+    try {
+      await ConectarCuentaML();
+    } catch (e) {
+      toast.error(e.message);
+      setAbriendo(false);
+    }
+  };
+  return (
+    <BtnPastilla type="button" disabled={abriendo} onClick={conectar}>
+      <Icon icon="solar:link-bold" width="18" />
+      {abriendo ? "Abriendo Mercado Libre..." : texto}
+    </BtnPastilla>
+  );
+}
+
+// Resultado de la vuelta desde ml-oauth (?ml=conectado|error&motivo=...).
+function useResultadoConexion() {
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ml = params.get("ml");
+    if (!ml) return;
+    if (ml === "conectado") toast.success("Cuenta de Mercado Libre conectada");
+    else toast.error(params.get("motivo") || "No se pudo conectar Mercado Libre");
+    queryClient.invalidateQueries({ queryKey: ["mercadolibre"] });
+    window.history.replaceState(null, "", window.location.pathname);
+  }, [queryClient]);
 }
 
 export const MercadoLibre = () => {
   const [pestana, setPestana] = useState("disenos");
   const { mutate: sincronizar, isPending } = useSincronizarMLMutation();
   const { Componente } = PESTANAS[pestana];
+  useResultadoConexion();
 
   return (
     <Container>
@@ -72,6 +118,12 @@ const Container = styled.div`
     justify-content: space-between;
     align-items: flex-start;
     gap: 12px;
+    flex-wrap: wrap;
+  }
+  .estado {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     flex-wrap: wrap;
   }
   .cuenta {
