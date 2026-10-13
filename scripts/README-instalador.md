@@ -49,7 +49,14 @@ el superadmin entra. Se puede volver a correr sin duplicar nada.
 - **Plan completo** (desde `joyeria-mercadolibre`):
   - `npx supabase functions deploy --project-ref <ref>`
   - `npx supabase secrets set --project-ref <ref> ML_CLIENT_ID=... ML_CLIENT_SECRET=...`
-  - Autorizar la cuenta de Mercado Libre de la joyería (llena `ml_cuenta`).
+  - En developers.mercadolibre.com.mx, en la app, agregar a las Redirect URIs
+    `https://<ref>.supabase.co/functions/v1/ml-oauth` (la app es una sola para
+    todos los clientes: una URI por proyecto).
+  - La joyería conecta su cuenta sola: admin → Mercado Libre → "Conectar
+    Mercado Libre" (llena `ml_cuenta`).
+  - Las notificaciones de la app de ML van a una sola URL (la de la joyería
+    original): las órdenes de los demás clientes entran por el cron de
+    reconciliación (cada 15 min), no al instante.
 
 ## Cambiar el plan después
 

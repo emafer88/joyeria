@@ -11,6 +11,15 @@ async function rpc(nombre, params) {
   return data;
 }
 
+// Abre el login de ML para conectar la cuenta (Edge Function ml-oauth). Al
+// terminar, ML/ml-oauth regresan a esta misma página con ?ml=conectado|error.
+export async function ConectarCuentaML() {
+  const volverA = window.location.origin + window.location.pathname;
+  const state = await rpc("ml_admin_iniciar_conexion", { _volver_a: volverA });
+  const base = import.meta.env.VITE_APP_SUPABASE_URL.replace(/\/$/, "");
+  window.location.assign(`${base}/functions/v1/ml-oauth?iniciar=${state}`);
+}
+
 export async function MostrarCuentaML() {
   const data = await rpc("ml_admin_cuenta");
   return data?.[0] ?? null;
