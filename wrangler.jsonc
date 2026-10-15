@@ -2,7 +2,7 @@
 // Cloudflare corre `npm run build` y luego `npx wrangler deploy`, que sube dist/.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "joyeria",
+  "name": "cubiks-pos",
   "compatibility_date": "2026-10-01",
   "assets": {
     "directory": "./dist",
