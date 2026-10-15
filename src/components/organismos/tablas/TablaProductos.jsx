@@ -398,7 +398,10 @@ const Container = styled.div`
         display: flex;
         justify-content: space-between;
         align-items: center;
-        min-height: 64px;
+        min-height: 44px;
+        @media (min-width: ${v.bpbart}) {
+          min-height: 64px;
+        }
 
         border-bottom: 1px solid rgba(161, 161, 161, 0.32);
         @media (min-width: ${v.bpbart}) {

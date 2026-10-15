@@ -15,6 +15,7 @@ import { useInventarioListadoQuery } from "../../../tanstack/JoyeriaStack";
 import { imprimirEtiquetas } from "../../../utils/codigoBarras";
 import { FiltrosInventario } from "./FiltrosInventario";
 import { usePermisosDeMenu } from "../../../hooks/usePermisosDeMenu";
+import { tablaTarjetasMovil } from "../../../styles/tablaMovil";
 
 const GRUPOS = ["categoria", "producto", "variante"];
 const COLS = 8;
@@ -234,7 +235,7 @@ export function TablaInventarioJoyeria() {
                 return (
                   <tr key={row.id} className={`grp d${row.depth}`}>
                     <td colSpan={cols}>
-                      <span style={{ paddingLeft: row.depth * 22 }} />
+                      <span className="sangria" style={{ paddingLeft: row.depth * 22 }} />
                       <button
                         className="tg"
                         onClick={row.getToggleExpandedHandler()}
@@ -262,20 +263,22 @@ export function TablaInventarioJoyeria() {
               const p = row.original;
               return (
                 <tr key={row.id}>
-                  <td className="mono" style={{ paddingLeft: 22 * 3 + 8 }}>
+                  <td className="mono celda-principal sku">
                     {p.sku}
                   </td>
-                  <td className="mono">{p.barcode}</td>
-                  <td>{gramos(p.peso)}</td>
-                  {veCostos && <td>{money(p.costo)}</td>}
-                  <td>{money(p.precio_venta)}</td>
-                  <td>
+                  <td data-title="Código de barras">
+                    <span className="mono">{p.barcode}</span>
+                  </td>
+                  <td data-title="Peso">{gramos(p.peso)}</td>
+                  {veCostos && <td data-title="Costo">{money(p.costo)}</td>}
+                  <td data-title="Precio">{money(p.precio_venta)}</td>
+                  <td data-title="Estado">
                     <span className={`badge ${p.estado}`}>
                       {ESTADO_LABEL[p.estado] ?? p.estado}
                     </span>
                   </td>
-                  <td>{p.almacen || "—"}</td>
-                  <td>
+                  <td data-title="Almacén">{p.almacen || "—"}</td>
+                  <td className="celda-acciones">
                     <div className="rowacc">
                       <button
                         title="Ajustar / marcar / devolver"
@@ -424,6 +427,9 @@ const Container = styled.div`
   .mono {
     font-family: monospace;
   }
+  td.sku {
+    padding-left: ${22 * 3 + 8}px;
+  }
   .rowacc {
     display: flex;
     gap: 8px;
@@ -464,5 +470,53 @@ const Container = styled.div`
   .badge.perdida {
     background: #fbdad6;
     color: #a5342a;
+  }
+
+  ${tablaTarjetasMovil}
+  @media (max-width: 767.98px) {
+    .barra .acc {
+      width: 100%;
+    }
+    .barra .acc button {
+      flex: 1;
+    }
+    td.sku {
+      padding-left: 0;
+      font-size: 15px;
+      font-weight: 700;
+    }
+    /* Encabezados de grupo (categoría → diseño → variante): barra completa,
+       con sangría chica según el nivel. */
+    tbody tr.grp {
+      padding: 0;
+    }
+    tbody tr.grp td {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      gap: 4px 8px;
+      padding: 10px 14px;
+      text-align: left;
+    }
+    tbody tr.grp.d1 td {
+      padding-left: 24px;
+    }
+    tbody tr.grp.d2 td {
+      padding-left: 34px;
+    }
+    .sangria {
+      display: none;
+    }
+    .tg,
+    .glabel {
+      margin-right: 0;
+    }
+    .gprint {
+      margin-left: 0;
+    }
+    td.vacio {
+      justify-content: center;
+      padding: 20px 0;
+    }
   }
 `;
