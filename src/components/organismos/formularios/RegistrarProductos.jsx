@@ -612,7 +612,7 @@ export function RegistrarProductos({
                 </ContainerSelector>
               )}
 
-              <ContainerSelector>
+              <ContainerSelector className="fila-marca">
                 <label>Marca / colección: </label>
                 <SelectList
                   data={[{ id: null, nombre: "Sin marca" }, ...(marcas ?? [])]}
@@ -624,7 +624,7 @@ export function RegistrarProductos({
                   onSelect={(m) => setIdMarca(m.id ?? null)}
                   displayField="nombre"
                 />
-                <ContainerAltaRapida>
+                <ContainerAltaRapida className="alta-rapida">
                   <input
                     type="text"
                     placeholder="+ nueva marca"
@@ -929,6 +929,46 @@ const Container = styled.div`
       }
       .contentPadregenerar {
         position: relative;
+      }
+    }
+  }
+
+  /* Celular: la caja ocupa el ancho de la pantalla y nada la ensancha
+     (antes la parte derecha del formulario quedaba fuera). */
+  @media (max-width: 767.98px) {
+    .sub-contenedor {
+      width: calc(100% - 16px);
+      height: calc(100vh - 16px);
+      padding: 13px 16px;
+      .headers {
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .headers h1 {
+        font-size: 22px;
+        padding-right: 40px;
+      }
+      .headers section:first-child {
+        flex: 1;
+        min-width: 0;
+      }
+      /* Marca: el alta rápida pasa a su propio renglón */
+      .fila-marca {
+        flex-wrap: wrap;
+      }
+      .fila-marca .alta-rapida {
+        flex-basis: 100%;
+        input {
+          flex: 1;
+        }
+      }
+      .fila-medidas {
+        flex-direction: column;
+      }
+      .formulario,
+      .formulario * {
+        min-width: 0;
+        max-width: 100%;
       }
     }
   }

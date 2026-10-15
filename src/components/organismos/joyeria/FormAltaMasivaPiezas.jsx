@@ -128,7 +128,7 @@ export function FormAltaMasivaPiezas({ onClose }) {
               <tbody>
                 {fields.map((f, i) => (
                   <tr key={f.id}>
-                    <td>
+                    <td data-title="Peso (g)">
                       <input
                         type="number"
                         step="0.001"
@@ -139,7 +139,7 @@ export function FormAltaMasivaPiezas({ onClose }) {
                         })}
                       />
                     </td>
-                    <td>
+                    <td data-title="Costo">
                       <input
                         type="number"
                         step="0.01"
@@ -147,7 +147,7 @@ export function FormAltaMasivaPiezas({ onClose }) {
                         {...register(`lineas.${i}.costo`)}
                       />
                     </td>
-                    <td>
+                    <td data-title="Precio">
                       <input
                         type="number"
                         step="0.01"
@@ -158,7 +158,7 @@ export function FormAltaMasivaPiezas({ onClose }) {
                         })}
                       />
                     </td>
-                    <td>
+                    <td data-title="Cantidad">
                       <input
                         type="number"
                         step="1"
@@ -169,14 +169,14 @@ export function FormAltaMasivaPiezas({ onClose }) {
                         })}
                       />
                     </td>
-                    <td>
+                    <td data-title="Talla">
                       <input
                         type="text"
                         placeholder="7 (opcional)"
                         {...register(`lineas.${i}.talla`)}
                       />
                     </td>
-                    <td>
+                    <td data-title="Medidas (cm)" className="medidas">
                       <div className="medidas-cm">
                         <input
                           type="number"
@@ -196,7 +196,7 @@ export function FormAltaMasivaPiezas({ onClose }) {
                         <span>cm</span>
                       </div>
                     </td>
-                    <td>
+                    <td className="borrar">
                       <button
                         type="button"
                         className="del"
@@ -446,6 +446,60 @@ const Container = styled.div`
     }
     .mono {
       font-family: monospace;
+    }
+
+    /* Celular: cada fila de piezas es una tarjeta de 2 columnas con la
+       etiqueta arriba de cada campo; medidas a todo el ancho y el botón de
+       borrar arriba a la derecha. */
+    @media (max-width: 767.98px) {
+      max-width: calc(100% - 16px);
+      max-height: calc(100vh - 16px);
+      overflow-y: auto;
+      padding: 13px 16px 18px;
+      .formulario .tabla thead {
+        display: none;
+      }
+      .formulario .tabla,
+      .formulario .tabla tbody {
+        display: block;
+      }
+      .formulario .tabla tr {
+        position: relative;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 10px;
+        padding: 12px;
+        margin-bottom: 10px;
+        border: 1px solid ${({ theme }) => theme.color2};
+        border-radius: 12px;
+      }
+      .formulario .tabla td {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 0;
+        min-width: 0;
+      }
+      .formulario .tabla input {
+        box-sizing: border-box;
+        min-width: 0;
+      }
+      .formulario .tabla td[data-title]::before {
+        content: attr(data-title);
+        font-size: 12px;
+        opacity: 0.7;
+      }
+      .formulario .tabla td.medidas {
+        grid-column: 1 / -1;
+      }
+      .formulario .tabla td.borrar {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+      }
+      .footer {
+        flex-wrap: wrap;
+      }
     }
     .preview {
       display: flex;
