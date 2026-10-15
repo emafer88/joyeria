@@ -6,6 +6,8 @@ export const useAuthStore = create((set) => ({
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
+        // Volver al mismo dominio desde el que se entró (localhost o Cloudflare)
+        redirectTo: window.location.origin,
         queryParams: { prompt: "select_account" },
       },
     });
