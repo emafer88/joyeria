@@ -14,6 +14,7 @@ import {
 import { FaArrowsAltV } from "react-icons/fa";
 import { useActualizarEstadoEnvioMutation } from "../../../tanstack/PedidosEcommerceStack";
 import { DetallePedidoModal } from "../PedidosDesign/DetallePedidoModal";
+import { tablaTarjetasMovil } from "../../../styles/tablaMovil";
 
 const METODOS_PAGO = {
   credit_card: "Tarjeta de crédito",
@@ -73,6 +74,7 @@ export function TablaPedidosEcommerce({ data }) {
     {
       id: "destinatario",
       header: "Destinatario",
+      meta: { clase: "celda-principal" },
       cell: (info) => (
         <div className="destinatario">
           <span className="nombre">{info.row.original.destinatario ?? "-"}</span>
@@ -126,6 +128,7 @@ export function TablaPedidosEcommerce({ data }) {
     {
       id: "detalle",
       header: "",
+      meta: { clase: "celda-acciones" },
       cell: (info) => (
         <BtnDetalle
           type="button"
@@ -181,7 +184,16 @@ export function TablaPedidosEcommerce({ data }) {
             {table.getRowModel().rows.map((item) => (
               <tr key={item.id}>
                 {item.getVisibleCells().map((cell) => (
-                  <td key={cell.id}>
+                  <td
+                    key={cell.id}
+                    className={cell.column.columnDef.meta?.clase}
+                    // Etiqueta de la celda en la vista de tarjetas (celular)
+                    data-title={
+                      cell.column.columnDef.meta?.clase
+                        ? undefined
+                        : cell.column.columnDef.header
+                    }
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
@@ -289,6 +301,8 @@ const Container = styled.div`
     opacity: 0.75;
     font-size: 12.5px;
   }
+
+  ${tablaTarjetasMovil}
 `;
 
 const EstadoSelect = styled.div`
