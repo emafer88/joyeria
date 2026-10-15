@@ -101,7 +101,9 @@ export function Layout({ children }) {
 }
 const Container = styled.main`
   display: grid;
-  grid-template-columns: 1fr;
+  /* minmax(0, …): el contenido ancho (tablas) hace scroll dentro de su caja
+     en vez de ensanchar toda la página en el celular. */
+  grid-template-columns: minmax(0, 1fr);
   transition: 0.1s ease-in-out;
   color: ${({ theme }) => theme.text};
   .contentSidebar {
@@ -113,9 +115,9 @@ const Container = styled.main`
     /* background-color: rgba(53, 219, 11, 0.5); */
   }
   @media ${Device.tablet} {
-    grid-template-columns: 88px 1fr;
+    grid-template-columns: 88px minmax(0, 1fr);
     &.active {
-      grid-template-columns: 260px 1fr;
+      grid-template-columns: 260px minmax(0, 1fr);
     }
     .contentSidebar {
       display: initial;
@@ -134,6 +136,7 @@ const Containerbody = styled.section`
   /* background-color: rgba(231, 13, 136, 0.5); */
   grid-column: 1;
   width: 100%;
+  min-width: 0;
 
   @media ${Device.tablet} {
     margin-top: 0;

@@ -187,22 +187,36 @@ const Container = styled.div`
     flex: 1;
     display: grid;
     grid-template:
-      "area1" 60px
-      "area2" 60px
+      "area1" minmax(60px, auto)
+      "area2" minmax(60px, auto)
       "main" auto;
   }
   .grid-productos .area1 {
     grid-area: area1;
     display: flex;
+    flex-wrap: wrap;
     justify-content: end;
     align-items: center;
-    gap: 15px;
+    gap: 10px 15px;
   }
   .grid-productos .area2 {
     grid-area: area2;
     display: flex;
     justify-content: end;
     align-items: center;
+  }
+  @media (max-width: 767.98px) {
+    .grid-productos .area1 {
+      justify-content: flex-start;
+      padding-bottom: 8px;
+    }
+    .grid-productos .area1 h1,
+    .grid-productos .area1 > :first-child {
+      flex-basis: 100%;
+    }
+    .grid-productos .area2 > * {
+      width: 100%;
+    }
   }
   .grid-productos .main {
     grid-area: main;

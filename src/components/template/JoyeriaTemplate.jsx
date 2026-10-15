@@ -101,12 +101,18 @@ const Container = styled.div`
   }
   .area1 {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-    gap: 15px;
+    gap: 10px 15px;
   }
   .area2 {
     display: flex;
     align-items: center;
+  }
+  @media (max-width: 767.98px) {
+    .area2 > * {
+      width: 100%;
+    }
   }
 `;

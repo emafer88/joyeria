@@ -74,7 +74,8 @@ export function InventarioProductos() {
             Producto: <strong>{productosItemSelect?.nombre}</strong>{" "}
           </span>
         )}
-        |<Title>Inventario</Title>
+        <span className="sep">|</span>
+        <Title>Inventario</Title>
         <Btn1 funcion={nuevoRegistro} titulo="Registrar" />
       </section>
       <section className="area2">
@@ -99,16 +100,31 @@ export function InventarioProductos() {
 const Container = styled.div`
   display: grid;
   grid-template:
-    "area1" 60px
-    "area2" 60px
+    "area1" minmax(60px, auto)
+    "area2" minmax(60px, auto)
     "main" auto;
   gap: 8px;
   .area1 {
     grid-area: area1;
     display: flex;
+    flex-wrap: wrap;
     justify-content: end;
     align-items: center;
-    gap: 15px;
+    gap: 10px 15px;
+  }
+  @media (max-width: 767.98px) {
+    .area1 {
+      justify-content: space-between;
+    }
+    .area1 > span:first-child {
+      flex-basis: 100%;
+    }
+    .area1 .sep {
+      display: none;
+    }
+    .area2 > * {
+      width: 100%;
+    }
   }
   .area2 {
     grid-area: area2;
