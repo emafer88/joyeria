@@ -57,7 +57,7 @@ export function DisenosML() {
             <tbody>
               {data.map((d) => (
                 <tr key={d.id_producto}>
-                  <td>
+                  <td className="celda-principal">
                     <div className="principal">{d.nombre}</div>
                     {d.publicaciones_con_error > 0 && (
                       <div className="error">
@@ -70,10 +70,10 @@ export function DisenosML() {
                       </div>
                     )}
                   </td>
-                  <td className="suave">{CATEGORIAS_ML[d.ml_category_id]?.label ?? d.ml_category_id}</td>
-                  <td>{d.piezas_disponibles}</td>
-                  <td>{d.publicaciones_activas}</td>
-                  <td>
+                  <td className="suave" data-title="Categoría">{CATEGORIAS_ML[d.ml_category_id]?.label ?? d.ml_category_id}</td>
+                  <td data-title="Piezas disponibles">{d.piezas_disponibles}</td>
+                  <td data-title="Publicaciones activas">{d.publicaciones_activas}</td>
+                  <td data-title="Estado">
                     <Chip
                       estado={d.publicar ? "active" : "paused"}
                       estados={{
@@ -82,7 +82,7 @@ export function DisenosML() {
                       }}
                     />
                   </td>
-                  <td>
+                  <td className="celda-acciones">
                     <div className="botones">
                       {/* Pausar es inmediato; publicar pasa por el formulario
                           para revisar la vista previa (fotos y precios). */}
@@ -136,22 +136,22 @@ export function PublicacionesML() {
           <tbody>
             {data.map((p) => (
               <tr key={p.id}>
-                <td>
+                <td className="celda-principal">
                   <div className="principal">{p.nombre}</div>
                   <div className="suave">{p.modelo}</div>
                   {p.ultimo_error && <div className="error">{p.ultimo_error}</div>}
                 </td>
-                <td>
+                <td data-title="Estado">
                   {p.estado_ml ? (
                     <Chip estado={p.estado_ml} estados={ESTADOS_PUBLICACION} />
                   ) : (
                     <span className="suave">Creándose</span>
                   )}
                 </td>
-                <td>{p.cantidad_publicada ?? "-"}</td>
-                <td className="monto">{formatoPrecio(p.precio_publicado)}</td>
-                <td className="suave">{formatoFecha(p.sincronizado_en)}</td>
-                <td>
+                <td data-title="Stock">{p.cantidad_publicada ?? "-"}</td>
+                <td className="monto" data-title="Precio">{formatoPrecio(p.precio_publicado)}</td>
+                <td className="suave" data-title="Sincronizada">{formatoFecha(p.sincronizado_en)}</td>
+                <td className="celda-acciones">
                   {p.ml_item_id && (
                     <a href={linkPublicacion(p.ml_item_id)} target="_blank" rel="noreferrer">
                       Ver en ML
@@ -188,27 +188,27 @@ export function OrdenesML() {
           <tbody>
             {data.map((o) => (
               <tr key={o.ml_order_id}>
-                <td className="suave">{formatoFecha(o.created_at)}</td>
-                <td>
+                <td className="suave" data-title="Fecha">{formatoFecha(o.created_at)}</td>
+                <td className="celda-principal">
                   <div className="principal">{o.ml_order_id}</div>
                   <div className="suave">{o.comprador ?? "-"}</div>
                   {o.ultimo_error && <div className="error">{o.ultimo_error}</div>}
                 </td>
-                <td className="monto">{formatoPrecio(o.total)}</td>
-                <td>
+                <td className="monto" data-title="Total">{formatoPrecio(o.total)}</td>
+                <td data-title="En ML">
                   <Chip estado={o.estado_ml} estados={ESTADOS_ORDEN} />
                 </td>
-                <td>
+                <td data-title="Venta">
                   {o.nro_comprobante ? (
-                    <>
+                    <div>
                       <div className="principal">{o.nro_comprobante}</div>
                       <div className="suave">{o.estado_venta}</div>
-                    </>
+                    </div>
                   ) : (
                     <span className="suave">Sin venta</span>
                   )}
                 </td>
-                <td>
+                <td className="celda-acciones">
                   <a href={linkOrden(o)} target="_blank" rel="noreferrer">
                     Ver en ML
                   </a>

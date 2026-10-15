@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { tablaTarjetasMovil } from "../../../styles/tablaMovil";
 
 // Atributos obligatorios por categoría de ML (consultados en la API, ver
 // README de joyeria-mercadolibre). SIZE no va acá: ml-sincronizar lo agrega
@@ -154,6 +155,7 @@ export const TablaML = styled.div`
       text-decoration: underline;
     }
   }
+  ${tablaTarjetasMovil}
 `;
 
 export const BtnPastilla = styled.button`
