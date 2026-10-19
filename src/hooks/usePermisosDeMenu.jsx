@@ -36,5 +36,12 @@ export function usePermisosDeMenu() {
     ["superadmin", "admin"].includes(datausuarios?.roles?.nombre) ||
     !!dataPermisosGlobales?.some((item) => item.modulos?.nombre === "Ver costos");
 
-  return { esSuperAdmin, puedeVer, veCostos };
+  // Mismo criterio que anular_venta() en la base.
+  const puedeCancelarVentas =
+    ["superadmin", "admin"].includes(datausuarios?.roles?.nombre) ||
+    !!dataPermisosGlobales?.some(
+      (item) => item.modulos?.nombre === "Cancelar ventas"
+    );
+
+  return { esSuperAdmin, puedeVer, veCostos, puedeCancelarVentas };
 }

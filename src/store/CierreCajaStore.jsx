@@ -15,6 +15,9 @@ export const useCierreCajaStore = create((set) => ({
 
   stateCierreCaja: false,
   setStateCierraCaja: (p) => set({ stateCierreCaja: p }),
+
+  stateVentasTurno: false,
+  setStateVentasTurno: (p) => set({ stateVentasTurno: p }),
   tipoRegistro: "",
   setTipoRegistro: (p) => set({ tipoRegistro: p }),
   dataCierreCaja: null,

@@ -56,3 +56,48 @@ export async function ConfirmarVenta(p) {
   }
   return data;
 }
+
+// Ventas cobradas (y canceladas) del turno de caja abierto, para el panel
+// "Ventas del turno" del POS.
+export async function MostrarVentasTurno(p) {
+  const { data, error } = await supabase
+    .from(tabla)
+    .select(
+      `id, nro_comprobante, fecha, monto_total, sub_total, total_impuestos,
+      vuelto, estado, motivo_anulacion, anulada_en,
+      cajero:usuarios!ventas_id_usuario_fkey(nombres),
+      cliente:clientes_proveedores(nombres, direccion, identificador_fiscal),
+      pagos:movimientos_caja(tipo_movimiento, monto, vuelto, metodos_pago(nombre))`
+    )
+    .eq("id_cierre_caja", p.id_cierre_caja)
+    .in("estado", ["confirmada", "anulada"])
+    .order("id", { ascending: false });
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data;
+}
+
+// Nombre del comprobante (Ticket, Boleta…) según la serie del número.
+export async function MostrarNombresComprobante(p) {
+  const { data, error } = await supabase
+    .from("serializacion_comprobantes")
+    .select("serie, tipo_comprobantes(nombre)")
+    .eq("sucursal_id", p.id_sucursal);
+  if (error) {
+    throw new Error(error.message);
+  }
+  return Object.fromEntries(
+    (data ?? []).map((s) => [s.serie, s.tipo_comprobantes?.nombre])
+  );
+}
+
+export async function AnularVenta(p) {
+  const { error } = await supabase.rpc("anular_venta", {
+    _id_venta: p.id_venta,
+    _motivo: p.motivo,
+  });
+  if (error) {
+    throw new Error(error.message);
+  }
+}
