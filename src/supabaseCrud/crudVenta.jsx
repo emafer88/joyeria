@@ -105,19 +105,19 @@ export async function AnularVenta(p) {
   return data;
 }
 
-// Clave numérica con la que un gerente autoriza cancelaciones.
-export async function TengoClaveAutorizacion() {
-  const { data, error } = await supabase.rpc("tengo_clave_autorizacion");
+// Clave numérica con la que un gerente autoriza cancelaciones. Solo la del
+// usuario actual; null si todavía no tiene.
+export async function MiClaveAutorizacion() {
+  const { data, error } = await supabase.rpc("mi_clave_autorizacion");
   if (error) {
     throw new Error(error.message);
   }
-  return !!data;
+  return data ?? null;
 }
 
 export async function GuardarClaveAutorizacion(p) {
   const { error } = await supabase.rpc("guardar_clave_autorizacion", {
-    _clave_nueva: p.clave_nueva,
-    _clave_actual: p.clave_actual || null,
+    _clave: p.clave,
   });
   if (error) {
     throw new Error(error.message);

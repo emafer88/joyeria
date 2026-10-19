@@ -1,39 +1,46 @@
 import { useState } from "react";
 import styled from "styled-components";
+import { Icon } from "@iconify/react";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Btn1 } from "../../moleculas/Btn1";
 import { InputText2 } from "./InputText2";
 import {
   GuardarClaveAutorizacion,
-  TengoClaveAutorizacion,
+  MiClaveAutorizacion,
 } from "../../../supabaseCrud/crudVenta";
 
 const SOLO_NUMEROS = /^[0-9]{4,8}$/;
 
 /**
  * Mi perfil: la clave numérica con la que este usuario autoriza en el POS la
- * cancelación de ventas. Solo se muestra a quien puede autorizar.
+ * cancelación de ventas. Se muestra oculta, con botón para verla y para
+ * cambiarla. Solo aparece a quien puede autorizar.
  */
 export function ClaveAutorizacion() {
   const queryClient = useQueryClient();
-  const { data: tieneClave, isLoading } = useQuery({
-    queryKey: ["tengo clave autorizacion"],
-    queryFn: TengoClaveAutorizacion,
+  const { data: clave, isLoading } = useQuery({
+    queryKey: ["mi clave autorizacion"],
+    queryFn: MiClaveAutorizacion,
   });
-  const [actual, setActual] = useState("");
+  const [visible, setVisible] = useState(false);
+  const [editando, setEditando] = useState(false);
   const [nueva, setNueva] = useState("");
   const [confirmar, setConfirmar] = useState("");
+
+  const cerrarEdicion = () => {
+    setEditando(false);
+    setNueva("");
+    setConfirmar("");
+  };
 
   const { mutate, isPending } = useMutation({
     mutationFn: GuardarClaveAutorizacion,
     onError: (e) => toast.error(e.message),
     onSuccess: () => {
       toast.success("Clave de autorización guardada");
-      setActual("");
-      setNueva("");
-      setConfirmar("");
-      queryClient.invalidateQueries({ queryKey: ["tengo clave autorizacion"] });
+      cerrarEdicion();
+      queryClient.invalidateQueries({ queryKey: ["mi clave autorizacion"] });
     },
   });
 
@@ -45,7 +52,7 @@ export function ClaveAutorizacion() {
     if (nueva !== confirmar) {
       return toast.error("Las claves no coinciden");
     }
-    mutate({ clave_nueva: nueva, clave_actual: actual });
+    mutate({ clave: nueva });
   }
 
   // Solo dígitos, máximo 8.
@@ -53,62 +60,76 @@ export function ClaveAutorizacion() {
     set(e.target.value.replace(/[^0-9]/g, "").slice(0, 8));
 
   if (isLoading) return null;
+  const mostrarFormulario = editando || !clave;
   return (
     <Container onSubmit={guardar}>
       <h2>Clave de autorización</h2>
       <p className="ayuda">
         Se pide en el punto de venta para cancelar una venta cobrada. Solo
-        números, de 4 a 8.{" "}
-        {tieneClave ? (
-          <strong>Ya tienes una clave.</strong>
-        ) : (
-          <strong>Todavía no tienes clave.</strong>
-        )}
+        números, de 4 a 8.
       </p>
-      {tieneClave && (
-        <InputText2>
-          <input
-            className="form__field"
-            type="password"
-            inputMode="numeric"
-            autoComplete="off"
-            placeholder="clave actual"
-            value={actual}
-            onChange={numeros(setActual)}
-          />
-        </InputText2>
+
+      {clave && (
+        <div className="actual">
+          <span className="valor">
+            {visible ? clave : "•".repeat(clave.length)}
+          </span>
+          <button
+            type="button"
+            title={visible ? "Ocultar clave" : "Mostrar clave"}
+            onClick={() => setVisible((x) => !x)}
+          >
+            <Icon icon={visible ? "mdi:eye-off-outline" : "mdi:eye-outline"} />
+            {visible ? "Ocultar" : "Mostrar"}
+          </button>
+          {!editando && (
+            <button type="button" onClick={() => setEditando(true)}>
+              <Icon icon="mdi:pencil-outline" /> Cambiar
+            </button>
+          )}
+        </div>
       )}
-      <InputText2>
-        <input
-          className="form__field"
-          type="password"
-          inputMode="numeric"
-          autoComplete="off"
-          placeholder={tieneClave ? "clave nueva" : "clave"}
-          value={nueva}
-          onChange={numeros(setNueva)}
-        />
-      </InputText2>
-      <InputText2>
-        <input
-          className="form__field"
-          type="password"
-          inputMode="numeric"
-          autoComplete="off"
-          placeholder="repite la clave"
-          value={confirmar}
-          onChange={numeros(setConfirmar)}
-        />
-      </InputText2>
-      <Btn1
-        type="submit"
-        bgcolor="#0930bb"
-        color="#fff"
-        disabled={isPending}
-        titulo={
-          isPending ? "Guardando..." : tieneClave ? "CAMBIAR CLAVE" : "GUARDAR CLAVE"
-        }
-      />
+
+      {mostrarFormulario && (
+        <>
+          <InputText2>
+            <input
+              className="form__field"
+              type="password"
+              inputMode="numeric"
+              autoComplete="off"
+              placeholder={clave ? "clave nueva" : "clave"}
+              value={nueva}
+              onChange={numeros(setNueva)}
+            />
+          </InputText2>
+          <InputText2>
+            <input
+              className="form__field"
+              type="password"
+              inputMode="numeric"
+              autoComplete="off"
+              placeholder="repite la clave"
+              value={confirmar}
+              onChange={numeros(setConfirmar)}
+            />
+          </InputText2>
+          <div className="botones">
+            <Btn1
+              type="submit"
+              bgcolor="#0930bb"
+              color="#fff"
+              disabled={isPending}
+              titulo={isPending ? "Guardando..." : "GUARDAR CLAVE"}
+            />
+            {editando && (
+              <button type="button" className="cancelar" onClick={cerrarEdicion}>
+                Cancelar
+              </button>
+            )}
+          </div>
+        </>
+      )}
     </Container>
   );
 }
@@ -130,5 +151,36 @@ const Container = styled.form`
     margin: 0;
     color: inherit;
     font-weight: 400;
+  }
+  .actual {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .valor {
+    font-family: monospace;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    min-width: 120px;
+  }
+  .actual button,
+  .cancelar {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid ${({ theme }) => theme.color2};
+    background: none;
+    color: ${({ theme }) => theme.text};
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .botones {
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
 `;
