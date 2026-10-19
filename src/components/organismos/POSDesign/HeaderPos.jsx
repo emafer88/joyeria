@@ -162,10 +162,12 @@ export function HeaderPos() {
   const { mutate: mutationInsertarVentas } = useMutation({
     mutationKey: ["insertar ventas"],
     mutationFn: insertarventas,
-    onError: (error) => {
+    onError: (error, cantidadGranel) => {
       toast.error(`Error: ${error.message}`);
       queryClient.invalidateQueries(["mostrar Stock XAlmacenes YProducto"]);
-      if (dataStockXAlmacenesYProducto) {
+      // El modal de otros almacenes agrega por unidades; a granel (kg) solo
+      // se avisa que no alcanza el stock.
+      if (dataStockXAlmacenesYProducto && cantidadGranel == null) {
         setStateModal(true);
       }
     },

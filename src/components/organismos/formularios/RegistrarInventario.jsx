@@ -161,6 +161,7 @@ export function RegistrarInventario() {
                     <input
                       className="form__field"
                       type="number"
+                      step="0.001"
                       {...register("cantidad", {
                         required: true,
                       })}
@@ -177,6 +178,7 @@ export function RegistrarInventario() {
                       <input
                         className="form__field"
                         type="number"
+                        step="0.01"
                         {...register("precio_compra", {
                           required: true,
                         })}
@@ -193,6 +195,7 @@ export function RegistrarInventario() {
                     <input
                       className="form__field"
                       type="number"
+                      step="0.01"
                       {...register("precio_venta", {
                         required: true,
                       })}
