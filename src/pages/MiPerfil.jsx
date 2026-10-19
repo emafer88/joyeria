@@ -9,9 +9,12 @@ import { slideBackground } from "../styles/keyframes";
 import { Toaster } from "sonner";
 import { useUsuariosStore } from "../store/UsuariosStore";
 import { useEditarPerfilMutation } from "../tanstack/UsuariosStack";
+import { usePermisosDeMenu } from "../hooks/usePermisosDeMenu";
+import { ClaveAutorizacion } from "../components/organismos/formularios/ClaveAutorizacion";
 export const MiPerfil = () => {
   const { datausuarios } = useUsuariosStore();
   const {mutate,isPending} = useEditarPerfilMutation()
+  const { puedeAutorizarCancelaciones } = usePermisosDeMenu();
   const {
     register,
     formState: { errors },
@@ -88,6 +91,7 @@ export const MiPerfil = () => {
             <br></br>
             <Btn1 bgcolor="#0930bb" color="#fff" titulo="GUARDAR CAMBIOS" />
           </form>
+          {puedeAutorizarCancelaciones && <ClaveAutorizacion />}
         </>
       )}
     </Container>

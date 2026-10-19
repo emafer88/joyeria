@@ -92,10 +92,32 @@ export async function MostrarNombresComprobante(p) {
   );
 }
 
+// Devuelve "ok", "clave_incorrecta" o "bloqueado".
 export async function AnularVenta(p) {
-  const { error } = await supabase.rpc("anular_venta", {
+  const { data, error } = await supabase.rpc("anular_venta", {
     _id_venta: p.id_venta,
     _motivo: p.motivo,
+    _clave: p.clave,
+  });
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data;
+}
+
+// Clave numérica con la que un gerente autoriza cancelaciones.
+export async function TengoClaveAutorizacion() {
+  const { data, error } = await supabase.rpc("tengo_clave_autorizacion");
+  if (error) {
+    throw new Error(error.message);
+  }
+  return !!data;
+}
+
+export async function GuardarClaveAutorizacion(p) {
+  const { error } = await supabase.rpc("guardar_clave_autorizacion", {
+    _clave_nueva: p.clave_nueva,
+    _clave_actual: p.clave_actual || null,
   });
   if (error) {
     throw new Error(error.message);

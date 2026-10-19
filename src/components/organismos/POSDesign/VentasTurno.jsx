@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCierreCajaStore } from "../../../store/CierreCajaStore";
 import { useEmpresaStore } from "../../../store/EmpresaStore";
-import { usePermisosDeMenu } from "../../../hooks/usePermisosDeMenu";
 import {
   AnularVenta,
   MostrarNombresComprobante,
@@ -38,7 +37,6 @@ const pagosDe = (venta) =>
 export function VentasTurno() {
   const { dataCierreCaja, setStateVentasTurno } = useCierreCajaStore();
   const { dataempresa } = useEmpresaStore();
-  const { puedeCancelarVentas } = usePermisosDeMenu();
   const queryClient = useQueryClient();
   const [imprimiendo, setImprimiendo] = useState(null);
   const idCierre = dataCierreCaja?.id;
@@ -84,27 +82,50 @@ export function VentasTurno() {
   const { mutate: anular, isPending: anulando } = useMutation({
     mutationFn: AnularVenta,
     onError: (e) => toast.error(e.message),
-    onSuccess: () => {
+    onSuccess: (resultado) => {
+      if (resultado === "clave_incorrecta") {
+        toast.error("Clave de autorización incorrecta");
+        return;
+      }
+      if (resultado === "bloqueado") {
+        toast.error(
+          "Demasiados intentos con clave incorrecta. Espera 15 minutos."
+        );
+        return;
+      }
       toast.success("Venta cancelada: se regresó el inventario y el dinero");
       queryClient.invalidateQueries({ queryKey: ["ventas del turno"] });
       queryClient.invalidateQueries({ queryKey: ["mostrar existencias"] });
     },
   });
 
+  // Cualquiera la pide; la autoriza la clave numérica de un gerente.
   async function cancelar(venta) {
-    const { value: motivo, isConfirmed } = await Swal.fire({
+    const { value, isConfirmed } = await Swal.fire({
       title: `¿Cancelar la venta ${venta.nro_comprobante}?`,
-      html: `Se devuelven ${dinero(venta.monto_total)} de la caja y los productos regresan al inventario.`,
-      input: "text",
-      inputPlaceholder: "Motivo (ej. el cliente devolvió la pieza)",
-      inputValidator: (v) => (!v?.trim() ? "Escribe el motivo" : undefined),
+      html: `
+        <p>Se devuelven ${dinero(venta.monto_total)} de la caja y los productos regresan al inventario.</p>
+        <input id="swal-motivo" class="swal2-input" placeholder="Motivo (ej. el cliente devolvió la pieza)">
+        <input id="swal-clave" class="swal2-input" type="password" inputmode="numeric"
+               autocomplete="off" maxlength="8" placeholder="Clave de autorización">`,
+      focusConfirm: false,
+      preConfirm: () => {
+        const motivo = document.getElementById("swal-motivo").value.trim();
+        const clave = document.getElementById("swal-clave").value.trim();
+        if (!motivo) return Swal.showValidationMessage("Escribe el motivo");
+        if (!/^[0-9]{4,8}$/.test(clave))
+          return Swal.showValidationMessage(
+            "La clave de autorización son de 4 a 8 números"
+          );
+        return { motivo, clave };
+      },
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonText: "No",
       confirmButtonText: "Sí, cancelar venta",
     });
-    if (isConfirmed) anular({ id_venta: venta.id, motivo: motivo.trim() });
+    if (isConfirmed) anular({ id_venta: venta.id, ...value });
   }
 
   return (
@@ -181,7 +202,7 @@ export function VentasTurno() {
                             <Icon icon="mdi:printer-outline" />
                             {imprimiendo === v.id ? "…" : "Reimprimir"}
                           </button>
-                          {!anulada && puedeCancelarVentas && (
+                          {!anulada && (
                             <button
                               className="peligro"
                               onClick={() => cancelar(v)}
