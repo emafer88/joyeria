@@ -245,3 +245,27 @@ export async function ReordenarImagenesProducto(imagenes) {
       .eq("id", img.id);
   }
 }
+
+// ---- Visible en la tienda en línea (productos.visible_ecommerce) ----
+
+export async function MostrarVisibleEcommerce(idProducto) {
+  const { data, error } = await supabase
+    .from("productos_v")
+    .select("visible_ecommerce")
+    .eq("id", idProducto)
+    .maybeSingle();
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data?.visible_ecommerce ?? true;
+}
+
+export async function EditarVisibleEcommerce(idProducto, visible) {
+  const { error } = await supabase
+    .from("productos")
+    .update({ visible_ecommerce: visible })
+    .eq("id", idProducto);
+  if (error) {
+    throw new Error(error.message);
+  }
+}
