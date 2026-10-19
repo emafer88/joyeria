@@ -28,6 +28,8 @@ import {
   useAgregarPiezaCarritoMutation,
 } from "../../../tanstack/JoyeriaStack";
 import { PosBuscarPieza } from "../../../supabaseCrud/crudJoyeria";
+import { esGranel } from "../../../utils/granel";
+import { ModalPesoGranel } from "./ModalPesoGranel";
 
 
 export function HeaderPos() {
@@ -35,6 +37,8 @@ export function HeaderPos() {
   const [cantidadInput, setCantidadInput] = useState(1);
   const [stateTeclado, setStateTeclado] = useState(false);
   const [stateListaproductos, setStateListaproductos] = useState(false);
+  // Producto a granel esperando que se capture su peso.
+  const [productoGranel, setProductoGranel] = useState(null);
   const { setBuscador, dataProductos, selectProductos, buscador } =
     useProductosStore();
   
@@ -82,7 +86,8 @@ export function HeaderPos() {
     }
   }
 
-  async function insertarventas() {
+  // cantidad: los kg de un producto a granel; si no viene, se usa el input.
+  async function insertarventas(cantidad) {
     if (idventa === 0) {
       const pventas = {
         fecha: fechaactual,
@@ -94,10 +99,10 @@ export function HeaderPos() {
 
       const result = await insertarVentas(pventas);
       if (result?.id > 0) {
-        await insertarDVentas(result?.id);
+        await insertarDVentas(result?.id, cantidad);
       }
     } else {
-      await insertarDVentas(idventa);
+      await insertarDVentas(idventa, cantidad);
     }
     setBuscador("");
     buscadorRef.current.focus();
@@ -116,15 +121,34 @@ export function HeaderPos() {
       });
       return;
     }
-    selectProductos(item);
+    agregarProducto(item);
+  }
+  // Los productos a granel primero piden el peso; los demás se agregan directo.
+  function agregarProducto(producto) {
+    if (esGranel(producto)) {
+      setStateListaproductos(false);
+      setProductoGranel(producto);
+      return;
+    }
+    selectProductos(producto);
     mutationInsertarVentas();
   }
-  async function insertarDVentas(idventa) {
+  function confirmarPeso(kg) {
+    selectProductos(productoGranel);
+    setProductoGranel(null);
+    mutationInsertarVentas(kg);
+  }
+  function cerrarModalPeso() {
+    setProductoGranel(null);
+    setBuscador("");
+    buscadorRef.current?.focus();
+  }
+  async function insertarDVentas(idventa, cantidad) {
     const productosItemSelect =
       useProductosStore.getState().productosItemSelect;
     const pDetalleVentas = {
       _id_venta: idventa,
-      _cantidad: parseFloat(cantidadInput) || 1,
+      _cantidad: cantidad ?? (parseFloat(cantidadInput) || 1),
       _precio_venta: productosItemSelect.precio_venta,
       _descripcion: productosItemSelect.nombre,
       _id_producto: productosItemSelect.id,
@@ -172,8 +196,7 @@ export function HeaderPos() {
           (p) => p.codigo_barras === texto
         );
         if (productoEncontrado) {
-          selectProductos(productoEncontrado);
-          mutationInsertarVentas();
+          agregarProducto(productoEncontrado);
           setBuscador("");
           return;
         }
@@ -218,6 +241,13 @@ export function HeaderPos() {
   }, [buscador]);
   return (
     <Header>
+      {productoGranel && (
+        <ModalPesoGranel
+          producto={productoGranel}
+          onConfirmar={confirmarPeso}
+          onCerrar={cerrarModalPeso}
+        />
+      )}
       <ContentSucursal>
       <div>
          <strong>SUCURSAL:&nbsp; </strong>{" "}

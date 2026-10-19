@@ -17,6 +17,7 @@ import { useState } from "react";
 import { Device } from "../../../styles/breakpoints";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { esGranel, formatearKg } from "../../../utils/granel";
 export function AreaDetalleventaPos() {
 
   const { dataempresa } = useEmpresaStore();
@@ -85,12 +86,17 @@ export function AreaDetalleventaPos() {
         // cantidad siempre es 1 (no se puede vender 2 veces el mismo código),
         // así que los controles de cantidad quedan deshabilitados.
         const esPieza = item.id_pieza != null;
+        // A granel la cantidad son kg: +1/-1 no tiene sentido, el peso se
+        // corrige con el lápiz.
+        const granel = esGranel(item.productos);
+        const sinBotones = esPieza || granel;
+        const etiquetaPrecio = granel ? "precio kg:" : "precio unit:";
         return (
           <Itemventa key={index}>
             <article className="contentdescripcion">
               <span className="descripcion">{item.descripcion}</span>
               <span className="importe">
-                <strong>precio unit:</strong>
+                <strong>{etiquetaPrecio}</strong>
                 🪵
                 {FormatearNumeroDinero(
                   item.precio_venta,
@@ -100,7 +106,7 @@ export function AreaDetalleventaPos() {
               </span>
               <ContentTotalResponsive>
                 <span className="importerespo">
-                  <strong>precio unit:</strong>
+                  <strong>{etiquetaPrecio}</strong>
                   🪵
                   {FormatearNumeroDinero(
                     item.precio_venta,
@@ -129,9 +135,9 @@ export function AreaDetalleventaPos() {
             </article>
             <article className="contentbtn">
               <Btn1
-                disabled={esPieza}
+                disabled={sinBotones}
                 funcion={
-                  esPieza
+                  sinBotones
                     ? undefined
                     : () =>
                         mutateEditarCantidadDV({
@@ -152,12 +158,15 @@ export function AreaDetalleventaPos() {
                     onBlur={() => handleInputBlur(item)}
                     onKeyDown={(e) => handleKeyDown(e, item)}
                     className="form__field"
-                    min="1"
+                    min={granel ? "0" : "1"}
+                    step={granel ? "0.001" : "1"}
                   />
                 </InputText2>
               ) : (
                 <>
-                  <span className="cantidad">{item.cantidad}</span>
+                  <span className="cantidad">
+                    {granel ? formatearKg(item.cantidad) : item.cantidad}
+                  </span>
                   <Icon
                     icon="mdi:pencil"
                     onClick={
@@ -171,9 +180,9 @@ export function AreaDetalleventaPos() {
               )}
 
               <Btn1
-                disabled={esPieza}
+                disabled={sinBotones}
                 funcion={
-                  esPieza
+                  sinBotones
                     ? undefined
                     : () =>
                         mutateEditarCantidadDV({
