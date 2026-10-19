@@ -1,5 +1,6 @@
 import { numeroALetras, urlToBase64 } from "../utils/Conversiones";
 import createPdf from "../utils/CreatePdf";
+import { esGranel } from "../utils/granel";
 const TicketVenta = async (output, data) => {
   const fechaCompleta = data.dataventas?.fecha;
   const fechaObj = new Date(fechaCompleta);
@@ -48,14 +49,28 @@ const TicketVenta = async (output, data) => {
         {},
       ],
       [
-        { text: item.cantidad, style: "tProductsBody", alignment: "center" },
-        { text: "unidad", style: "tProductsBody", alignment: "center" },
+        {
+          text: esGranel(item.productos)
+            ? Number(item.cantidad).toFixed(3)
+            : item.cantidad,
+          style: "tProductsBody",
+          alignment: "center",
+        },
+        {
+          text: esGranel(item.productos) ? "kg" : "unidad",
+          style: "tProductsBody",
+          alignment: "center",
+        },
         {
           text: item.precio_venta,
           style: "tProductsBody",
           alignment: "right",
         },
-        { text: item.total, style: "tProductsBody", alignment: "right" },
+        {
+          text: Number(item.total).toFixed(2),
+          style: "tProductsBody",
+          alignment: "right",
+        },
       ],
     ]),
   ];

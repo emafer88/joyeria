@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { RegistrarInventario } from "../formularios/RegistrarInventario";
-import { TablaInventarios } from "../tablas/TablaInventarios";
+import { TablaExistencias } from "./TablaExistencias";
+import { MovimientosProducto } from "./MovimientosProducto";
 import { useQuery } from "@tanstack/react-query";
 
 import { useMovStockStore } from "../../../store/MovStockStore";
@@ -18,121 +19,144 @@ import { useGlobalStore } from "../../../store/GlobalStore";
  * catálogo, igual que Joyería tiene su propio Catálogo/Inventario.
  */
 export function InventarioProductos() {
-  const { mostrarMovStock } = useMovStockStore();
+  const { mostrarMovStock, setTipo } = useMovStockStore();
   const { dataempresa } = useEmpresaStore();
   const { buscarProductos, buscador } = useProductosStore();
-  const { productosItemSelect, setBuscador, selectProductos } =
-    useProductosStore();
-  const [openRegistro, SetopenRegistro] = useState(false);
-  const { setStateClose, setAccion, stateClose, accion } = useGlobalStore();
+  const { setBuscador, selectProductos } = useProductosStore();
+  const { setStateClose, setAccion, stateClose } = useGlobalStore();
 
-  const [dataSelect, setdataSelect] = useState([]);
-  const [isExploding, setIsExploding] = useState(false);
-  const {
-    data: dataproductos,
-    isLoading: isLoadingBuscarProductos,
-    error,
-  } = useQuery({
+  // null = lista de existencias; un producto = sus movimientos.
+  const [productoMovs, setProductoMovs] = useState(null);
+  const { data: dataproductos } = useQuery({
     queryKey: ["buscar productos", buscador],
     queryFn: () =>
       buscarProductos({
         id_empresa: dataempresa?.id,
         buscador: buscador,
       }),
-    enabled: !!dataempresa,
+    enabled: !!dataempresa && !!productoMovs,
   });
 
-  const { data, isLoading } = useQuery({
+  const { data } = useQuery({
     queryKey: [
       "mostrar movimientos de stock",
       {
         id_empresa: dataempresa?.id,
-        id_producto: productosItemSelect?.id,
+        id_producto: productoMovs?.id,
       },
     ],
     queryFn: () =>
       mostrarMovStock({
         id_empresa: dataempresa?.id,
-        id_producto: productosItemSelect?.id,
+        id_producto: productoMovs?.id,
       }),
-    enabled: !!dataempresa,
+    enabled: !!dataempresa && !!productoMovs,
   });
 
   function nuevoRegistro() {
+    setTipo("ingreso");
     setStateClose(true);
     setAccion("Nuevo");
-    setdataSelect([]);
+  }
+  // Abre el formulario de entrada/salida con el producto del renglón ya
+  // elegido.
+  function registrarDesdeFila(fila, tipo) {
+    selectProductos(fila.productos);
+    setTipo(tipo);
+    setStateClose(true);
+    setAccion("Nuevo");
   }
   return (
     <Container>
       {stateClose && <RegistrarInventario />}
 
       <section className="area1">
-        {productosItemSelect?.nombre && (
-          <span>
-            {" "}
-            Producto: <strong>{productosItemSelect?.nombre}</strong>{" "}
+        {productoMovs ? (
+          <button className="volver" onClick={() => setProductoMovs(null)}>
+            ← Existencias
+          </button>
+        ) : (
+          <span className="ayuda">
+            Cuánto tienes de cada producto que controla stock.
           </span>
         )}
-        <span className="sep">|</span>
-        <Title>Inventario</Title>
-        <Btn1 funcion={nuevoRegistro} titulo="Registrar" />
-      </section>
-      <section className="area2">
-        <BuscadorList
-          setBuscador={setBuscador}
-          data={dataproductos}
-          onSelect={selectProductos}
-        />
+        <div className="derecha">
+          <Title>{productoMovs ? "Movimientos" : "Inventario"}</Title>
+          <Btn1 funcion={nuevoRegistro} titulo="Registrar entrada/salida" />
+        </div>
       </section>
 
-      <section className="main">
-        <TablaInventarios
-          setdataSelect={setdataSelect}
-          setAccion={setAccion}
-          SetopenRegistro={SetopenRegistro}
-          data={data}
-        />
-      </section>
+      {productoMovs ? (
+        <>
+          <section className="area2">
+            <span>
+              Producto: <strong>{productoMovs.nombre}</strong>
+            </span>
+            <BuscadorList
+              setBuscador={setBuscador}
+              data={dataproductos}
+              onSelect={setProductoMovs}
+            />
+          </section>
+          <section className="main">
+            <MovimientosProducto data={data} producto={productoMovs} />
+          </section>
+        </>
+      ) : (
+        <section className="main">
+          <TablaExistencias
+            onEntrada={(fila) => registrarDesdeFila(fila, "ingreso")}
+            onSalida={(fila) => registrarDesdeFila(fila, "salida")}
+            onMovimientos={(fila) => setProductoMovs(fila.productos)}
+          />
+        </section>
+      )}
     </Container>
   );
 }
 const Container = styled.div`
-  display: grid;
-  grid-template:
-    "area1" minmax(60px, auto)
-    "area2" minmax(60px, auto)
-    "main" auto;
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   .area1 {
-    grid-area: area1;
     display: flex;
     flex-wrap: wrap;
-    justify-content: end;
+    justify-content: space-between;
     align-items: center;
     gap: 10px 15px;
   }
+  .area1 .derecha {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  .ayuda {
+    opacity: 0.7;
+    font-size: 14px;
+  }
+  .volver {
+    background: none;
+    border: 1px solid ${({ theme }) => theme.color2};
+    border-radius: 8px;
+    padding: 7px 12px;
+    cursor: pointer;
+    color: ${({ theme }) => theme.text};
+    font-size: 14px;
+  }
+  .area2 {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
   @media (max-width: 767.98px) {
-    .area1 {
+    .area1 .derecha {
+      width: 100%;
       justify-content: space-between;
-    }
-    .area1 > span:first-child {
-      flex-basis: 100%;
-    }
-    .area1 .sep {
-      display: none;
     }
     .area2 > * {
       width: 100%;
     }
-  }
-  .area2 {
-    grid-area: area2;
-    display: flex;
-    justify-content: end;
-    align-items: center;
-  }
-  .main {
-    grid-area: main;
   }
 `;

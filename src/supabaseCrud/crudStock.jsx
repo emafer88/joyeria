@@ -33,3 +33,21 @@ export async function MostrarStockXAlmacenesYProducto(p) {
     .gt("stock", 0);
   return data;
 }
+// Existencias de todos los productos que controlan stock, por almacén.
+export async function MostrarExistencias(p) {
+  const { data, error } = await supabase
+    .from(tabla)
+    .select(
+      `id, stock, stock_minimo, ubicacion,
+      almacen!inner(id, nombre, sucursales!inner(nombre, id_empresa)),
+      productos:productos_v!inner(id, nombre, codigo_barras, sevende_por,
+        maneja_inventarios, precio_venta, precio_compra, activo)`
+    )
+    .eq("almacen.sucursales.id_empresa", p.id_empresa)
+    .eq("productos.activo", true)
+    .eq("productos.maneja_inventarios", true);
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data;
+}

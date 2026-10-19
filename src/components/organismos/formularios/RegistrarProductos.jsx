@@ -583,7 +583,7 @@ export function RegistrarProductos({
                   isChecked={isChecked1}
                   onChange={() => handleCheckboxChange(1)}
                 />
-                <label>GRANEL(decimales) </label>
+                <label>GRANEL (precio por kg) </label>
                 <Checkbox1
                   isChecked={isChecked2}
                   onChange={() => handleCheckboxChange(2)}
@@ -805,7 +805,7 @@ export function RegistrarProductos({
                               : stock
                             : stock
                         }
-                        step="0.01"
+                        step="0.001"
                         type="number"
                         placeholder="stock"
                         {...register("stock")}
@@ -826,7 +826,7 @@ export function RegistrarProductos({
                               : stockMinimo
                             : stockMinimo
                         }
-                        step="0.01"
+                        step="0.001"
                         type="number"
                         placeholder="stock minimo"
                         {...register("stock_minimo")}
