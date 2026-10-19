@@ -9,8 +9,12 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 export function FooterPos() {
   const { eliminarVenta,idventa } = useVentasStore();
-  const { setStateIngresoSalida, setTipoRegistro, setStateCierraCaja } =
-  useCierreCajaStore();
+  const {
+    setStateIngresoSalida,
+    setTipoRegistro,
+    setStateCierraCaja,
+    setStateVentasTurno,
+  } = useCierreCajaStore();
   const queryClient = useQueryClient()
   const {mutate:mutateEliminarVenta,isPending} = useMutation({
     mutationKey:["eliminar venta"],
@@ -66,12 +70,13 @@ export function FooterPos() {
           icono={<Icon icon="noto-v1:money-bag" />}
           titulo="Retirar dinero"
         />
-        {/* <Btn1
+        <Btn1
           bgcolor="#fff"
           color="#2d2d2d"
+          funcion={() => setStateVentasTurno(true)}
           icono={<Icon icon="icon-park:preview-open" />}
-          titulo="Ver ventas del día"
-        /> */}
+          titulo="Ventas del turno"
+        />
       </article>
     </Footer>
   );

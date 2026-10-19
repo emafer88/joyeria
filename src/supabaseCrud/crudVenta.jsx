@@ -56,3 +56,70 @@ export async function ConfirmarVenta(p) {
   }
   return data;
 }
+
+// Ventas cobradas (y canceladas) del turno de caja abierto, para el panel
+// "Ventas del turno" del POS.
+export async function MostrarVentasTurno(p) {
+  const { data, error } = await supabase
+    .from(tabla)
+    .select(
+      `id, nro_comprobante, fecha, monto_total, sub_total, total_impuestos,
+      vuelto, estado, motivo_anulacion, anulada_en,
+      cajero:usuarios!ventas_id_usuario_fkey(nombres),
+      cliente:clientes_proveedores(nombres, direccion, identificador_fiscal),
+      pagos:movimientos_caja(tipo_movimiento, monto, vuelto, metodos_pago(nombre))`
+    )
+    .eq("id_cierre_caja", p.id_cierre_caja)
+    .in("estado", ["confirmada", "anulada"])
+    .order("id", { ascending: false });
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data;
+}
+
+// Nombre del comprobante (Ticket, Boleta…) según la serie del número.
+export async function MostrarNombresComprobante(p) {
+  const { data, error } = await supabase
+    .from("serializacion_comprobantes")
+    .select("serie, tipo_comprobantes(nombre)")
+    .eq("sucursal_id", p.id_sucursal);
+  if (error) {
+    throw new Error(error.message);
+  }
+  return Object.fromEntries(
+    (data ?? []).map((s) => [s.serie, s.tipo_comprobantes?.nombre])
+  );
+}
+
+// Devuelve "ok", "clave_incorrecta" o "bloqueado".
+export async function AnularVenta(p) {
+  const { data, error } = await supabase.rpc("anular_venta", {
+    _id_venta: p.id_venta,
+    _motivo: p.motivo,
+    _clave: p.clave,
+  });
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data;
+}
+
+// Clave numérica con la que un gerente autoriza cancelaciones. Solo la del
+// usuario actual; null si todavía no tiene.
+export async function MiClaveAutorizacion() {
+  const { data, error } = await supabase.rpc("mi_clave_autorizacion");
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data ?? null;
+}
+
+export async function GuardarClaveAutorizacion(p) {
+  const { error } = await supabase.rpc("guardar_clave_autorizacion", {
+    _clave: p.clave,
+  });
+  if (error) {
+    throw new Error(error.message);
+  }
+}

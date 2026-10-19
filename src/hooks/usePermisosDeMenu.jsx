@@ -36,5 +36,13 @@ export function usePermisosDeMenu() {
     ["superadmin", "admin"].includes(datausuarios?.roles?.nombre) ||
     !!dataPermisosGlobales?.some((item) => item.modulos?.nombre === "Ver costos");
 
-  return { esSuperAdmin, puedeVer, veCostos };
+  // Mismo criterio que admin_puede_autorizar() en la base: su clave sirve
+  // para autorizar cancelaciones de ventas.
+  const puedeAutorizarCancelaciones =
+    ["superadmin", "admin"].includes(datausuarios?.roles?.nombre) ||
+    !!dataPermisosGlobales?.some(
+      (item) => item.modulos?.nombre === "Autorizar cancelaciones"
+    );
+
+  return { esSuperAdmin, puedeVer, veCostos, puedeAutorizarCancelaciones };
 }

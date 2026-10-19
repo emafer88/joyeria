@@ -18,6 +18,7 @@ import { Toaster } from "sonner";
 import { PantallaIngresoSalidaDinero } from "../organismos/POSDesign/CajaDesign/PantallaIngresoSalidaDinero";
 import { useCierreCajaStore } from "../../store/CierreCajaStore";
 import { MenuFlotante } from "../organismos/POSDesign/MenuFlotante";
+import { VentasTurno } from "../organismos/POSDesign/VentasTurno";
 import { SelectAlmacenModal } from "../organismos/POSDesign/SelectAlmacenModal";
 import { useStockStore } from "../../store/StockStore";
 import { useBuscarProductosQuery } from "../../tanstack/ProductosStack";
@@ -28,7 +29,8 @@ import { useMostrarSerializacionesVentasQuery } from "../../tanstack/Serializaci
 import { useMostrasrImpresorasPorCajaQuery } from "../../tanstack/ImpresorasStack";
 export function POSTemplate() {
   const { statePantallaCobro } = useVentasStore();
-  const { stateIngresoSalida, stateCierreCaja } = useCierreCajaStore();
+  const { stateIngresoSalida, stateCierreCaja, stateVentasTurno } =
+    useCierreCajaStore();
   const { stateModal } = useStockStore();
   useBuscarProductosQuery();
   const { isLoading: isLoadingAlmacenXSucursal } =
@@ -54,6 +56,7 @@ export function POSTemplate() {
       <MenuFlotante />
       {stateIngresoSalida && <PantallaIngresoSalidaDinero />}
       {stateCierreCaja && <PantallaCierreCaja />}
+      {stateVentasTurno && <VentasTurno />}
     </Container>
   );
 }
