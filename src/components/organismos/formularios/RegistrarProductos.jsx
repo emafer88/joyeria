@@ -255,8 +255,8 @@ export function RegistrarProductos({
           const pStock = {
             id_almacen: almacenSelectItem?.id,
             id_producto: dataSelect?.id,
-            stock: parseFloat(data.stock),
-            stock_minimo: parseFloat(data.stock_minimo),
+            stock: parseFloat(data.stock) || 0,
+            stock_minimo: parseFloat(data.stock_minimo) || 0,
             ubicacion: data.ubicacion,
           };
           await insertarStock(pStock);
@@ -296,8 +296,8 @@ export function RegistrarProductos({
         const pStock = {
           id_almacen: almacenSelectItem?.id,
           id_producto: id_producto_nuevo,
-          stock: parseFloat(data.stock),
-          stock_minimo: parseFloat(data.stock_minimo),
+          stock: parseFloat(data.stock) || 0,
+          stock_minimo: parseFloat(data.stock_minimo) || 0,
           ubicacion: data.ubicacion,
         };
 

@@ -72,8 +72,10 @@ export const useInsertarMovStockMutation = () => {
       console.log("pProductos",pProductos)
       console.log("tipo",tipo)
       
+      // Primero el stock: si la salida no alcanza falla aquí y no queda
+      // anotado un movimiento que no ocurrió.
+      await editarStock(pStock, tipo);
       await insertarMovStock(pMovimientoStock);
-       await editarStock(pStock, tipo);
        await editarPreciosProductos(pProductos);
     },
     onError: (error) => {
