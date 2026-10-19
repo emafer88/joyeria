@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { esGranel, formatearKg } from "../../../utils/granel";
+import { formatearCantidad } from "../../../utils/granel";
 import { tablaTarjetasMovil } from "../../../styles/tablaMovil";
 
 const fechaHora = (f) =>
@@ -19,8 +19,6 @@ const motivo = (m) =>
 /** Historial (kardex) de un producto, del más reciente al más viejo. */
 export function MovimientosProducto({ data, producto }) {
   const filas = [...(data ?? [])].sort((a, b) => b.id - a.id);
-  const cantidad = (n) =>
-    esGranel(producto) ? formatearKg(n) : `${Number(n)} pz`;
   return (
     <Container>
       <table>
@@ -60,7 +58,7 @@ export function MovimientosProducto({ data, producto }) {
                   className={`num cant ${entra ? "entra" : "sale"}`}
                 >
                   {entra ? "+" : "−"}
-                  {cantidad(m.cantidad)}
+                  {formatearCantidad(m.cantidad, producto)}
                 </td>
               </tr>
             );

@@ -6,11 +6,14 @@ import { InputText2 } from "../formularios/InputText2";
 import { useEmpresaStore } from "../../../store/EmpresaStore";
 import { FormatearNumeroDinero } from "../../../utils/Conversiones";
 import { v } from "../../../styles/variables";
+import { unidadPeso } from "../../../utils/granel";
 
-// Pide el peso de un producto a granel antes de agregarlo a la venta. El peso
-// se escribe a mano (leído de la báscula); el importe es precio por kg × kg.
+// Pide el peso de un producto por peso antes de agregarlo a la venta. El peso
+// se escribe a mano (leído de la báscula) en la unidad del producto (kg o g);
+// el importe es precio por unidad × peso.
 export function ModalPesoGranel({ producto, onConfirmar, onCerrar }) {
   const { dataempresa } = useEmpresaStore();
+  const unidad = unidadPeso(producto);
   const [peso, setPeso] = useState("");
   const inputRef = useRef(null);
   useEffect(() => {
@@ -40,7 +43,7 @@ export function ModalPesoGranel({ producto, onConfirmar, onCerrar }) {
         <span className="titulo">Peso del producto</span>
         <span className="producto">{producto.nombre}</span>
         <span className="precio">
-          {dinero(Number(producto.precio_venta))} por kg
+          {dinero(Number(producto.precio_venta))} por {unidad}
         </span>
         <InputText2>
           <input
@@ -51,10 +54,12 @@ export function ModalPesoGranel({ producto, onConfirmar, onCerrar }) {
             min="0"
             value={peso}
             onChange={(e) => setPeso(e.target.value)}
-            placeholder="kg"
+            placeholder={unidad}
             className="form__field"
           />
-          <label className="form__label">peso en kg (ej. 0.350)</label>
+          <label className="form__label">
+            {unidad === "kg" ? "peso en kg (ej. 0.350)" : "peso en gramos (ej. 350)"}
+          </label>
         </InputText2>
         <span className="importe">
           Importe: <strong>{dinero(importe)}</strong>

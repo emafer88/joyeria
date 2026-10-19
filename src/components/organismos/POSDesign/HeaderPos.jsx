@@ -28,7 +28,7 @@ import {
   useAgregarPiezaCarritoMutation,
 } from "../../../tanstack/JoyeriaStack";
 import { PosBuscarPieza } from "../../../supabaseCrud/crudJoyeria";
-import { esGranel } from "../../../utils/granel";
+import { esPorPeso } from "../../../utils/granel";
 import { ModalPesoGranel } from "./ModalPesoGranel";
 
 
@@ -123,9 +123,9 @@ export function HeaderPos() {
     }
     agregarProducto(item);
   }
-  // Los productos a granel primero piden el peso; los demás se agregan directo.
+  // Los productos por peso (kg o g) primero piden el peso; los demás se agregan directo.
   function agregarProducto(producto) {
-    if (esGranel(producto)) {
+    if (esPorPeso(producto)) {
       setStateListaproductos(false);
       setProductoGranel(producto);
       return;

@@ -57,8 +57,7 @@ export function RegistrarProductos({
   const { tiene } = useLicencia();
   const mostrarCosto = veCostos || accion !== "Editar";
   //validar checkboxs
-  const [isChecked1, setIsChecked1] = useState(true);
-  const [isChecked2, setIsChecked2] = useState(false);
+  // "UNIDAD", "GRANEL" (por kg) o "GRAMO" (por g); ver utils/granel.
   const [sevendepor, setSevendepor] = useState("UNIDAD");
   const [stock, setStock] = useState("");
   const [stockMinimo, setStockMinimo] = useState("");
@@ -71,18 +70,6 @@ export function RegistrarProductos({
   // "medidas" se guarda como un solo texto ("45 x 3 cm") pero se carga como
   // dos inputs numéricos (largo/ancho); esto prellena esos dos inputs al editar.
   const medidasIniciales = parseMedidas(dataSelect?.medidas);
-  const handleCheckboxChange = (checkboxNumber) => {
-    if (checkboxNumber === 1) {
-      setIsChecked1(true);
-      setIsChecked2(false);
-      setSevendepor("UNIDAD");
-    } else {
-      setIsChecked1(false);
-      setIsChecked2(true);
-      setSevendepor("GRANEL");
-    }
-  };
-  //
 
   const {
     insertarProductos,
@@ -396,9 +383,11 @@ export function RegistrarProductos({
       })
       setRandomCodeinterno(dataSelect.codigo_interno);
       setRandomCodebarras(dataSelect.codigo_barras);
-      dataSelect.sevende_por === "UNIDAD"
-        ? handleCheckboxChange(1)
-        : handleCheckboxChange(0);
+      setSevendepor(
+        ["GRANEL", "GRAMO"].includes(dataSelect.sevende_por?.toUpperCase())
+          ? dataSelect.sevende_por.toUpperCase()
+          : "UNIDAD"
+      );
       dataSelect.maneja_inventarios
         ? setStateInventarios(true)
         : setStateInventarios(false);
@@ -577,18 +566,21 @@ export function RegistrarProductos({
             </section>
             <section className="seccion2">
               <label>Se vende por: </label>
-              <ContainerSelector>
-                <label>UNIDAD </label>
-                <Checkbox1
-                  isChecked={isChecked1}
-                  onChange={() => handleCheckboxChange(1)}
-                />
-                <label>GRANEL (precio por kg) </label>
-                <Checkbox1
-                  isChecked={isChecked2}
-                  onChange={() => handleCheckboxChange(2)}
-                />
-              </ContainerSelector>
+              <OpcionesVenta>
+                {[
+                  ["UNIDAD", "Unidad"],
+                  ["GRANEL", "Kilo (precio por kg)"],
+                  ["GRAMO", "Gramo (precio por g)"],
+                ].map(([valor, texto]) => (
+                  <span className="opcion" key={valor}>
+                    <Checkbox1
+                      isChecked={sevendepor === valor}
+                      onChange={() => setSevendepor(valor)}
+                    />
+                    <span onClick={() => setSevendepor(valor)}>{texto}</span>
+                  </span>
+                ))}
+              </OpcionesVenta>
 
               <ContainerSelector>
                 <label>Categoria: </label>
@@ -1085,4 +1077,16 @@ const ContainerMensajeStock = styled.div`
   padding: 5px;
   margin: 10px;
   font-weight: 600;
+`;
+const OpcionesVenta = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  margin: 6px 0 4px;
+  .opcion {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+  }
 `;

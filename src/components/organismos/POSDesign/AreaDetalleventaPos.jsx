@@ -17,7 +17,7 @@ import { useState } from "react";
 import { Device } from "../../../styles/breakpoints";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { esGranel, formatearKg } from "../../../utils/granel";
+import { formatearPeso, unidadPeso } from "../../../utils/granel";
 export function AreaDetalleventaPos() {
 
   const { dataempresa } = useEmpresaStore();
@@ -86,11 +86,12 @@ export function AreaDetalleventaPos() {
         // cantidad siempre es 1 (no se puede vender 2 veces el mismo código),
         // así que los controles de cantidad quedan deshabilitados.
         const esPieza = item.id_pieza != null;
-        // A granel la cantidad son kg: +1/-1 no tiene sentido, el peso se
+        // Por peso la cantidad son kg o g: +1/-1 no tiene sentido, el peso se
         // corrige con el lápiz.
-        const granel = esGranel(item.productos);
+        const unidad = unidadPeso(item.productos);
+        const granel = unidad != null;
         const sinBotones = esPieza || granel;
-        const etiquetaPrecio = granel ? "precio kg:" : "precio unit:";
+        const etiquetaPrecio = granel ? `precio ${unidad}:` : "precio unit:";
         return (
           <Itemventa key={index}>
             <article className="contentdescripcion">
@@ -165,7 +166,7 @@ export function AreaDetalleventaPos() {
               ) : (
                 <>
                   <span className="cantidad">
-                    {granel ? formatearKg(item.cantidad) : item.cantidad}
+                    {granel ? formatearPeso(item.cantidad, item.productos) : item.cantidad}
                   </span>
                   <Icon
                     icon="mdi:pencil"
