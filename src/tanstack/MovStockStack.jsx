@@ -10,7 +10,6 @@ import { ConvertirMinusculas } from "../utils/Conversiones";
 import { useCategoriasStore } from "../store/CategoriasStore";
 import { useMovStockStore } from "../store/MovStockStore";
 import { useAlmacenesStore } from "../store/AlmacenesStore";
-import { useFormattedDate } from "../hooks/useFormattedDate";
 import { useStockStore } from "../store/StockStore";
 import { useGlobalStore } from "../store/GlobalStore";
 import { usePermisosDeMenu } from "../hooks/usePermisosDeMenu";
@@ -40,7 +39,6 @@ export const useInsertarMovStockMutation = () => {
    
   const { editarPreciosProductos } = useProductosStore();
   const { veCostos } = usePermisosDeMenu();
-  const fechaActual = useFormattedDate();
   console.log("dataStock",dataStock)
   return useMutation({
     mutationKey: ["insertar movimiento stock"],
@@ -50,7 +48,7 @@ export const useInsertarMovStockMutation = () => {
         id_producto: productosItemSelect?.id,
         tipo_movimiento: tipo,
         cantidad: parseFloat(data.cantidad),
-        fecha: fechaActual,
+        // fecha: la pone la base (now()), igual que los movimientos de ventas.
         detalle: "registro de inventario manual",
         origen: "inventario",
       };
