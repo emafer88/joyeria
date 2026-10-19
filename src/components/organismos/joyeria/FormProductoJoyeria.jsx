@@ -16,6 +16,8 @@ import { useJoyeriaStore } from "../../../store/JoyeriaStore";
 import { useEmpresaStore } from "../../../store/EmpresaStore";
 import { useProductosStore } from "../../../store/ProductosStore";
 import { useLicencia } from "../../../hooks/useLicencia";
+import { useVisibleEcommerce } from "../../../hooks/useVisibleEcommerce";
+import { useDisenosMLQuery } from "../../../tanstack/MercadoLibreStack";
 import {
   useGuardarDisenoMutation,
   useCategoriasJoyeriaQuery,
@@ -48,6 +50,18 @@ export function FormProductoJoyeria({ onClose }) {
   const [destacado, setDestacado] = useState(
     esEditar ? !!disenoSelect?.destacado : false
   );
+  const [visibleEcommerce, setVisibleEcommerce] = useVisibleEcommerce(
+    esEditar ? disenoSelect?.id : null
+  );
+  // Mercado Libre solo publica diseños que ya tienen categoría configurada
+  // (pantalla Mercado Libre); aquí solo se prende o apaga la publicación.
+  const conML = tiene("mercadolibre");
+  const { data: disenosML = [] } = useDisenosMLQuery({ enabled: conML });
+  const configML = esEditar
+    ? disenosML.find((d) => Number(d.id_producto) === Number(disenoSelect?.id))
+    : null;
+  const [publicarML, setPublicarML] = useState(null);
+  const publicarMLActual = publicarML ?? !!configML?.publicar;
   const [nuevaMarca, setNuevaMarca] = useState("");
   const [etiquetasSel, setEtiquetasSel] = useState([]);
   const [nuevaEtiqueta, setNuevaEtiqueta] = useState("");
@@ -138,7 +152,19 @@ export function FormProductoJoyeria({ onClose }) {
     mutate(
       {
         accion,
-        values: { ...values, id: disenoSelect?.id, destacado, etiquetasSel },
+        values: {
+          ...values,
+          id: disenoSelect?.id,
+          destacado,
+          etiquetasSel,
+          visibleEcommerce,
+          // Solo si se movió el switch: guardar la config de ML dispara la
+          // sincronización.
+          configML:
+            configML && publicarML != null && publicarML !== !!configML.publicar
+              ? { ...configML, publicar: publicarML }
+              : null,
+        },
       },
       {
         onSuccess: async (idDiseno) => {
@@ -291,6 +317,32 @@ export function FormProductoJoyeria({ onClose }) {
 
           {tiene("tienda") && (
             <div className="fila-switch">
+              <label>Mostrar en la tienda en línea</label>
+              <Switch1
+                state={visibleEcommerce}
+                setState={() => setVisibleEcommerce((x) => !x)}
+              />
+            </div>
+          )}
+          {conML && (
+            <div className="fila-switch">
+              <label>Publicar en Mercado Libre</label>
+              {configML ? (
+                <Switch1
+                  state={publicarMLActual}
+                  setState={() => setPublicarML(!publicarMLActual)}
+                />
+              ) : (
+                <span className="nota">
+                  {esEditar
+                    ? "Primero configura su categoría en Mercado Libre"
+                    : "Guárdalo y configúralo en Mercado Libre"}
+                </span>
+              )}
+            </div>
+          )}
+          {tiene("tienda") && visibleEcommerce && (
+            <div className="fila-switch">
               <label>Destacado (home ecommerce)</label>
               <Switch1 state={destacado} setState={() => setDestacado((d) => !d)} />
             </div>
@@ -359,6 +411,11 @@ const Container = styled.div`
         justify-content: space-between;
         gap: 12px;
         font-size: 14px;
+      }
+      .fila-switch .nota {
+        font-size: 12px;
+        opacity: 0.7;
+        text-align: right;
       }
       .sel-label {
         font-size: 14px;

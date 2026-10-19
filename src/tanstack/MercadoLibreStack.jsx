@@ -18,8 +18,8 @@ const CLAVE = "mercadolibre";
 export const useCuentaMLQuery = () =>
   useQuery({ queryKey: [CLAVE, "cuenta"], queryFn: MostrarCuentaML });
 
-export const useDisenosMLQuery = () =>
-  useQuery({ queryKey: [CLAVE, "disenos"], queryFn: MostrarDisenosML });
+export const useDisenosMLQuery = ({ enabled = true } = {}) =>
+  useQuery({ queryKey: [CLAVE, "disenos"], queryFn: MostrarDisenosML, enabled });
 
 export const useDisenosSinConfigurarMLQuery = (enabled) =>
   useQuery({
