@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Spinner1 } from "../../../index";
 import { useEmpresaStore } from "../../../store/EmpresaStore";
 import { MostrarExistencias } from "../../../supabaseCrud/crudStock";
-import { esGranel, formatearKg } from "../../../utils/granel";
+import { formatearCantidad } from "../../../utils/granel";
 import { tablaTarjetasMovil } from "../../../styles/tablaMovil";
 
 const ESTADOS = {
@@ -21,10 +21,8 @@ function estadoDe(r) {
   return "ok";
 }
 
-// Cantidad con su unidad: kilos a granel, piezas lo demás.
 function cantidad(n, producto) {
-  if (n == null) return "—";
-  return esGranel(producto) ? formatearKg(n) : `${Number(n)} pz`;
+  return n == null ? "—" : formatearCantidad(n, producto);
 }
 
 /**
