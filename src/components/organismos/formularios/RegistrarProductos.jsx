@@ -1,6 +1,6 @@
 import styled from "styled-components";
-import { useVisibleEcommerce } from "../../../hooks/useVisibleEcommerce";
-import { EditarVisibleEcommerce } from "../../../supabaseCrud/crudProductos";
+import { useOpcionesProducto } from "../../../hooks/useOpcionesProducto";
+import { EditarOpcionesProducto } from "../../../supabaseCrud/crudProductos";
 import { v } from "../../../styles/variables";
 import {
   InputText,
@@ -65,7 +65,7 @@ export function RegistrarProductos({
   const [stockMinimo, setStockMinimo] = useState("");
   const [ubicacion, setUbicacion] = useState("");
   const [destacado, setDestacado] = useState(false);
-  const [visibleEcommerce, setVisibleEcommerce] = useVisibleEcommerce(
+  const [opciones, cambiarOpcion] = useOpcionesProducto(
     accion === "Editar" ? dataSelect?.id : null
   );
   const [idMarca, setIdMarca] = useState(null);
@@ -241,7 +241,7 @@ export function RegistrarProductos({
       };
       console.log(p);
       await editarProductos(p);
-      await EditarVisibleEcommerce(dataSelect.id, visibleEcommerce);
+      await EditarOpcionesProducto(dataSelect.id, opciones);
       await setEtiquetasProducto(dataSelect.id, etiquetasSel);
       if (stateInventarios) {
         if (!dataStockXAlmacenYProducto) {
@@ -284,7 +284,7 @@ export function RegistrarProductos({
       };
 
       const id_producto_nuevo = await insertarProductos(p);
-      await EditarVisibleEcommerce(id_producto_nuevo, visibleEcommerce);
+      await EditarOpcionesProducto(id_producto_nuevo, opciones);
       await setEtiquetasProducto(id_producto_nuevo, etiquetasSel);
       if (stateInventarios) {
         const pStock = {
@@ -601,16 +601,23 @@ export function RegistrarProductos({
                   setState={checkUseInventarios}
                 />
               </ContainerSelector>
+              <ContainerSelector>
+                <label>Se puede apartar: </label>
+                <Switch1
+                  state={opciones.permite_apartado}
+                  setState={() => cambiarOpcion("permite_apartado")}
+                />
+              </ContainerSelector>
               {tiene("tienda") && (
                 <ContainerSelector>
                   <label>Mostrar en la tienda en línea: </label>
                   <Switch1
-                    state={visibleEcommerce}
-                    setState={() => setVisibleEcommerce((x) => !x)}
+                    state={opciones.visible_ecommerce}
+                    setState={() => cambiarOpcion("visible_ecommerce")}
                   />
                 </ContainerSelector>
               )}
-              {tiene("tienda") && visibleEcommerce && (
+              {tiene("tienda") && opciones.visible_ecommerce && (
                 <ContainerSelector>
                   <label>Destacado (home ecommerce): </label>
                   <Switch1

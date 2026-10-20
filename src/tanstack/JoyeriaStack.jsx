@@ -5,7 +5,7 @@ import { useUsuariosStore } from "../store/UsuariosStore";
 import { useVentasStore } from "../store/VentasStore";
 import { useCierreCajaStore } from "../store/CierreCajaStore";
 import { useProductosStore } from "../store/ProductosStore";
-import { EditarVisibleEcommerce } from "../supabaseCrud/crudProductos";
+import { EditarOpcionesProducto } from "../supabaseCrud/crudProductos";
 import { GuardarDisenoML } from "../supabaseCrud/crudMercadoLibre";
 import {
   CrearProductoJoyeria,
@@ -195,7 +195,7 @@ export const useGuardarDisenoMutation = () => {
         });
       }
       await setEtiquetasProducto(idDiseno, etiquetasSel);
-      await EditarVisibleEcommerce(idDiseno, values.visibleEcommerce ?? true);
+      if (values.opciones) await EditarOpcionesProducto(idDiseno, values.opciones);
       if (values.configML) {
         await GuardarDisenoML(values.configML);
         qc.invalidateQueries({ queryKey: ["mercadolibre"] });
