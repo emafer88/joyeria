@@ -9,11 +9,28 @@ import { useMetodosPagoStore } from "../../../store/MetodosPagoStore";
 import { useQuery } from "@tanstack/react-query";
 import { useValidarPermisosOperativos } from "../../../hooks/useValidarPermisosOperativos";
 import { useDetalleVentasStore } from "../../../store/DetalleVentasStore";
+import { useCierreCajaStore } from "../../../store/CierreCajaStore";
+import { toast } from "sonner";
 export function AreaTecladoPos() {
   const { setStatePantallaCobro, stateMetodosPago } = useVentasStore();
   const { dataempresa } = useEmpresaStore();
   const { dataMetodosPago: datametodospago } = useMetodosPagoStore();
   const {datadetalleventa} = useDetalleVentasStore()
+  const { setStateApartar } = useCierreCajaStore();
+  const abrirApartar = () => {
+    if (!datadetalleventa?.length) {
+      toast.warning("Agrega productos para apartarlos");
+      return;
+    }
+    const noSe = datadetalleventa.filter((d) => !d.productos?.permite_apartado);
+    if (noSe.length) {
+      toast.error(
+        `No se pueden apartar: ${noSe.map((d) => d.descripcion).join(", ")}`
+      );
+      return;
+    }
+    setStateApartar(true);
+  };
   const { validarPermiso } = useValidarPermisosOperativos();
   // const { data: datametodospago } = useQuery({
   //   queryKey: ["mostrar metodos de pago"],
@@ -44,6 +61,15 @@ export function AreaTecladoPos() {
             </article>
           );
         })}
+        <article className="box">
+          <Btn1
+            funcion={abrirApartar}
+            titulo="Apartar"
+            border="0"
+            height="70px"
+            width="100%"
+          />
+        </article>
       </section>
       <section className="totales">
         {/* <div className="subtotal">

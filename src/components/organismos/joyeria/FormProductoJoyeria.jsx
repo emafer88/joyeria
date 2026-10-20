@@ -16,7 +16,7 @@ import { useJoyeriaStore } from "../../../store/JoyeriaStore";
 import { useEmpresaStore } from "../../../store/EmpresaStore";
 import { useProductosStore } from "../../../store/ProductosStore";
 import { useLicencia } from "../../../hooks/useLicencia";
-import { useVisibleEcommerce } from "../../../hooks/useVisibleEcommerce";
+import { useOpcionesProducto } from "../../../hooks/useOpcionesProducto";
 import { useDisenosMLQuery } from "../../../tanstack/MercadoLibreStack";
 import {
   useGuardarDisenoMutation,
@@ -50,7 +50,7 @@ export function FormProductoJoyeria({ onClose }) {
   const [destacado, setDestacado] = useState(
     esEditar ? !!disenoSelect?.destacado : false
   );
-  const [visibleEcommerce, setVisibleEcommerce] = useVisibleEcommerce(
+  const [opciones, cambiarOpcion] = useOpcionesProducto(
     esEditar ? disenoSelect?.id : null
   );
   // Mercado Libre solo publica diseños que ya tienen categoría configurada
@@ -157,7 +157,7 @@ export function FormProductoJoyeria({ onClose }) {
           id: disenoSelect?.id,
           destacado,
           etiquetasSel,
-          visibleEcommerce,
+          opciones,
           // Solo si se movió el switch: guardar la config de ML dispara la
           // sincronización.
           configML:
@@ -315,12 +315,19 @@ export function FormProductoJoyeria({ onClose }) {
             </button>
           </div>
 
+          <div className="fila-switch">
+            <label>Se puede apartar</label>
+            <Switch1
+              state={opciones.permite_apartado}
+              setState={() => cambiarOpcion("permite_apartado")}
+            />
+          </div>
           {tiene("tienda") && (
             <div className="fila-switch">
               <label>Mostrar en la tienda en línea</label>
               <Switch1
-                state={visibleEcommerce}
-                setState={() => setVisibleEcommerce((x) => !x)}
+                state={opciones.visible_ecommerce}
+                setState={() => cambiarOpcion("visible_ecommerce")}
               />
             </div>
           )}
@@ -341,7 +348,7 @@ export function FormProductoJoyeria({ onClose }) {
               )}
             </div>
           )}
-          {tiene("tienda") && visibleEcommerce && (
+          {tiene("tienda") && opciones.visible_ecommerce && (
             <div className="fila-switch">
               <label>Destacado (home ecommerce)</label>
               <Switch1 state={destacado} setState={() => setDestacado((d) => !d)} />

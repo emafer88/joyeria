@@ -14,6 +14,7 @@ export function FooterPos() {
     setTipoRegistro,
     setStateCierraCaja,
     setStateVentasTurno,
+    setStateApartados,
   } = useCierreCajaStore();
   const queryClient = useQueryClient()
   const {mutate:mutateEliminarVenta,isPending} = useMutation({
@@ -76,6 +77,13 @@ export function FooterPos() {
           funcion={() => setStateVentasTurno(true)}
           icono={<Icon icon="icon-park:preview-open" />}
           titulo="Ventas del turno"
+        />
+        <Btn1
+          bgcolor="#fff"
+          color="#2d2d2d"
+          funcion={() => setStateApartados(true)}
+          icono={<Icon icon="mdi:archive-clock-outline" />}
+          titulo="Apartados"
         />
       </article>
     </Footer>

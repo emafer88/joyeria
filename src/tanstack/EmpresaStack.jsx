@@ -17,6 +17,8 @@ export const useUpdateEmpresaMutation = ( ) => {
         direccion_fiscal: data.direccion,
         impuesto: data.impuesto,
         valor_impuesto: parseFloat(data.valor_impuesto),
+        apartado_anticipo_pct: parseFloat(data.apartado_anticipo_pct),
+        apartado_dias: parseInt(data.apartado_dias, 10),
       };
       await editarEmpresa(p,dataempresa?.logo,file);
     },

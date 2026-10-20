@@ -134,6 +134,20 @@ const TicketVenta = async (output, data) => {
           ]
     ),
   ];
+  // Comprobante de apartado/abono: cuánto lleva abonado, saldo y vencimiento.
+  const fila = (texto, valor) => [
+    { text: texto, style: "tTotals", colSpan: 2 },
+    {},
+    { text: valor, style: "tTotals", colSpan: 2, alignment: "right" },
+    {},
+  ];
+  const apartadoTableBody = data.apartado
+    ? [
+        fila("Abonado:", `${simboloMoneda} ${Number(data.apartado.abonado).toFixed(2)}`),
+        fila("Saldo:", `${simboloMoneda} ${Number(data.apartado.saldo).toFixed(2)}`),
+        ...(data.apartado.vence ? [fila("Liquidar antes de:", data.apartado.vence)] : []),
+      ]
+    : [];
 
   const content = [
     //DATA EMPRESA
@@ -312,6 +326,7 @@ const TicketVenta = async (output, data) => {
             {},
           ],
           ...formasPagoTableBody,
+          ...apartadoTableBody,
           //FORMAS DE PAGO
         ],
       },

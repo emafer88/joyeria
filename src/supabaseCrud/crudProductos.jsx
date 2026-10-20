@@ -246,24 +246,33 @@ export async function ReordenarImagenesProducto(imagenes) {
   }
 }
 
-// ---- Visible en la tienda en línea (productos.visible_ecommerce) ----
+// ---- Opciones del producto: visible en la tienda en línea y si se puede
+// apartar (productos.visible_ecommerce / permite_apartado) ----
 
-export async function MostrarVisibleEcommerce(idProducto) {
+export const OPCIONES_PRODUCTO_DEFAULT = {
+  visible_ecommerce: true,
+  permite_apartado: false,
+};
+
+export async function MostrarOpcionesProducto(idProducto) {
   const { data, error } = await supabase
     .from("productos_v")
-    .select("visible_ecommerce")
+    .select("visible_ecommerce, permite_apartado")
     .eq("id", idProducto)
     .maybeSingle();
   if (error) {
     throw new Error(error.message);
   }
-  return data?.visible_ecommerce ?? true;
+  return { ...OPCIONES_PRODUCTO_DEFAULT, ...data };
 }
 
-export async function EditarVisibleEcommerce(idProducto, visible) {
+export async function EditarOpcionesProducto(idProducto, opciones) {
   const { error } = await supabase
     .from("productos")
-    .update({ visible_ecommerce: visible })
+    .update({
+      visible_ecommerce: opciones.visible_ecommerce,
+      permite_apartado: opciones.permite_apartado,
+    })
     .eq("id", idProducto);
   if (error) {
     throw new Error(error.message);

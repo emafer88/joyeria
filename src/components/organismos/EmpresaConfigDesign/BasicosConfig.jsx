@@ -25,7 +25,9 @@ export const BasicosConfig = () => {
       nombre:dataempresa?.nombre,
       direccion:dataempresa?.direccion_fiscal,
       impuesto:dataempresa?.impuesto,
-      valor_impuesto: dataempresa?.valor_impuesto
+      valor_impuesto: dataempresa?.valor_impuesto,
+      apartado_anticipo_pct: dataempresa?.apartado_anticipo_pct ?? 20,
+      apartado_dias: dataempresa?.apartado_dias ?? 30,
     }
   });
 
@@ -100,6 +102,35 @@ export const BasicosConfig = () => {
               {errors.valor_impuesto?.type === "required" && (
                 <p>Campo requerido</p>
               )}
+            </InputText2>
+            <Label>Apartados: anticipo mínimo (%)</Label>
+            <InputText2>
+              <input
+                className="form__field"
+                placeholder="anticipo mínimo %"
+                type="number"
+                step="0.01"
+                min="0"
+                max="100"
+                {...register("apartado_anticipo_pct", {
+                  required: true,
+                  min: 0,
+                  max: 100,
+                })}
+              />
+              {errors.apartado_anticipo_pct && <p>De 0 a 100</p>}
+            </InputText2>
+            <Label>Apartados: días para liquidar</Label>
+            <InputText2>
+              <input
+                className="form__field"
+                placeholder="días"
+                type="number"
+                step="1"
+                min="1"
+                {...register("apartado_dias", { required: true, min: 1 })}
+              />
+              {errors.apartado_dias && <p>Al menos 1 día</p>}
             </InputText2>
             <br></br>
             <Btn1 bgcolor="#0930bb" color="#fff" titulo="GUARDAR CAMBIOS" />

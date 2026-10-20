@@ -19,6 +19,8 @@ import { PantallaIngresoSalidaDinero } from "../organismos/POSDesign/CajaDesign/
 import { useCierreCajaStore } from "../../store/CierreCajaStore";
 import { MenuFlotante } from "../organismos/POSDesign/MenuFlotante";
 import { VentasTurno } from "../organismos/POSDesign/VentasTurno";
+import { ModalApartar } from "../organismos/POSDesign/ModalApartar";
+import { PanelApartados } from "../organismos/POSDesign/PanelApartados";
 import { SelectAlmacenModal } from "../organismos/POSDesign/SelectAlmacenModal";
 import { useStockStore } from "../../store/StockStore";
 import { useBuscarProductosQuery } from "../../tanstack/ProductosStack";
@@ -29,8 +31,13 @@ import { useMostrarSerializacionesVentasQuery } from "../../tanstack/Serializaci
 import { useMostrasrImpresorasPorCajaQuery } from "../../tanstack/ImpresorasStack";
 export function POSTemplate() {
   const { statePantallaCobro } = useVentasStore();
-  const { stateIngresoSalida, stateCierreCaja, stateVentasTurno } =
-    useCierreCajaStore();
+  const {
+    stateIngresoSalida,
+    stateCierreCaja,
+    stateVentasTurno,
+    stateApartar,
+    stateApartados,
+  } = useCierreCajaStore();
   const { stateModal } = useStockStore();
   useBuscarProductosQuery();
   const { isLoading: isLoadingAlmacenXSucursal } =
@@ -57,6 +64,8 @@ export function POSTemplate() {
       {stateIngresoSalida && <PantallaIngresoSalidaDinero />}
       {stateCierreCaja && <PantallaCierreCaja />}
       {stateVentasTurno && <VentasTurno />}
+      {stateApartar && <ModalApartar />}
+      {stateApartados && <PanelApartados />}
     </Container>
   );
 }
