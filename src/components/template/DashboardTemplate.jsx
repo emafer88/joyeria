@@ -11,6 +11,7 @@ import { useReportesStore } from "../../store/ReportesStore";
 import { usePermisosDeMenu } from "../../hooks/usePermisosDeMenu";
 import { DesgloseVentas } from "../organismos/DashboardDesign/DesgloseVentas";
 import { ModalDetalleDashboard } from "../organismos/DashboardDesign/ModalDetalleDashboard";
+import { MapaCalorVentas } from "../organismos/DashboardDesign/MapaCalorVentas";
 import { useDesgloseVentasDashboardQuery } from "../../tanstack/ReportesStack";
 export const DashboardTemplate = () => {
   const {totalventas,porcentajeCambio,totalCantidadDetalleVentas,totalGanancias} = useReportesStore() 
@@ -72,6 +73,9 @@ export const DashboardTemplate = () => {
         <Area5>
           <DesgloseVentas />
         </Area5>
+        <Area6>
+          <MapaCalorVentas />
+        </Area6>
         <Area4>
         <CardMovimientosCajaLive/>
         <CardProductosTopMonto/>
@@ -103,6 +107,7 @@ const MainContent = styled.div`
     "area2"
     "area3"
     "area5"
+    "area6"
     "area4";
   grid-template-columns: 1fr;
   gap: 15px;
@@ -111,6 +116,7 @@ const MainContent = styled.div`
       "area1 area1 area3"
       "area2 area2 area3"
       "area5 area5 area5"
+      "area6 area6 area6"
       "area4 area4 area4";
     grid-template-columns: 2fr 1fr 1fr;
     gap: 20px;
@@ -147,6 +153,9 @@ const Area5 = styled.section`
   border: 2px solid ${({ theme }) => theme.bordercolorDash};
   box-shadow: ${({ theme }) => theme.boxshadow};
   border-radius: 20px;
+`;
+const Area6 = styled(Area5)`
+  grid-area: area6;
 `;
 const Area4 = styled.section`
   grid-area: area4;
