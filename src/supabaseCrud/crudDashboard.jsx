@@ -27,3 +27,13 @@ export async function DetalleProductosDashboard(p) {
   }
   return data;
 }
+
+// Ventas cobradas por día de la semana (1 = lunes) y hora local, para el mapa
+// de calor: [{ dia, hora, ventas, total }].
+export async function VentasPorHoraDashboard(p) {
+  const { data, error } = await supabase.rpc("dashboard_ventas_por_hora", p);
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data;
+}
