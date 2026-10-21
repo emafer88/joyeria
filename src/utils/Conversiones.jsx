@@ -25,30 +25,52 @@ export function ConvertirCapitalize(input) {
       reader.readAsDataURL(blob)
     })
   }
+  // 0 a 29 tienen nombre propio; de 30 en adelante es "TREINTA Y UNO".
+  const MENORES_30 = [
+    "", "UNO", "DOS", "TRES", "CUATRO", "CINCO", "SEIS", "SIETE", "OCHO", "NUEVE",
+    "DIEZ", "ONCE", "DOCE", "TRECE", "CATORCE", "QUINCE", "DIECISÉIS", "DIECISIETE",
+    "DIECIOCHO", "DIECINUEVE", "VEINTE", "VEINTIUNO", "VEINTIDÓS", "VEINTITRÉS",
+    "VEINTICUATRO", "VEINTICINCO", "VEINTISÉIS", "VEINTISIETE", "VEINTIOCHO", "VEINTINUEVE",
+  ];
+  const DECENAS = ["", "", "", "TREINTA", "CUARENTA", "CINCUENTA", "SESENTA", "SETENTA", "OCHENTA", "NOVENTA"];
+  const CENTENAS = ["", "CIENTO", "DOSCIENTOS", "TRESCIENTOS", "CUATROCIENTOS", "QUINIENTOS",
+    "SEISCIENTOS", "SETECIENTOS", "OCHOCIENTOS", "NOVECIENTOS"];
+
+  // 1 a 999
+  function centenasALetras(n) {
+    if (n === 100) return "CIEN";
+    const c = Math.floor(n / 100);
+    const r = n % 100;
+    let resto = "";
+    if (r < 30) resto = MENORES_30[r];
+    else resto = DECENAS[Math.floor(r / 10)] + (r % 10 ? " Y " + MENORES_30[r % 10] : "");
+    return [CENTENAS[c], resto].filter(Boolean).join(" ");
+  }
+
+  // Antes de MIL/MILLONES "UNO" se dice "UN": VEINTIÚN MIL, TREINTA Y UN MIL.
+  function apocopar(texto) {
+    return texto.replace(/VEINTIUNO$/, "VEINTIÚN").replace(/UNO$/, "UN");
+  }
+
+  function enteroALetras(n) {
+    if (n === 0) return "CERO";
+    const millones = Math.floor(n / 1000000);
+    const miles = Math.floor((n % 1000000) / 1000);
+    const resto = n % 1000;
+    const partes = [];
+    if (millones === 1) partes.push("UN MILLÓN");
+    else if (millones > 1) partes.push(`${apocopar(enteroALetras(millones))} MILLONES`);
+    if (miles === 1) partes.push("MIL");
+    else if (miles > 1) partes.push(`${apocopar(centenasALetras(miles))} MIL`);
+    if (resto > 0) partes.push(centenasALetras(resto));
+    return partes.join(" ");
+  }
+
   export function numeroALetras(num,nombreMoneda) {
-    const unidades = ["", "UNO", "DOS", "TRES", "CUATRO", "CINCO", "SEIS", "SIETE", "OCHO", "NUEVE"];
-    const decenas = ["", "", "VEINTE", "TREINTA", "CUARENTA", "CINCUENTA", "SESENTA", "SETENTA", "OCHENTA", "NOVENTA"];
-    const especiales = {
-      10: "DIEZ", 11: "ONCE", 12: "DOCE", 13: "TRECE", 14: "CATORCE", 15: "QUINCE",
-      16: "DIECISÉIS", 17: "DIECISIETE", 18: "DIECIOCHO", 19: "DIECINUEVE",
-      20: "VEINTE"
-    };
-  
-    const [entero, decimal] = num.toFixed(2).split(".");
-    const n = parseInt(entero, 10);
-  
-    let texto = "";
-  
-    if (n === 0) texto = "CERO";
-    else if (n < 10) texto = unidades[n];
-    else if (n < 21) texto = especiales[n];
-    else {
-      const dec = Math.floor(n / 10);
-      const uni = n % 10;
-      texto = decenas[dec];
-      if (uni > 0) texto += " Y " + unidades[uni];
-    }
-  
-    return `SON: ${texto} CON ${decimal}/100 ${nombreMoneda}`;
+    const [entero, decimal] = Number(num || 0).toFixed(2).split(".");
+    const texto = enteroALetras(parseInt(entero, 10));
+    // nombre_moneda vale "-" si la empresa no lo configuró.
+    const moneda = nombreMoneda && nombreMoneda !== "-" ? ` ${nombreMoneda}` : "";
+    return `SON: ${texto} CON ${decimal}/100${moneda}`;
   }
   
