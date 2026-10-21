@@ -4,7 +4,8 @@ import { Device } from "../../../styles/breakpoints";
 import { FormatearNumeroDinero } from "../../../utils/Conversiones";
 import { useEmpresaStore } from "../../../store/EmpresaStore";
 // formato="cantidad": número sin signo de pesos (ej. piezas vendidas).
-export const CardTotales = ({ title, icon, value, percentage, formato }) => {
+// detalle: texto chico bajo el valor (ej. "12 ventas").
+export const CardTotales = ({ title, icon, value, percentage, formato, detalle }) => {
   const isPositive = percentage > 0;
   const isNeutral = percentage === 0;
   const {dataempresa} = useEmpresaStore()
@@ -21,6 +22,7 @@ export const CardTotales = ({ title, icon, value, percentage, formato }) => {
           ? Number(value || 0).toLocaleString("es-MX", { maximumFractionDigits: 3 })
           : FormatearNumeroDinero(value || 0, dataempresa?.currency, dataempresa?.iso)}
       </SalesValue>
+      {detalle && <Detalle>{detalle}</Detalle>}
       {
         percentage!=undefined &&<Percentage isPositive={isPositive} isNeutral={isNeutral}>
        <Icon icon={isNeutral?"akar-icons:minus":isPositive?"iconamoon:arrow-up-2-fill":"iconamoon:arrow-down-2-fill"}   width="16"
@@ -61,6 +63,12 @@ const SalesValue = styled.span`
   @media ${Device.tablet} {
     font-size: 1.8rem;
   }
+`;
+const Detalle = styled.span`
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: start;
 `;
 const Percentage = styled.span`
   color: ${(props) =>

@@ -8,10 +8,14 @@ import { CardMovimientosCajaLive } from "../organismos/DashboardDesign/CardMovim
 import {CardProductosTopMonto} from "../organismos/DashboardDesign/CardProductosTopMonto"
 import { useReportesStore } from "../../store/ReportesStore";
 import { usePermisosDeMenu } from "../../hooks/usePermisosDeMenu";
+import { DesgloseVentas } from "../organismos/DashboardDesign/DesgloseVentas";
+import { useDesgloseVentasDashboardQuery } from "../../tanstack/ReportesStack";
 export const DashboardTemplate = () => {
   const {totalventas,porcentajeCambio,totalCantidadDetalleVentas,totalGanancias} = useReportesStore() 
   // La ganancia sale del costo: sin "Ver costos" la base la devuelve en null.
   const { veCostos } = usePermisosDeMenu();
+  const { data: desglose } = useDesgloseVentasDashboardQuery();
+  const numVentas = desglose?.num_ventas ?? 0;
    return (
     <Container>
       <DashboardHeader />
@@ -33,6 +37,14 @@ export const DashboardTemplate = () => {
               icon={"fluent-mdl2:product-variant"}
             />
           </ContentTotales>
+          <ContentTotales>
+            <CardTotales
+              value={desglose?.ticket_promedio}
+              title="Ticket promedio"
+              icon={"mdi:receipt-text-outline"}
+              detalle={`${numVentas} venta${numVentas === 1 ? "" : "s"}`}
+            />
+          </ContentTotales>
           {veCostos && (
             <ContentTotales>
               <CardTotales
@@ -49,6 +61,9 @@ export const DashboardTemplate = () => {
         <Area3>
         <ChartProductosTop5/>
         </Area3>
+        <Area5>
+          <DesgloseVentas />
+        </Area5>
         <Area4>
         <CardMovimientosCajaLive/>
         <CardProductosTopMonto/>
@@ -72,6 +87,7 @@ const MainContent = styled.div`
     "area1"
     "area2"
     "area3"
+    "area5"
     "area4";
   grid-template-columns: 1fr;
   gap: 15px;
@@ -79,6 +95,7 @@ const MainContent = styled.div`
     grid-template-areas:
       "area1 area1 area3"
       "area2 area2 area3"
+      "area5 area5 area5"
       "area4 area4 area4";
     grid-template-columns: 2fr 1fr 1fr;
     gap: 20px;
@@ -91,7 +108,7 @@ const Area1 = styled.section`
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
   @media ${Device.desktop} {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
 `;
 const Area2 = styled.section`
@@ -108,6 +125,13 @@ const Area3 = styled.section`
   border: 2px solid ${({ theme }) => theme.bordercolorDash};
   border-radius: 20px;
   /* background-color: rgba(21, 56, 231, 0.2); */
+`;
+const Area5 = styled.section`
+  grid-area: area5;
+  background-color: ${({ theme }) => theme.body};
+  border: 2px solid ${({ theme }) => theme.bordercolorDash};
+  box-shadow: ${({ theme }) => theme.boxshadow};
+  border-radius: 20px;
 `;
 const Area4 = styled.section`
   grid-area: area4;
