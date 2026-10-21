@@ -1,3 +1,4 @@
+import { useState } from "react";
 import styled from "styled-components";
 import { Device } from "../../styles/breakpoints";
 import { DashboardHeader } from "../organismos/DashboardDesign/DashboardHeader";
@@ -9,6 +10,7 @@ import {CardProductosTopMonto} from "../organismos/DashboardDesign/CardProductos
 import { useReportesStore } from "../../store/ReportesStore";
 import { usePermisosDeMenu } from "../../hooks/usePermisosDeMenu";
 import { DesgloseVentas } from "../organismos/DashboardDesign/DesgloseVentas";
+import { ModalDetalleDashboard } from "../organismos/DashboardDesign/ModalDetalleDashboard";
 import { useDesgloseVentasDashboardQuery } from "../../tanstack/ReportesStack";
 export const DashboardTemplate = () => {
   const {totalventas,porcentajeCambio,totalCantidadDetalleVentas,totalGanancias} = useReportesStore() 
@@ -16,6 +18,8 @@ export const DashboardTemplate = () => {
   const { veCostos } = usePermisosDeMenu();
   const { data: desglose } = useDesgloseVentasDashboardQuery();
   const numVentas = desglose?.num_ventas ?? 0;
+  // Tarjeta cuyo detalle está abierto: ventas | ticket | piezas | ganancias.
+  const [detalle, setDetalle] = useState(null);
    return (
     <Container>
       <DashboardHeader />
@@ -27,6 +31,7 @@ export const DashboardTemplate = () => {
               value={totalventas}
               title="Ventas"
               icon={"mdi:dollar"}
+              onClick={() => setDetalle("ventas")}
             />
           </ContentTotales>
           <ContentTotales>
@@ -35,6 +40,7 @@ export const DashboardTemplate = () => {
               value={totalCantidadDetalleVentas}
               title="Piezas vendidas"
               icon={"fluent-mdl2:product-variant"}
+              onClick={() => setDetalle("piezas")}
             />
           </ContentTotales>
           <ContentTotales>
@@ -43,6 +49,7 @@ export const DashboardTemplate = () => {
               title="Ticket promedio"
               icon={"mdi:receipt-text-outline"}
               detalle={`${numVentas} venta${numVentas === 1 ? "" : "s"}`}
+              onClick={() => setDetalle("ticket")}
             />
           </ContentTotales>
           {veCostos && (
@@ -51,6 +58,7 @@ export const DashboardTemplate = () => {
                 value={totalGanancias}
                 title="Ganancias"
                 icon={"hugeicons:money-send-circle"}
+                onClick={() => setDetalle("ganancias")}
               />
             </ContentTotales>
           )}
@@ -69,6 +77,13 @@ export const DashboardTemplate = () => {
         <CardProductosTopMonto/>
         </Area4>
       </MainContent>
+      {detalle && (
+        <ModalDetalleDashboard
+          tipo={detalle}
+          veCostos={veCostos}
+          onClose={() => setDetalle(null)}
+        />
+      )}
     </Container>
   );
 };
@@ -145,6 +160,10 @@ const Area4 = styled.section`
 `;
 const ContentTotales = styled.div`
   background-color: ${({ theme }) => theme.body};
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  &:has([role="button"]):hover {
+    transform: translateY(-2px);
+  }
   padding: 10px;
   border-radius: 20px;
   text-align: center;
