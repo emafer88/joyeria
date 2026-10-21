@@ -5,13 +5,30 @@ import { FormatearNumeroDinero } from "../../../utils/Conversiones";
 import { useEmpresaStore } from "../../../store/EmpresaStore";
 // formato="cantidad": número sin signo de pesos (ej. piezas vendidas).
 // detalle: texto chico bajo el valor (ej. "12 ventas").
-export const CardTotales = ({ title, icon, value, percentage, formato, detalle }) => {
+// onClick: la tarjeta abre su detalle (se ve "Ver detalle").
+export const CardTotales = ({ title, icon, value, percentage, formato, detalle, onClick }) => {
   const isPositive = percentage > 0;
   const isNeutral = percentage === 0;
   const {dataempresa} = useEmpresaStore()
 
+  const clicable = !!onClick;
   return (
-    <Container>
+    <Container
+      $clicable={clicable}
+      onClick={onClick}
+      role={clicable ? "button" : undefined}
+      tabIndex={clicable ? 0 : undefined}
+      onKeyDown={
+        clicable
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
+    >
       <Title>
         <TitleText>{title} </TitleText>
         <Icon width="20" height="20" icon={icon} />
@@ -30,6 +47,11 @@ export const CardTotales = ({ title, icon, value, percentage, formato, detalle }
         {percentage}% al periodo anterior
       </Percentage>
       }
+      {clicable && (
+        <VerDetalle className="ver-detalle">
+          Ver detalle <Icon icon="mdi:chevron-right" width="16" height="16" />
+        </VerDetalle>
+      )}
       
     </Container>
   );
@@ -37,6 +59,12 @@ export const CardTotales = ({ title, icon, value, percentage, formato, detalle }
 const Container = styled.div`
   height: 100%;
   position: relative;
+  cursor: ${({ $clicable }) => ($clicable ? "pointer" : "default")};
+  outline: none;
+  &:hover .ver-detalle,
+  &:focus-visible .ver-detalle {
+    color: ${({ theme }) => theme.text};
+  }
   display:flex;
   flex-direction:column;
   justify-content:space-between;
@@ -63,6 +91,15 @@ const SalesValue = styled.span`
   @media ${Device.tablet} {
     font-size: 1.8rem;
   }
+`;
+const VerDetalle = styled.span`
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-end;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  transition: color 0.15s ease;
 `;
 const Detalle = styled.span`
   color: #6b7280;
