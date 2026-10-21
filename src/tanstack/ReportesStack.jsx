@@ -6,6 +6,9 @@ import { useReportesStore } from "../store/ReportesStore";
 import { useReportStore } from "../store/ReportStore";
 import { useReportesFiltrosStore } from "../store/ReportesFiltrosStore";
 import { DesgloseVentasDashboard } from "../supabaseCrud/crudDashboard";
+// Las consultas del dashboard esperan a que el filtro ponga fechas: antes
+// salían también con fechas null, respondían 0 y, si esa respuesta llegaba
+// después de la buena, la tarjeta se quedaba en $0.00 (guardan en el store).
 export const useMostrarVentasDashboardQuery = () => {
   const { dataempresa } = useEmpresaStore();
   const { fechaInicio, fechaFin } = useDashboardStore();
@@ -25,7 +28,7 @@ export const useMostrarVentasDashboardQuery = () => {
         _fecha_inicio: fechaInicio,
         _fecha_fin: fechaFin,
       }),
-    enabled: !!dataempresa,
+    enabled: !!dataempresa && !!fechaInicio && !!fechaFin,
   });
 };
 export const useMostrarCantidadDetalleVentaDashboardQuery = () => {
@@ -48,7 +51,7 @@ export const useMostrarCantidadDetalleVentaDashboardQuery = () => {
         _fecha_inicio: fechaInicio,
         _fecha_fin: fechaFin,
       }),
-    enabled: !!dataempresa,
+    enabled: !!dataempresa && !!fechaInicio && !!fechaFin,
   });
 };
 export const useMostrarCantidadDetalleVentaPeriodoAnteriorDashboardQuery =
@@ -72,7 +75,7 @@ export const useMostrarCantidadDetalleVentaPeriodoAnteriorDashboardQuery =
           _fecha_inicio: fechasAnteriores?.fechaAnteriorInicio,
           _fecha_fin: fechasAnteriores?.fechaAnteriorFin,
         }),
-      enabled: !!dataempresa,
+      enabled: !!dataempresa && !!fechasAnteriores?.fechaAnteriorInicio,
     });
   };
 export const useMostrarVentasDashboardPeriodoAnteriorQuery = () => {
@@ -102,7 +105,7 @@ export const useMostrarVentasDashboardPeriodoAnteriorQuery = () => {
             _fecha_fin: fechasAnteriores?.fechaAnteriorFin,
           })
         : sinPeriodoAnterior(),
-    enabled: !!dataempresa,
+    enabled: !!dataempresa && !!fechaInicio && !!fechaFin,
     refetchOnWindowFocus: false,
   });
 };
@@ -127,7 +130,7 @@ export const useGananciasDetalleVentaQuery = () => {
         _fecha_inicio: fechaInicio,
         _fecha_fin: fechaFin,
       }),
-    enabled: !!dataempresa,
+    enabled: !!dataempresa && !!fechaInicio && !!fechaFin,
     refetchOnWindowFocus: false,
   });
 };
