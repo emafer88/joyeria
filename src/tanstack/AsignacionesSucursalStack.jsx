@@ -17,6 +17,7 @@ export const useMostrarSucursalAsignadasQuery = () => {
       mostrarSucursalAsignadas({
         id_usuario: datausuarios?.id,
       }),
-    enabled: !!datausuarios,
+    // datausuarios arranca como [] (truthy): esperar a que tenga id.
+    enabled: !!datausuarios?.id,
   });
 };

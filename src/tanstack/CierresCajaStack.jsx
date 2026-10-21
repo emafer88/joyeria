@@ -36,6 +36,7 @@ export const useMostrarAperturasCajaPorUsuarioQuery = () => {
       mostrarCierreCajaPorUsuario({
         id_usuario: datausuarios?.id,
       }),
-    enabled: !!datausuarios,
+    // datausuarios arranca como [] (truthy): esperar a que tenga id.
+    enabled: !!datausuarios?.id,
   });
 };

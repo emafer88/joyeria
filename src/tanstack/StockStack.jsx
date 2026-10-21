@@ -29,7 +29,8 @@ export const useMostrarStockXAlmacenesYProductoQuery = () => {
         id_producto: productosItemSelect?.id,
         id_almacen: almacenSelectItem?.id,
       }),
-    enabled: !!almacenSelectItem,
+    // almacenSelectItem arranca como [] (truthy): esperar a que tenga id.
+    enabled: !!almacenSelectItem?.id && !!productosItemSelect?.id,
     refetchOnWindowFocus: false,
   });
 };
