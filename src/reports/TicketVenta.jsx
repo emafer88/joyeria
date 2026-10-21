@@ -9,12 +9,12 @@ const TicketVenta = async (output, data) => {
     data.dataventas?.monto_total,
     data.dataempresa?.nombre_moneda
   );
-  const fecha = fechaObj.toLocaleDateString("es-PE", {
+  const fecha = fechaObj.toLocaleDateString("es-MX", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
   });
-  const hora = fechaObj.toLocaleTimeString("es-PE", {
+  const hora = fechaObj.toLocaleTimeString("es-MX", {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
@@ -100,7 +100,7 @@ const TicketVenta = async (output, data) => {
               },
               {},
               {
-                text: item.monto,
+                text: Number(item.monto).toFixed(2),
                 style: "tTotals",
                 colSpan: 2,
                 border: [false, false, false, true],
@@ -111,7 +111,7 @@ const TicketVenta = async (output, data) => {
               { text: " ", colSpan: 2, border: [false, false, false, false] },
               {},
               {
-                text: `Vuelto: ${simboloMoneda} ${item.vuelto}`,
+                text: `Cambio: ${simboloMoneda} ${Number(item.vuelto).toFixed(2)}`,
                 style: "tProductsBody",
                 colSpan: 2,
                 alignment: "right",
@@ -128,7 +128,7 @@ const TicketVenta = async (output, data) => {
                 colSpan: 2,
               },
               {},
-              { text: item.monto, style: "tTotals", colSpan: 2 },
+              { text: Number(item.monto).toFixed(2), style: "tTotals", colSpan: 2 },
               {},
             ],
           ]
@@ -299,7 +299,7 @@ const TicketVenta = async (output, data) => {
           [
             { text: `TOTAL: ${simboloMoneda}`, style: "tTotals", colSpan: 2 },
             {},
-            { text: data.dataventas.monto_total, style: "tTotals", colSpan: 2 },
+            { text: Number(data.dataventas.monto_total).toFixed(2), style: "tTotals", colSpan: 2 },
             {},
           ],
           //TOTAL IMPORTE EN LETRAS

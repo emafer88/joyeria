@@ -91,25 +91,29 @@ export const IngresoCobro = forwardRef((props, ref) => {
   //Movientos de caja
   const { insertarMovCaja } = useMovCajaStore();
   const calcularVueltoYRestante = () => {
+    // Se trabaja en centavos: con flotantes 700 - 94.95 da 605.0499999 y un
+    // restante de 0.0000001 bloqueaba la venta.
+    const centavos = (n) => Math.round((Number(n) || 0) * 100);
     const totalPagado = Object.values(valoresPago).reduce(
-      (acc, curr) => acc + curr,
+      (acc, curr) => acc + centavos(curr),
       0
     );
-    const totalSinEfectivo = totalPagado - (valoresPago["Efectivo"] || 0);
+    const precio = centavos(precioVenta);
+    const totalSinEfectivo = totalPagado - centavos(valoresPago["Efectivo"]);
     // Si el total sin efectivo excede el precio de venta, no permitir el exceso
-    if (totalSinEfectivo > precioVenta) {
+    if (totalSinEfectivo > precio) {
       setVuelto(0);
-      setRestante(precioVenta - totalSinEfectivo); //Restante negativo para indicar que se excede sin efectivo
+      setRestante((precio - totalSinEfectivo) / 100); //Restante negativo para indicar que se excede sin efectivo
     } else {
       // Permitir el exceso solo si es en efectivo
-      if (totalPagado >= precioVenta) {
-        const exceso = totalPagado - precioVenta;
-        setVuelto(valoresPago["Efectivo"] ? exceso : 0);
+      if (totalPagado >= precio) {
+        const exceso = totalPagado - precio;
+        setVuelto(valoresPago["Efectivo"] ? exceso / 100 : 0);
         setRestante(0);
       } else {
         // Si el total pagado no cubre el precio de venta, calcular el restante
         setVuelto(0);
-        setRestante(precioVenta - totalPagado);
+        setRestante((precio - totalPagado) / 100);
       }
     }
   };
@@ -321,7 +325,7 @@ export const IngresoCobro = forwardRef((props, ref) => {
           <section className="area3">
             <article className="etiquetas">
               <span className="total">Total: </span>
-              <span>Vuelto: </span>
+              <span>Cambio: </span>
               <span>Restante: </span>
             </article>
             <article>
