@@ -3,7 +3,8 @@ import styled from "styled-components";
 import { Device } from "../../../styles/breakpoints";
 import { FormatearNumeroDinero } from "../../../utils/Conversiones";
 import { useEmpresaStore } from "../../../store/EmpresaStore";
-// formato="cantidad": número sin signo de pesos (ej. piezas vendidas).
+// formato="cantidad": número sin signo de pesos (ej. piezas vendidas);
+// formato="gramos": número con " g".
 // detalle: texto chico bajo el valor (ej. "12 ventas").
 // onClick: la tarjeta abre su detalle (se ve "Ver detalle").
 export const CardTotales = ({ title, icon, value, percentage, formato, detalle, onClick }) => {
@@ -37,6 +38,8 @@ export const CardTotales = ({ title, icon, value, percentage, formato, detalle, 
       <SalesValue>
         {formato === "cantidad"
           ? Number(value || 0).toLocaleString("es-MX", { maximumFractionDigits: 3 })
+          : formato === "gramos"
+          ? `${Number(value || 0).toLocaleString("es-MX", { maximumFractionDigits: 2 })} g`
           : FormatearNumeroDinero(value || 0, dataempresa?.currency, dataempresa?.iso)}
       </SalesValue>
       {detalle && <Detalle>{detalle}</Detalle>}

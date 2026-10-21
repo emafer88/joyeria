@@ -37,3 +37,21 @@ export async function VentasPorHoraDashboard(p) {
   }
   return data;
 }
+
+// Pestaña Joyería: piezas vendidas en el rango por material y pureza.
+export async function JoyeriaVentasDashboard(p) {
+  const { data, error } = await supabase.rpc("dashboard_joyeria_ventas", p);
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data;
+}
+
+// Pestaña Joyería: piezas disponibles hoy por material y pureza.
+export async function JoyeriaInventarioDashboard(p) {
+  const { data, error } = await supabase.rpc("dashboard_joyeria_inventario", p);
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data;
+}
