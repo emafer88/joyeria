@@ -15,9 +15,16 @@ import { CardTotales } from "./CardTotales";
 const gramos = (n) =>
   `${Number(n || 0).toLocaleString("es-MX", { maximumFractionDigits: 2 })} g`;
 const nombre = (f) => [f.material, f.pureza].filter(Boolean).join(" ");
+// Metal de una fila por el nombre del material ("Oro amarillo", "Oro blanco",
+// "Plata"...); los demás materiales no entran en las tarjetas de gramos.
+const metal = (f) => {
+  const m = String(f.material || "").toLowerCase();
+  return m.includes("oro") ? "oro" : m.includes("plata") ? "plata" : null;
+};
 
 /**
- * Pestaña "Joyería" del dashboard: piezas vendidas en el rango por material y
+ * Pestaña "Joyería" del dashboard: gramos de oro y de plata vendidos (cada
+ * uno con su precio por gramo), piezas vendidas en el rango por material y
  * pureza (piezas, gramos, monto, precio por gramo y ganancia con "Ver costos")
  * e inventario disponible hoy por material.
  */
@@ -47,8 +54,18 @@ export function DashboardJoyeria({ veCostos }) {
 
   const filasVentas = ventas.data ?? [];
   const totalPiezas = filasVentas.reduce((s, f) => s + Number(f.piezas), 0);
-  const totalGramos = filasVentas.reduce((s, f) => s + Number(f.gramos), 0);
   const totalMonto = filasVentas.reduce((s, f) => s + Number(f.total), 0);
+  const porMetal = (m) =>
+    filasVentas
+      .filter((f) => metal(f) === m)
+      .reduce(
+        (s, f) => ({ gramos: s.gramos + Number(f.gramos), total: s.total + Number(f.total) }),
+        { gramos: 0, total: 0 }
+      );
+  const oro = porMetal("oro");
+  const plata = porMetal("plata");
+  const detallePorGramo = (x) =>
+    x.gramos > 0 ? `${dinero(x.total / x.gramos)} por gramo en promedio` : "Sin ventas";
   const maxMonto = Math.max(0, ...filasVentas.map((f) => Number(f.total)));
 
   const filasInv = inventario.data ?? [];
@@ -68,17 +85,25 @@ export function DashboardJoyeria({ veCostos }) {
           <CardTotales value={totalPiezas} formato="cantidad" title="Piezas vendidas" icon="mdi:ring" />
         </Tarjeta>
         <Tarjeta>
-          <CardTotales value={totalGramos} formato="gramos" title="Gramos vendidos" icon="mdi:scale-balance" />
-        </Tarjeta>
-        <Tarjeta>
-          <CardTotales value={totalMonto} title="Monto en joyería" icon="mdi:dollar" />
+          <CardTotales
+            value={oro.gramos}
+            formato="gramos"
+            title="Gramos de oro"
+            icon="mdi:gold"
+            detalle={detallePorGramo(oro)}
+          />
         </Tarjeta>
         <Tarjeta>
           <CardTotales
-            value={totalGramos > 0 ? totalMonto / totalGramos : 0}
-            title="Precio promedio por gramo"
-            icon="mdi:tag-outline"
+            value={plata.gramos}
+            formato="gramos"
+            title="Gramos de plata"
+            icon="mdi:scale-balance"
+            detalle={detallePorGramo(plata)}
           />
+        </Tarjeta>
+        <Tarjeta>
+          <CardTotales value={totalMonto} title="Monto en joyería" icon="mdi:dollar" />
         </Tarjeta>
       </section>
 
