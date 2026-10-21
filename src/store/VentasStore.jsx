@@ -40,6 +40,8 @@ export const useVentasStore = create((set, get) => ({
         };
       }
     }),
+  // Cambia la venta del carrito (al retomar una venta en espera).
+  setIdventa: (id) => set({ idventa: id }),
   setStateMetodosPago: () =>
     set((state) => ({ stateMetodosPago: !state.stateMetodosPago })),
   insertarVentas: async (p) => {

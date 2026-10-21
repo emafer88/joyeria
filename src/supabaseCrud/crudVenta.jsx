@@ -123,3 +123,70 @@ export async function GuardarClaveAutorizacion(p) {
     throw new Error(error.message);
   }
 }
+
+// Venta en espera: el carrito se guarda con estado 'espera' para atender a
+// otro cliente. No es 'pendiente', así que la limpieza de ventas incompletas
+// al abrir el POS no la borra, y su stock sigue descontado.
+export async function PonerVentaEnEspera(p) {
+  const { error } = await supabase
+    .from(tabla)
+    .update({ estado: "espera" })
+    .eq("id", p.id)
+    .eq("estado", "pendiente");
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+// Ventas en espera de la sucursal (de cualquier turno), con sus productos.
+export async function MostrarVentasEnEspera(p) {
+  const { data: ventas, error } = await supabase
+    .from(tabla)
+    .select(`id, fecha, cajero:usuarios!ventas_id_usuario_fkey(nombres)`)
+    .eq("id_sucursal", p.id_sucursal)
+    .eq("estado", "espera")
+    .order("fecha", { ascending: true });
+  if (error) {
+    throw new Error(error.message);
+  }
+  if (!ventas.length) return [];
+  const { data: detalle, error: errorDetalle } = await supabase
+    .from("detalle_venta_v")
+    .select("id_venta, descripcion, total")
+    .in(
+      "id_venta",
+      ventas.map((v) => v.id)
+    );
+  if (errorDetalle) {
+    throw new Error(errorDetalle.message);
+  }
+  return ventas.map((v) => {
+    const lineas = detalle.filter((d) => d.id_venta === v.id);
+    return {
+      ...v,
+      productos: lineas.map((d) => d.descripcion),
+      total:
+        lineas.reduce((s, d) => s + Math.round(Number(d.total) * 100), 0) / 100,
+    };
+  });
+}
+
+// La venta vuelve al carrito, en el turno y con el cajero de quien la retoma.
+export async function RetomarVentaEnEspera(p) {
+  const { data, error } = await supabase
+    .from(tabla)
+    .update({
+      estado: "pendiente",
+      id_cierre_caja: p.id_cierre_caja,
+      id_usuario: p.id_usuario,
+    })
+    .eq("id", p.id)
+    .eq("estado", "espera")
+    .select("id");
+  if (error) {
+    throw new Error(error.message);
+  }
+  if (!data?.length) {
+    throw new Error("Esa venta ya no está en espera (otra caja la retomó o se descartó)");
+  }
+}

@@ -11,6 +11,7 @@ import { useValidarPermisosOperativos } from "../../../hooks/useValidarPermisosO
 import { useDetalleVentasStore } from "../../../store/DetalleVentasStore";
 import { useCierreCajaStore } from "../../../store/CierreCajaStore";
 import { toast } from "sonner";
+import { usePonerEnEsperaMutate } from "../../../tanstack/VentasStack";
 export function AreaTecladoPos() {
   const { setStatePantallaCobro, stateMetodosPago } = useVentasStore();
   const { dataempresa } = useEmpresaStore();
@@ -30,6 +31,16 @@ export function AreaTecladoPos() {
       return;
     }
     setStateApartar(true);
+  };
+  const ponerEnEspera = usePonerEnEsperaMutate();
+  const pedirEspera = () => {
+    if (!datadetalleventa?.length) {
+      toast.warning("Agrega productos para dejar la venta en espera");
+      return;
+    }
+    ponerEnEspera.mutate(undefined, {
+      onSuccess: () => toast.success("Venta en espera: el carrito quedó libre"),
+    });
   };
   const { validarPermiso } = useValidarPermisosOperativos();
   // const { data: datametodospago } = useQuery({
@@ -65,6 +76,16 @@ export function AreaTecladoPos() {
           <Btn1
             funcion={abrirApartar}
             titulo="Apartar"
+            border="0"
+            height="70px"
+            width="100%"
+          />
+        </article>
+        <article className="box">
+          <Btn1
+            funcion={pedirEspera}
+            disabled={ponerEnEspera.isPending}
+            titulo="En espera"
             border="0"
             height="70px"
             width="100%"

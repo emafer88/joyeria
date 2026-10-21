@@ -9,7 +9,7 @@ import { toast } from "sonner";
 export function MenuFlotante() {
   const [isOpen, setIsOpen] = useState(false);
   const { eliminarVenta,idventa } = useVentasStore();
-  const { setStateIngresoSalida, setTipoRegistro, setStateCierraCaja, setStateVentasTurno, setStateApartados } =
+  const { setStateIngresoSalida, setTipoRegistro, setStateCierraCaja, setStateVentasTurno, setStateApartados, setStateVentasEspera } =
   useCierreCajaStore();
   const queryClient = useQueryClient()
   const {mutate:mutateEliminarVenta,isPending} = useMutation({
@@ -97,6 +97,17 @@ export function MenuFlotante() {
         >
           <Icon icon="mdi:archive-clock-outline" />
           <Text>Apartados</Text>
+        </MenuItem>
+        <MenuItem
+          isOpen={isOpen}
+          delay="0.5s"
+          onClick={() => {
+            toggleMenu();
+            setStateVentasEspera(true);
+          }}
+        >
+          <Icon icon="mdi:pause-circle-outline" />
+          <Text>Ventas en espera</Text>
         </MenuItem>
         <MenuItem isOpen={isOpen} delay="0.3s" onClick={mutateEliminarVenta}>
           <Icon icon="flat-color-icons:delete-row" />

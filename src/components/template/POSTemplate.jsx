@@ -21,6 +21,7 @@ import { MenuFlotante } from "../organismos/POSDesign/MenuFlotante";
 import { VentasTurno } from "../organismos/POSDesign/VentasTurno";
 import { ModalApartar } from "../organismos/POSDesign/ModalApartar";
 import { PanelApartados } from "../organismos/POSDesign/PanelApartados";
+import { PanelVentasEspera } from "../organismos/POSDesign/PanelVentasEspera";
 import { SelectAlmacenModal } from "../organismos/POSDesign/SelectAlmacenModal";
 import { useStockStore } from "../../store/StockStore";
 import { useBuscarProductosQuery } from "../../tanstack/ProductosStack";
@@ -37,6 +38,7 @@ export function POSTemplate() {
     stateVentasTurno,
     stateApartar,
     stateApartados,
+    stateVentasEspera,
   } = useCierreCajaStore();
   const { stateModal } = useStockStore();
   useBuscarProductosQuery();
@@ -66,6 +68,7 @@ export function POSTemplate() {
       {stateVentasTurno && <VentasTurno />}
       {stateApartar && <ModalApartar />}
       {stateApartados && <PanelApartados />}
+      {stateVentasEspera && <PanelVentasEspera />}
     </Container>
   );
 }
