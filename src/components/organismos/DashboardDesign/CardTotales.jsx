@@ -3,7 +3,9 @@ import styled from "styled-components";
 import { Device } from "../../../styles/breakpoints";
 import { FormatearNumeroDinero } from "../../../utils/Conversiones";
 import { useEmpresaStore } from "../../../store/EmpresaStore";
-export const CardTotales = ({ title, icon, value, percentage }) => {
+// formato="cantidad": número sin signo de pesos; decimales solo si los hay
+// (ventas por peso), hasta 3.
+export const CardTotales = ({ title, icon, value, percentage, formato }) => {
   const isPositive = percentage > 0;
   const isNeutral = percentage === 0;
   const {dataempresa} = useEmpresaStore()
@@ -15,11 +17,11 @@ export const CardTotales = ({ title, icon, value, percentage }) => {
         <Icon width="20" height="20" icon={icon} />
       </Title>
       
-      <SalesValue>{FormatearNumeroDinero(
-                  value || 0,
-                  dataempresa?.currency,
-                  dataempresa?.iso
-                )}  </SalesValue>
+      <SalesValue>
+        {formato === "cantidad"
+          ? Number(value || 0).toLocaleString("es-MX", { maximumFractionDigits: 3 })
+          : FormatearNumeroDinero(value || 0, dataempresa?.currency, dataempresa?.iso)}
+      </SalesValue>
       {
         percentage!=undefined &&<Percentage isPositive={isPositive} isNeutral={isNeutral}>
        <Icon icon={isNeutral?"akar-icons:minus":isPositive?"iconamoon:arrow-up-2-fill":"iconamoon:arrow-down-2-fill"}   width="16"
