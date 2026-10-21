@@ -3,8 +3,7 @@ import styled from "styled-components";
 import { Device } from "../../../styles/breakpoints";
 import { FormatearNumeroDinero } from "../../../utils/Conversiones";
 import { useEmpresaStore } from "../../../store/EmpresaStore";
-// formato="cantidad": número sin signo de pesos; decimales solo si los hay
-// (ventas por peso), hasta 3.
+// formato="cantidad": número sin signo de pesos (ej. piezas vendidas).
 export const CardTotales = ({ title, icon, value, percentage, formato }) => {
   const isPositive = percentage > 0;
   const isNeutral = percentage === 0;
