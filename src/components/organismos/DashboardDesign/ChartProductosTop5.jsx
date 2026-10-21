@@ -50,7 +50,7 @@ export const ChartProductosTop5 = () => {
     <Container>
       <Header>
         <Title>TOP 5</Title>
-        <Subtitle>Productos por cantidad vendida</Subtitle>
+        <Subtitle>Productos por piezas vendidas</Subtitle>
       </Header>
       {
         data && data.length >0 ?(<>
