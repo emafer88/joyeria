@@ -66,11 +66,19 @@ export function ConvertirCapitalize(input) {
     return partes.join(" ");
   }
 
+  // Formato de México: "SON: SEIS MIL PESOS 00/100 M.N.".
   export function numeroALetras(num,nombreMoneda) {
     const [entero, decimal] = Number(num || 0).toFixed(2).split(".");
-    const texto = enteroALetras(parseInt(entero, 10));
+    const n = parseInt(entero, 10);
     // nombre_moneda vale "-" si la empresa no lo configuró.
-    const moneda = nombreMoneda && nombreMoneda !== "-" ? ` ${nombreMoneda}` : "";
-    return `SON: ${texto} CON ${decimal}/100${moneda}`;
+    const configurada = nombreMoneda && nombreMoneda !== "-" ? nombreMoneda.toUpperCase() : "PESOS";
+    const esPeso = configurada === "PESOS" || configurada === "PESO";
+    let moneda = configurada;
+    if (esPeso && n === 1) moneda = "PESO";
+    else if (esPeso) moneda = "PESOS";
+    // "VEINTIÚN PESOS"; con millones cerrados "UN MILLÓN DE PESOS".
+    let texto = apocopar(enteroALetras(n));
+    if (n >= 1000000 && n % 1000000 === 0) texto += " DE";
+    return `SON: ${texto} ${moneda} ${decimal}/100${esPeso ? " M.N." : ""}`;
   }
   
