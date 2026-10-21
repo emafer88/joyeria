@@ -5,6 +5,7 @@ import { useDashboardStore } from "../store/DashboardStore";
 import { useReportesStore } from "../store/ReportesStore";
 import { useReportStore } from "../store/ReportStore";
 import { useReportesFiltrosStore } from "../store/ReportesFiltrosStore";
+import { DesgloseVentasDashboard } from "../supabaseCrud/crudDashboard";
 export const useMostrarVentasDashboardQuery = () => {
   const { dataempresa } = useEmpresaStore();
   const { fechaInicio, fechaFin } = useDashboardStore();
@@ -144,6 +145,22 @@ export const useReporteInventarioValoradoQuery = () => {
     queryKey: ["reporte de inventario valorado", params],
     queryFn: () => reportStockPorAlmacenSucursal(params),
     enabled: !!dataempresa?.id,
+    refetchOnWindowFocus: false,
+  });
+};
+// Número de ventas, ticket promedio y desglose por método de pago y canal.
+export const useDesgloseVentasDashboardQuery = () => {
+  const { dataempresa } = useEmpresaStore();
+  const { fechaInicio, fechaFin } = useDashboardStore();
+  const params = {
+    _id_empresa: dataempresa?.id,
+    _fecha_inicio: fechaInicio,
+    _fecha_fin: fechaFin,
+  };
+  return useQuery({
+    queryKey: ["desglose ventas dashboard", params],
+    queryFn: () => DesgloseVentasDashboard(params),
+    enabled: !!dataempresa?.id && !!fechaInicio && !!fechaFin,
     refetchOnWindowFocus: false,
   });
 };
