@@ -12,6 +12,7 @@ import { usePermisosDeMenu } from "../../hooks/usePermisosDeMenu";
 import { DesgloseVentas } from "../organismos/DashboardDesign/DesgloseVentas";
 import { ModalDetalleDashboard } from "../organismos/DashboardDesign/ModalDetalleDashboard";
 import { MapaCalorVentas } from "../organismos/DashboardDesign/MapaCalorVentas";
+import { DashboardJoyeria } from "../organismos/DashboardDesign/DashboardJoyeria";
 import { useDesgloseVentasDashboardQuery } from "../../tanstack/ReportesStack";
 export const DashboardTemplate = () => {
   const {totalventas,porcentajeCambio,totalCantidadDetalleVentas,totalGanancias} = useReportesStore() 
@@ -21,66 +22,81 @@ export const DashboardTemplate = () => {
   const numVentas = desglose?.num_ventas ?? 0;
   // Tarjeta cuyo detalle está abierto: ventas | ticket | piezas | ganancias.
   const [detalle, setDetalle] = useState(null);
+  const [tab, setTab] = useState("general");
    return (
     <Container>
       <DashboardHeader />
-      <MainContent>
-        <Area1>
-          <ContentTotales>
-            <CardTotales
-              percentage={porcentajeCambio}
-              value={totalventas}
-              title="Ventas"
-              icon={"mdi:dollar"}
-              onClick={() => setDetalle("ventas")}
-            />
-          </ContentTotales>
-          <ContentTotales>
-            <CardTotales
-              formato="cantidad"
-              value={totalCantidadDetalleVentas}
-              title="Piezas vendidas"
-              icon={"fluent-mdl2:product-variant"}
-              onClick={() => setDetalle("piezas")}
-            />
-          </ContentTotales>
-          <ContentTotales>
-            <CardTotales
-              value={desglose?.ticket_promedio}
-              title="Ticket promedio"
-              icon={"mdi:receipt-text-outline"}
-              detalle={`${numVentas} venta${numVentas === 1 ? "" : "s"}`}
-              onClick={() => setDetalle("ticket")}
-            />
-          </ContentTotales>
-          {veCostos && (
+      <Tabs>
+        {[
+          ["general", "General"],
+          ["joyeria", "Joyería"],
+        ].map(([id, texto]) => (
+          <button key={id} className={tab === id ? "on" : ""} onClick={() => setTab(id)}>
+            {texto}
+          </button>
+        ))}
+      </Tabs>
+      {tab === "joyeria" ? (
+        <DashboardJoyeria veCostos={veCostos} />
+      ) : (
+        <MainContent>
+          <Area1>
             <ContentTotales>
               <CardTotales
-                value={totalGanancias}
-                title="Ganancias"
-                icon={"hugeicons:money-send-circle"}
-                onClick={() => setDetalle("ganancias")}
+                percentage={porcentajeCambio}
+                value={totalventas}
+                title="Ventas"
+                icon={"mdi:dollar"}
+                onClick={() => setDetalle("ventas")}
               />
             </ContentTotales>
-          )}
-        </Area1>
-        <Area2>
-          <ChartVentas />
-        </Area2>
-        <Area3>
-        <ChartProductosTop5/>
-        </Area3>
-        <Area5>
-          <DesgloseVentas />
-        </Area5>
-        <Area6>
-          <MapaCalorVentas />
-        </Area6>
-        <Area4>
-        <CardMovimientosCajaLive/>
-        <CardProductosTopMonto/>
-        </Area4>
-      </MainContent>
+            <ContentTotales>
+              <CardTotales
+                formato="cantidad"
+                value={totalCantidadDetalleVentas}
+                title="Piezas vendidas"
+                icon={"fluent-mdl2:product-variant"}
+                onClick={() => setDetalle("piezas")}
+              />
+            </ContentTotales>
+            <ContentTotales>
+              <CardTotales
+                value={desglose?.ticket_promedio}
+                title="Ticket promedio"
+                icon={"mdi:receipt-text-outline"}
+                detalle={`${numVentas} venta${numVentas === 1 ? "" : "s"}`}
+                onClick={() => setDetalle("ticket")}
+              />
+            </ContentTotales>
+            {veCostos && (
+              <ContentTotales>
+                <CardTotales
+                  value={totalGanancias}
+                  title="Ganancias"
+                  icon={"hugeicons:money-send-circle"}
+                  onClick={() => setDetalle("ganancias")}
+                />
+              </ContentTotales>
+            )}
+          </Area1>
+          <Area2>
+            <ChartVentas />
+          </Area2>
+          <Area3>
+          <ChartProductosTop5/>
+          </Area3>
+          <Area5>
+            <DesgloseVentas />
+          </Area5>
+          <Area6>
+            <MapaCalorVentas />
+          </Area6>
+          <Area4>
+          <CardMovimientosCajaLive/>
+          <CardProductosTopMonto/>
+          </Area4>
+        </MainContent>
+      )}
       {detalle && (
         <ModalDetalleDashboard
           tipo={detalle}
@@ -99,6 +115,27 @@ const Container = styled.div`
   margin: auto;
   gap: 20px;
   padding: 20px;
+`;
+// Mismo estilo que las pestañas de Productos.
+const Tabs = styled.nav`
+  display: flex;
+  gap: 8px;
+  border-bottom: 2px solid ${({ theme }) => theme.color2};
+  button {
+    background: none;
+    border: none;
+    padding: 10px 18px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    color: ${({ theme }) => theme.text};
+    opacity: 0.5;
+    border-bottom: 3px solid transparent;
+  }
+  button.on {
+    opacity: 1;
+    border-bottom-color: #f3d20c;
+  }
 `;
 const MainContent = styled.div`
   display: grid;
