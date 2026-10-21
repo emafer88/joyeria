@@ -180,8 +180,8 @@ export const ConfiguracionTicket = () => {
               <tbody>
                 <tr>
                   <td>1</td>
-                  <td>Gaseosa Coca Cola x 1 Lt</td>
-                  <td>S/. 26</td>
+                  <td>Anillo de plata 925</td>
+                  <td>$ 26</td>
                 </tr>
               </tbody>
             </table>
@@ -189,7 +189,7 @@ export const ConfiguracionTicket = () => {
             <div className="summary-section">
               <div className="summary-row">
                 <div>Sub Total:</div>
-                <div>S/. 26</div>
+                <div>$ 26</div>
                 <div className="tech-label">
                   <span>SubTotal</span>
                   <span className="tech-type">(currency)</span>
@@ -198,7 +198,7 @@ export const ConfiguracionTicket = () => {
               </div>
               <div className="summary-row">
                 <div>Descuento:</div>
-                <div>S/. 0.00</div>
+                <div>$ 0.00</div>
                 <div className="tech-label">
                   <span>Descuento</span>
                   <span className="tech-type">(currency)</span>
@@ -207,7 +207,7 @@ export const ConfiguracionTicket = () => {
               </div>
               <div className="summary-row total">
                 <div>TOTAL:</div>
-                <div>S/. 26</div>
+                <div>$ 26</div>
                 <div className="tech-label">
                   <span>Total</span>
                   <span className="tech-type">(currency)</span>
@@ -235,7 +235,7 @@ export const ConfiguracionTicket = () => {
               </div>
               <div className="payment-row">
                 <div>EFECTIVO:</div>
-                <div>S/. 50</div>
+                <div>$ 50</div>
                 <div className="tech-label">
                   <span>Efectivo</span>
                   <span className="tech-type">(currency)</span>
@@ -243,10 +243,10 @@ export const ConfiguracionTicket = () => {
                 <div className="connector-line" />
               </div>
               <div className="payment-row">
-                <div>VUELTO:</div>
-                <div>S/. 14</div>
+                <div>CAMBIO:</div>
+                <div>$ 14</div>
                 <div className="tech-label">
-                  <span>Vuelto</span>
+                  <span>Cambio</span>
                   <span className="tech-type">(currency)</span>
                 </div>
                 <div className="connector-line" />

@@ -7,11 +7,14 @@ import {
   Mostrartop10productosmasvendidosxmonto,
   EditarCantidadDetalleVenta,
 } from "../index";
+// Cada renglón se redondea a centavos (0.350 kg × 189.90 = 66.465 → 66.47),
+// igual que detalle_venta.total en la base.
 function calcularTotal(items) {
-  return items.reduce(
-    (total, item) => total + item.precio_venta * item.cantidad,
+  const centavos = items.reduce(
+    (total, item) => total + Math.round(item.precio_venta * item.cantidad * 100),
     0
   );
+  return centavos / 100;
 }
 export const useDetalleVentasStore = create((set, get) => ({
   datadetalleventa: [],
