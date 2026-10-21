@@ -11,6 +11,11 @@ export const useDashboardStore = create((set, get) => ({
       console.warn("Fechas no definidas, no se puede calcular el rango anterior.");
       return { fechaAnteriorInicio: null, fechaAnteriorFin: null };
     }
+    // Con "Todo" (1900-01-01 a 9999-12-31) no hay periodo anterior: restar
+    // el rango daba fechas como -006200-01-02 y la consulta fallaba (400).
+    if (fechaInicio <= "1900-01-01") {
+      return { fechaAnteriorInicio: null, fechaAnteriorFin: null };
+    }
 
     const inicioActual = new Date(fechaInicio);
     const finActual = new Date(fechaFin);

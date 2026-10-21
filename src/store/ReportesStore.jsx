@@ -42,6 +42,11 @@ export const useReportesStore = create((set, get) => ({
     }
     return data;
   },
+  sinPeriodoAnterior: () => {
+    set({ totalventasAnterior: 0 });
+    get().setCalcularPorcentajeCambio();
+    return 0;
+  },
   mostrarGananciasDetalleVenta: async (p) => {
     const { data, error } = await supabase.rpc(
       "dashboardsumargananciadetalleventa",

@@ -78,8 +78,11 @@ export const useMostrarVentasDashboardPeriodoAnteriorQuery = () => {
   const { dataempresa } = useEmpresaStore();
   const { fechaInicio, fechaFin, setFechasAnteriores } = useDashboardStore();
 
-  const { mostrarVentasDashboardPeriodoAnterior, mostrarVentasDashboard } =
-    useReportesStore();
+  const {
+    mostrarVentasDashboardPeriodoAnterior,
+    mostrarVentasDashboard,
+    sinPeriodoAnterior,
+  } = useReportesStore();
   const fechasAnteriores = setFechasAnteriores();
   return useQuery({
     queryKey: [
@@ -91,11 +94,13 @@ export const useMostrarVentasDashboardPeriodoAnteriorQuery = () => {
       },
     ],
     queryFn: () =>
-      mostrarVentasDashboardPeriodoAnterior({
-        _id_empresa: dataempresa?.id,
-        _fecha_inicio: fechasAnteriores?.fechaAnteriorInicio,
-        _fecha_fin: fechasAnteriores?.fechaAnteriorFin,
-      }),
+      fechasAnteriores?.fechaAnteriorInicio
+        ? mostrarVentasDashboardPeriodoAnterior({
+            _id_empresa: dataempresa?.id,
+            _fecha_inicio: fechasAnteriores?.fechaAnteriorInicio,
+            _fecha_fin: fechasAnteriores?.fechaAnteriorFin,
+          })
+        : sinPeriodoAnterior(),
     enabled: !!dataempresa,
     refetchOnWindowFocus: false,
   });
