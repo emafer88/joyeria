@@ -14,6 +14,8 @@ import { ModalDetalleDashboard } from "../organismos/DashboardDesign/ModalDetall
 import { MapaCalorVentas } from "../organismos/DashboardDesign/MapaCalorVentas";
 import { DashboardJoyeria } from "../organismos/DashboardDesign/DashboardJoyeria";
 import { ResumenApartados } from "../organismos/DashboardDesign/ResumenApartados";
+import { AlertasInventario } from "../organismos/DashboardDesign/AlertasInventario";
+import { CancelacionesPeriodo } from "../organismos/DashboardDesign/CancelacionesPeriodo";
 import { useDesgloseVentasDashboardQuery } from "../../tanstack/ReportesStack";
 export const DashboardTemplate = () => {
   const {totalventas,porcentajeCambio,totalCantidadDetalleVentas,totalGanancias} = useReportesStore() 
@@ -95,6 +97,12 @@ export const DashboardTemplate = () => {
           <Area7>
             <ResumenApartados />
           </Area7>
+          <Area8>
+            <AlertasInventario />
+          </Area8>
+          <Area9>
+            <CancelacionesPeriodo />
+          </Area9>
           <Area4>
           <CardMovimientosCajaLive/>
           <CardProductosTopMonto/>
@@ -150,6 +158,8 @@ const MainContent = styled.div`
     "area5"
     "area6"
     "area7"
+    "area8"
+    "area9"
     "area4";
   grid-template-columns: 1fr;
   gap: 15px;
@@ -160,6 +170,8 @@ const MainContent = styled.div`
       "area5 area5 area5"
       "area6 area6 area6"
       "area7 area7 area7"
+      "area8 area8 area8"
+      "area9 area9 area9"
       "area4 area4 area4";
     grid-template-columns: 2fr 1fr 1fr;
     gap: 20px;
@@ -202,6 +214,12 @@ const Area6 = styled(Area5)`
 `;
 const Area7 = styled(Area5)`
   grid-area: area7;
+`;
+const Area8 = styled(Area5)`
+  grid-area: area8;
+`;
+const Area9 = styled(Area5)`
+  grid-area: area9;
 `;
 const Area4 = styled.section`
   grid-area: area4;

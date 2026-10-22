@@ -55,3 +55,23 @@ export async function JoyeriaInventarioDashboard(p) {
   }
   return data;
 }
+
+// Alertas de inventario al día de hoy: agotados, bajo el mínimo y sin
+// movimiento en los últimos _dias_sin_movimiento días.
+export async function AlertasInventarioDashboard(p) {
+  const { data, error } = await supabase.rpc("dashboard_alertas_inventario", p);
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data;
+}
+
+// Ventas cobradas que se cancelaron en el rango (fecha de cancelación en la
+// zona horaria _zona).
+export async function CancelacionesDashboard(p) {
+  const { data, error } = await supabase.rpc("dashboard_cancelaciones", p);
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data;
+}

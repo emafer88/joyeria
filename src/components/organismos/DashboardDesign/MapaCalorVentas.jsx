@@ -6,6 +6,7 @@ import { useEmpresaStore } from "../../../store/EmpresaStore";
 import { useDashboardStore } from "../../../store/DashboardStore";
 import { useUsuariosStore } from "../../../store/UsuariosStore";
 import { VentasPorHoraDashboard } from "../../../supabaseCrud/crudDashboard";
+import { ZONA_NAVEGADOR } from "../../../utils/zonaHoraria";
 import { FormatearNumeroDinero } from "../../../utils/Conversiones";
 
 const DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
@@ -52,6 +53,7 @@ export const MapaCalorVentas = () => {
     _id_empresa: dataempresa?.id,
     _fecha_inicio: fechaInicio,
     _fecha_fin: fechaFin,
+    _zona: ZONA_NAVEGADOR,
   };
   const { data = [], isLoading, error } = useQuery({
     queryKey: ["ventas por hora dashboard", params],
