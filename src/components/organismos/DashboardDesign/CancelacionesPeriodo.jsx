@@ -9,10 +9,9 @@ import { CancelacionesDashboard } from "../../../supabaseCrud/crudDashboard";
 import { useDesgloseVentasDashboardQuery } from "../../../tanstack/ReportesStack";
 import { FormatearNumeroDinero } from "../../../utils/Conversiones";
 import { tablaTarjetasMovil } from "../../../styles/tablaMovil";
+import { ZONA_NAVEGADOR } from "../../../utils/zonaHoraria";
 
 const VISIBLES = 8;
-// La base convierte la hora de cancelación a esta zona (la del navegador).
-const ZONA = Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Mexico_City";
 
 const fechaHora = (f) =>
   new Date(f).toLocaleString("es-MX", {
@@ -35,7 +34,7 @@ export function CancelacionesPeriodo() {
     _id_empresa: dataempresa?.id,
     _fecha_inicio: fechaInicio,
     _fecha_fin: fechaFin,
-    _zona: ZONA,
+    _zona: ZONA_NAVEGADOR,
   };
   const { data: filas = [], isLoading, error } = useQuery({
     queryKey: ["cancelaciones dashboard", params],
