@@ -41,7 +41,7 @@ export const Light = {
     color2:"#c5c5c5",
     // Borde de las secciones del dashboard (y listas de almacenes/sucursales):
     // en claro tiene que verse sobre el fondo bgtotal, como #1f1f1f en oscuro.
-    bordercolorDash:"#dde3eb",
+    bordercolorDash:"#c3ccd8",
     boxshadow:"0px 10px 20px -20px rgba(0,0,0,0.1)"
   };
   export const Dark = {
