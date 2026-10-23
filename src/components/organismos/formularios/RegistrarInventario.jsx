@@ -211,7 +211,7 @@ export function RegistrarInventario() {
                   disabled={!productosItemSelect?.nombre}
                   icono={<v.iconoguardar />}
                   titulo="Guardar"
-                  bgcolor="#F9D70B"
+                  bgcolor="acento"
                 />
               </section>
             </form>

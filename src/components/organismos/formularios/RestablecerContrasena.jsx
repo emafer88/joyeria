@@ -44,7 +44,7 @@ export function RestablecerContrasena({ usuario, cerrar }) {
               Listo. Pásale la contraseña nueva a {usuario.usuario}: sus
               sesiones abiertas se cerraron y tendrá que entrar con ella.
             </p>
-            <Btn1 titulo="Cerrar" bgcolor="#F9D70B" type="button" funcion={cerrar} />
+            <Btn1 titulo="Cerrar" bgcolor="acento" type="button" funcion={cerrar} />
           </section>
         ) : (
           <form onSubmit={handleSubmit((data) => mutate(data))}>
@@ -87,7 +87,7 @@ export function RestablecerContrasena({ usuario, cerrar }) {
               <Btn1
                 icono={<v.iconoguardar />}
                 titulo={isPending ? "Guardando..." : "Guardar"}
-                bgcolor="#F9D70B"
+                bgcolor="acento"
                 disabled={isPending}
               />
             </section>

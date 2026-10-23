@@ -56,7 +56,7 @@ export function JoyeriaTemplate() {
         {vista === "catalogo" && (
           <Btn1
             funcion={nuevoDiseno}
-            bgcolor={v.colorPrincipal}
+            bgcolor="acento"
             titulo="nuevo diseño"
             icono={<v.iconoagregar />}
           />

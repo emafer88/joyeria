@@ -38,7 +38,7 @@ export function CrudTemplate({
         {
           stateBtnAdd &&   <Btn1
           funcion={nuevoRegistro}
-          bgcolor={v.colorPrincipal}
+          bgcolor="acento"
           titulo="nuevo"
           icono={<v.iconoagregar />}
         />

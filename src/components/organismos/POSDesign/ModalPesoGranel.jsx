@@ -5,7 +5,6 @@ import { BtnClose } from "../../ui/buttons/BtnClose";
 import { InputText2 } from "../formularios/InputText2";
 import { useEmpresaStore } from "../../../store/EmpresaStore";
 import { FormatearNumeroDinero } from "../../../utils/Conversiones";
-import { v } from "../../../styles/variables";
 import { unidadPeso } from "../../../utils/granel";
 
 // Pide el peso de un producto por peso antes de agregarlo a la venta. El peso
@@ -68,7 +67,7 @@ export function ModalPesoGranel({ producto, onConfirmar, onCerrar }) {
           type="submit"
           disabled={!valido}
           titulo="Agregar"
-          bgcolor={v.colorPrincipal}
+          bgcolor="acento"
           width="100%"
         />
       </Caja>

@@ -325,7 +325,7 @@ const Container = styled.div`
         }
         .th-label.sortable:hover {
           opacity: 1;
-          color: ${v.colorPrincipal};
+          color: ${({ theme }) => theme.acentoLinea};
         }
       }
     }

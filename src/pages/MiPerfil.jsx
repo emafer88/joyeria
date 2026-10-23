@@ -89,7 +89,7 @@ export const MiPerfil = () => {
               />
             </InputText2>
             <br></br>
-            <Btn1 bgcolor="#0930bb" color="#fff" titulo="GUARDAR CAMBIOS" />
+            <Btn1 bgcolor="acento" titulo="GUARDAR CAMBIOS" />
           </form>
           {puedeAutorizarCancelaciones && <ClaveAutorizacion />}
         </>

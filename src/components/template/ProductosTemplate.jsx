@@ -112,7 +112,7 @@ export function ProductosTemplate() {
                 />
                 <Btn1
                   funcion={nuevoRegistro}
-                  bgcolor={v.colorPrincipal}
+                  bgcolor="acento"
                   titulo="nuevo"
                   icono={<v.iconoagregar />}
                 />
@@ -162,7 +162,7 @@ const Container = styled.div`
   }
   .tabs button.on {
     opacity: 1;
-    border-bottom-color: #f3d20c;
+    border-bottom-color: ${({ theme }) => theme.acentoLinea};
   }
   .subtabs {
     display: flex;

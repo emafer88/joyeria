@@ -107,7 +107,7 @@ const Container = styled.div`
     overflow: hidden;
   }
   .fila.abierta {
-    border-color: ${v.colorPrincipal};
+    border-color: ${({ theme }) => theme.acentoLinea};
   }
   .cabecera {
     display: flex;

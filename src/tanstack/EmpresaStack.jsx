@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEmpresaStore } from "..";
 import { toast } from "sonner";
 import { useGlobalStore } from "../store/GlobalStore";
+import { GuardarPaletaAdmin } from "../supabaseCrud/crudEmpresa";
 
 export const useUpdateEmpresaMutation = ( ) => {
   const queyClient = useQueryClient();
@@ -74,3 +75,17 @@ export const useUpdateEmpresaTicketMutation = () => {
       },
     });
   };
+export const useGuardarPaletaMutation = () => {
+  const queyClient = useQueryClient();
+  const { dataempresa } = useEmpresaStore();
+  return useMutation({
+    mutationKey: ["guardar paleta"],
+    mutationFn: (paleta) =>
+      GuardarPaletaAdmin({ _id_empresa: dataempresa?.id, _paleta: paleta }),
+    onError: (error) => toast.error(error.message),
+    onSuccess: () => {
+      toast.success("Paleta guardada");
+      queyClient.invalidateQueries(["mostrar empresa"]);
+    },
+  });
+};

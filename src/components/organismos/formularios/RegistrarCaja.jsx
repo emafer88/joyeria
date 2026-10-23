@@ -107,7 +107,7 @@ export function RegistrarCaja() {
               <Btn1
                 icono={<v.iconoguardar />}
                 titulo="Guardar"
-                bgcolor="#F9D70B"
+                bgcolor="acento"
               />
             </section>
           </form>

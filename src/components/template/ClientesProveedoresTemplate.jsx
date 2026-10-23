@@ -43,7 +43,7 @@ export function ClientesProveedoresTemplate() {
         <Title>{location.pathname==="/configuracion/clientes"?"Clientes":"Proveedores"}</Title>
         <Btn1
           funcion={nuevoRegistro}
-          bgcolor={v.colorPrincipal}
+          bgcolor="acento"
           titulo="nuevo"
           icono={<v.iconoagregar />}
         />

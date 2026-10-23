@@ -117,8 +117,7 @@ export function ClaveAutorizacion() {
           <div className="botones">
             <Btn1
               type="submit"
-              bgcolor="#0930bb"
-              color="#fff"
+              bgcolor="acento"
               disabled={isPending}
               titulo={isPending ? "Guardando..." : "GUARDAR CLAVE"}
             />

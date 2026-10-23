@@ -184,7 +184,7 @@ export function FormVariante({ onClose }) {
           <Btn1
             icono={<v.iconoguardar />}
             titulo={isPending ? "Guardando..." : "Guardar"}
-            bgcolor="#F9D70B"
+            bgcolor="acento"
             disabled={isPending}
           />
         </form>

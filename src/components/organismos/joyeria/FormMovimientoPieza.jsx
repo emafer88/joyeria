@@ -231,7 +231,7 @@ export function FormMovimientoPieza({ onClose }) {
           <Btn1
             icono={<v.iconoguardar />}
             titulo={isPending ? "Guardando..." : "Registrar movimiento"}
-            bgcolor="#F9D70B"
+            bgcolor="acento"
             disabled={isPending}
           />
         </form>

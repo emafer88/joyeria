@@ -162,7 +162,7 @@ export function RegistrarCategorias({
               <Btn1
                 icono={<v.iconoguardar />}
                 titulo="Guardar"
-                bgcolor="#F9D70B"
+                bgcolor="acento"
               />
             </section>
           </form>
@@ -247,7 +247,7 @@ const PictureContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: start;
-  border: 2px dashed #f9d70b;
+  border: 2px dashed ${({ theme }) => theme.acentoLinea};
   border-radius: 5px;
   background-color: rgba(249, 215, 11, 0.1);
   padding: 8px;

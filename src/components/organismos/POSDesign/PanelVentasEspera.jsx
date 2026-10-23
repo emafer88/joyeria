@@ -277,9 +277,9 @@ const Panel = styled.div`
     white-space: nowrap;
   }
   .acciones button.principal {
-    background: #0930bb;
-    border-color: #0930bb;
-    color: #fff;
+    background: ${({ theme }) => theme.acento};
+    border-color: ${({ theme }) => theme.acento};
+    color: ${({ theme }) => theme.acentoTexto};
   }
   .acciones button.peligro {
     color: #c0392b;

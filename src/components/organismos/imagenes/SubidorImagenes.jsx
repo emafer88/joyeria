@@ -201,7 +201,7 @@ const Miniatura = styled.div`
   overflow: hidden;
   flex-shrink: 0;
   cursor: ${({ $nueva }) => ($nueva ? "default" : "grab")};
-  border: 2px solid ${({ $portada }) => ($portada ? "#F9D70B" : "transparent")};
+  border: 2px solid ${({ $portada, theme }) => ($portada ? theme.acentoLinea : "transparent")};
   img {
     width: 100%;
     height: 100%;

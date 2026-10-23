@@ -146,7 +146,7 @@ const Tabs = styled.nav`
   }
   button.on {
     opacity: 1;
-    border-bottom-color: #f3d20c;
+    border-bottom-color: ${({ theme }) => theme.acentoLinea};
   }
 `;
 const MainContent = styled.div`

@@ -197,7 +197,8 @@ const Panel = styled.div`
     border-radius: 6px;
     border: none;
     cursor: pointer;
-    background: #f3d20c;
+    background: ${({ theme }) => theme.acento};
+    color: ${({ theme }) => theme.acentoTexto};
     font-weight: 600;
     &.del {
       background: #f9184c;
