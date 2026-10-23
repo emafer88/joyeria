@@ -12,6 +12,7 @@ const FUNCIONES_POR_PLAN = {
 const FUNCION_POR_RUTA = {
   "/pedidos": "tienda",
   "/configuracion/envio": "tienda",
+  "/configuracion/tienda": "tienda",
   "/mercadolibre": "mercadolibre",
 };
 

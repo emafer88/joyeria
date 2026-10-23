@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEmpresaStore } from "..";
 import { toast } from "sonner";
 import { useGlobalStore } from "../store/GlobalStore";
-import { GuardarPaletaAdmin } from "../supabaseCrud/crudEmpresa";
+import { GuardarDisenoTienda, GuardarPaletaAdmin } from "../supabaseCrud/crudEmpresa";
 
 export const useUpdateEmpresaMutation = ( ) => {
   const queyClient = useQueryClient();
@@ -85,6 +85,20 @@ export const useGuardarPaletaMutation = () => {
     onError: (error) => toast.error(error.message),
     onSuccess: () => {
       toast.success("Paleta guardada");
+      queyClient.invalidateQueries(["mostrar empresa"]);
+    },
+  });
+};
+export const useGuardarDisenoTiendaMutation = () => {
+  const queyClient = useQueryClient();
+  const { dataempresa } = useEmpresaStore();
+  return useMutation({
+    mutationKey: ["guardar diseno tienda"],
+    mutationFn: (diseno) =>
+      GuardarDisenoTienda({ _id_empresa: dataempresa?.id, _diseno: diseno }),
+    onError: (error) => toast.error(error.message),
+    onSuccess: () => {
+      toast.success("Diseño publicado en la tienda");
       queyClient.invalidateQueries(["mostrar empresa"]);
     },
   });

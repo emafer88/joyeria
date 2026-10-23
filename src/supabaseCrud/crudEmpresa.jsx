@@ -23,6 +23,12 @@ export async function GuardarPaletaAdmin(p) {
     throw new Error(error.message);
   }
 }
+export async function GuardarDisenoTienda(p) {
+  const { error } = await supabase.rpc("admin_guardar_diseno_tienda", p);
+  if (error) {
+    throw new Error(error.message);
+  }
+}
 export async function EditarMonedaEmpresa(p){
   const {error}= await supabase.from(tabla).update(p).eq("id",p.id)
   if(error){
