@@ -877,7 +877,7 @@ export function RegistrarProductos({
             <Btn1
               icono={<v.iconoguardar />}
               titulo="Guardar"
-              bgcolor="#F9D70B"
+              bgcolor="acento"
             />
           </form>
         </div>
@@ -1063,7 +1063,8 @@ const ContainerCatalogo = styled.div`
       border-radius: 6px;
       border: none;
       cursor: pointer;
-      background-color: #F9D70B;
+      background-color: ${({ theme }) => theme.acento};
+      color: ${({ theme }) => theme.acentoTexto};
       font-weight: 600;
     }
   }
@@ -1083,7 +1084,8 @@ const ContainerAltaRapida = styled.div`
     border-radius: 6px;
     border: none;
     cursor: pointer;
-    background-color: #F9D70B;
+    background-color: ${({ theme }) => theme.acento};
+    color: ${({ theme }) => theme.acentoTexto};
     font-weight: 600;
   }
 `;

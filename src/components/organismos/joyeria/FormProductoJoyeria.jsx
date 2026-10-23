@@ -358,7 +358,7 @@ export function FormProductoJoyeria({ onClose }) {
           <Btn1
             icono={<v.iconoguardar />}
             titulo={isPending ? "Guardando..." : "Guardar"}
-            bgcolor="#F9D70B"
+            bgcolor="acento"
             disabled={isPending}
           />
         </form>
@@ -463,7 +463,8 @@ const Container = styled.div`
           border-radius: 6px;
           border: none;
           cursor: pointer;
-          background-color: #f9d70b;
+          background-color: ${({ theme }) => theme.acento};
+          color: ${({ theme }) => theme.acentoTexto};
           font-weight: 600;
         }
       }

@@ -68,7 +68,7 @@ function PiezasDeVariante({ idVariante, producto, material, pureza }) {
         />
         <Btn1
           titulo={`Imprimir selección (${seleccionadas.length})`}
-          bgcolor="#F9D70B"
+          bgcolor="acento"
           disabled={seleccionadas.length === 0}
           funcion={() => imprimir(seleccionadas)}
         />
@@ -185,7 +185,7 @@ export function DetalleProductoJoyeria({ diseno }) {
         <Btn1
           funcion={nuevaVariante}
           titulo="+ variante"
-          bgcolor={v.colorPrincipal}
+          bgcolor="acento"
         />
       </div>
 
@@ -228,7 +228,7 @@ export function DetalleProductoJoyeria({ diseno }) {
                     conVariante(variante, "piezas_masivo", "Nuevo")
                   }
                   titulo="+ piezas"
-                  bgcolor={v.colorPrincipal}
+                  bgcolor="acento"
                 />
                 <button
                   title="Editar variante"

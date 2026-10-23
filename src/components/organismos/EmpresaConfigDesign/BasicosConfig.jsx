@@ -133,7 +133,7 @@ export const BasicosConfig = () => {
               {errors.apartado_dias && <p>Al menos 1 día</p>}
             </InputText2>
             <br></br>
-            <Btn1 bgcolor="#0930bb" color="#fff" titulo="GUARDAR CAMBIOS" />
+            <Btn1 bgcolor="acento" titulo="GUARDAR CAMBIOS" />
           </form>
           <br></br>
           <section className="advertencia">

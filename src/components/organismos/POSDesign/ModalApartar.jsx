@@ -209,8 +209,7 @@ export function ModalApartar() {
 
         <Btn1
           type="submit"
-          bgcolor="#0930bb"
-          color="#fff"
+          bgcolor="acento"
           width="100%"
           disabled={isPending}
           titulo={isPending ? "Guardando..." : "Apartar e imprimir comprobante"}

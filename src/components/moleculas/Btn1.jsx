@@ -1,5 +1,7 @@
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { Icono } from "../../index";
+// bgcolor="acento": color principal de la paleta de la empresa, con el texto
+// en negro o blanco según cuál se lea mejor sobre él.
 export function Btn1({
   funcion,
   titulo,
@@ -15,6 +17,11 @@ export function Btn1({
   imagen,
   type,
 }) {
+  const theme = useTheme();
+  if (bgcolor === "acento") {
+    bgcolor = theme.acento;
+    color = color ?? theme.acentoTexto;
+  }
   return (
     <Container
       $width={width}

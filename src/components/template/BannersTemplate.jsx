@@ -25,7 +25,7 @@ export function BannersTemplate() {
         <Title>Banners del home</Title>
         <Btn1
           funcion={nuevoBanner}
-          bgcolor={v.colorPrincipal}
+          bgcolor="acento"
           titulo="nuevo banner"
           icono={<v.iconoagregar />}
         />

@@ -40,7 +40,7 @@ export function MetodosPagoTemplate() {
         <Title>Métodos de pago</Title>
         <Btn1
           funcion={nuevoRegistro}
-          bgcolor={v.colorPrincipal}
+          bgcolor="acento"
           titulo="nuevo"
           icono={<v.iconoagregar />}
         />

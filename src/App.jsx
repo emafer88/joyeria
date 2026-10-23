@@ -5,11 +5,13 @@ import {
   GlobalStyles,
   Light,
   MyRoutes,
+  useEmpresaStore,
   useThemeStore,
   useUsuariosStore,
 } from "./index";
+import { aplicarPaleta } from "./styles/paletas";
 import { Device } from "./styles/breakpoints";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useLicencia } from "./hooks/useLicencia";
@@ -18,9 +20,15 @@ import { CuentaSuspendida } from "./pages/CuentaSuspendida";
 function App() {
   const { setTheme } = useThemeStore();
   const { datausuarios } = useUsuariosStore();
+  const { dataempresa } = useEmpresaStore();
   const location = useLocation();
   const { suspendida, mensajeSuspension } = useLicencia();
-  const themeStyle = datausuarios?.tema ==="light"?Light:Dark
+  // Claro/oscuro es de cada usuario; la paleta de colores, de la empresa.
+  const paleta = dataempresa?.paleta_admin;
+  const themeStyle = useMemo(
+    () => aplicarPaleta(datausuarios?.tema === "light" ? Light : Dark, paleta),
+    [datausuarios?.tema, paleta]
+  );
   useEffect(() => {
     if (location.pathname === "/login") {
       setTheme({
@@ -29,14 +37,13 @@ function App() {
       });
     } else {
       if (datausuarios) {
-        const themeStyle = datausuarios?.tema === "light" ? Light : Dark;
         setTheme({
           tema: datausuarios?.tema,
           style: themeStyle,
         });
       }
     }
-  }, [datausuarios]);
+  }, [datausuarios, themeStyle]);
   return (
     <ThemeProvider theme={themeStyle}>
       <AuthContextProvider>

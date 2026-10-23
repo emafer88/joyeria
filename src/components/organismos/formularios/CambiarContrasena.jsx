@@ -64,7 +64,7 @@ export function CambiarContrasena({ cerrar }) {
         {listo ? (
           <section className="form-subcontainer">
             <p className="ok">Tu contraseña se cambió correctamente.</p>
-            <Btn1 titulo="Cerrar" bgcolor="#F9D70B" type="button" funcion={cerrar} />
+            <Btn1 titulo="Cerrar" bgcolor="acento" type="button" funcion={cerrar} />
           </section>
         ) : (
           <form onSubmit={handleSubmit((data) => mutate(data))}>
@@ -121,7 +121,7 @@ export function CambiarContrasena({ cerrar }) {
               <Btn1
                 icono={<v.iconoguardar />}
                 titulo={isPending ? "Guardando..." : "Guardar"}
-                bgcolor="#F9D70B"
+                bgcolor="acento"
                 disabled={isPending}
               />
             </section>

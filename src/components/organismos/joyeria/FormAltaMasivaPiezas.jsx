@@ -232,7 +232,7 @@ export function FormAltaMasivaPiezas({ onClose }) {
               <Btn1
                 icono={<v.iconoguardar />}
                 titulo={isPending ? "Generando..." : "Generar piezas"}
-                bgcolor="#F9D70B"
+                bgcolor="acento"
                 disabled={isPending || totalPiezas < 1}
               />
             </div>
@@ -284,7 +284,7 @@ export function FormAltaMasivaPiezas({ onClose }) {
               <div className="der">
                 <Btn1
                   titulo="Cargar más"
-                  bgcolor="#F9D70B"
+                  bgcolor="acento"
                   funcion={cargarMas}
                 />
                 <Btn1 titulo="Cerrar" bgcolor="#d7d7d7" color="#333" funcion={onClose} />
