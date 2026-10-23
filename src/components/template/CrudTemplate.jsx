@@ -15,7 +15,9 @@ export function CrudTemplate({
   tipoBuscador,
   dataBuscadorList,
   selectBuscadorList,
-  setBuscadorList,stateBtnAdd,stateBuscador
+  setBuscadorList,stateBtnAdd,stateBuscador,
+  // La tabla se dibuja aunque no haya datos (encabezados + aviso de vacío).
+  tablaSiempre,
 }) {
   const {stateClose,isExploding,setItemSelect,setAccion,setIsExploding,setStateClose} = useGlobalStore() 
 
@@ -63,7 +65,7 @@ export function CrudTemplate({
 
       <section className="main">
         {isExploding && <ConfettiExplosion />}
-        {data?.length > 0 && Tabla}
+        {(tablaSiempre || data?.length > 0) && Tabla}
       </section>
     </Container>
   );

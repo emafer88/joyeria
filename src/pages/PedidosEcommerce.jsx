@@ -16,7 +16,8 @@ export const PedidosEcommerce = () => {
     <CrudTemplate
       data={data}
       title="Pedidos"
-      Tabla={<TablaPedidosEcommerce data={data} />}
+      tablaSiempre
+      Tabla={<TablaPedidosEcommerce data={data ?? []} />}
     />
   );
 };

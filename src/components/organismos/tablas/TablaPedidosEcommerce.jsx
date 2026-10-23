@@ -204,13 +204,15 @@ export function TablaPedidosEcommerce({ data }) {
         {data.length === 0 && <p className="vacio">Todavía no hay pedidos.</p>}
       </div>
 
-      <Paginacion
-        table={table}
-        irinicio={() => table.setPageIndex(0)}
-        pagina={table.getState().pagination.pageIndex + 1}
-        setPagina={() => {}}
-        maximo={table.getPageCount()}
-      />
+      {data.length > 0 && (
+        <Paginacion
+          table={table}
+          irinicio={() => table.setPageIndex(0)}
+          pagina={table.getState().pagination.pageIndex + 1}
+          setPagina={() => {}}
+          maximo={table.getPageCount()}
+        />
+      )}
 
       {pedidoDetalle && (
         <DetallePedidoModal
