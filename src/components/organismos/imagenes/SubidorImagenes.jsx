@@ -112,7 +112,7 @@ export function SubidorImagenes({
             onDragOver={onDragOver}
             onDrop={() => onDrop(i)}
             $portada={i === 0}
-            title="Arrastrá para reordenar"
+            title="Arrastra para reordenar"
           >
             <img src={img.url} alt="imagen" />
             {i === 0 && <span className="badge">portada</span>}

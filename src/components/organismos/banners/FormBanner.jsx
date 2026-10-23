@@ -62,7 +62,7 @@ export function FormBanner({ onClose }) {
             onPendientesChange={(files) => setFile(files[files.length - 1] ?? null)}
             onEliminarExistente={() => setFile(null)}
           />
-          {!esEditar && !file && <p className="err">Elegí una imagen</p>}
+          {!esEditar && !file && <p className="err">Elige una imagen</p>}
 
           <InputText icono={<v.icononombre />}>
             <input
