@@ -212,7 +212,7 @@ export function FormAltaMasivaPiezas({ onClose }) {
             </table>
             {errors.lineas && (
               <p className="err">
-                Revisá las filas: peso y cantidad son obligatorios (peso &gt; 0,
+                Revisa las filas: peso y cantidad son obligatorios (peso &gt; 0,
                 cantidad &ge; 1).
               </p>
             )}

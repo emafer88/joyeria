@@ -120,7 +120,7 @@ export function FormMovimientoPieza({ onClose }) {
           {tab === "ajuste" && (
             <>
               <p className="hint">
-                Dejá un campo vacío para no tocar ese valor. No aplica a piezas vendidas.
+                Deja un campo vacío para no tocar ese valor. No aplica a piezas vendidas.
               </p>
               <div className="fila">
                 <label>
@@ -226,7 +226,7 @@ export function FormMovimientoPieza({ onClose }) {
               {...register("nota")}
             />
           </label>
-          {errors.estado && <p className="err">Elegí un estado</p>}
+          {errors.estado && <p className="err">Elige un estado</p>}
 
           <Btn1
             icono={<v.iconoguardar />}

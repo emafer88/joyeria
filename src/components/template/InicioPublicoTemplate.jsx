@@ -15,7 +15,7 @@ export function InicioPublicoTemplate() {
         </ContentLogo>
         <Title $paddingbottom="10px">Sistema de punto de venta</Title>
         <p className="bajada">
-          Gestioná tus ventas, stock y sucursales desde un solo lugar.
+          Gestiona tus ventas, stock y sucursales desde un solo lugar.
         </p>
         <Btn1
           border="2px"

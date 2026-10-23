@@ -157,7 +157,7 @@ export function imprimirEtiquetas(piezas, meta = {}) {
 
   const win = window.open("", "_blank", "width=900,height=650");
   if (!win) {
-    alert("Habilitá las ventanas emergentes para poder imprimir las etiquetas.");
+    alert("Habilita las ventanas emergentes para poder imprimir las etiquetas.");
     return;
   }
   win.document.open();

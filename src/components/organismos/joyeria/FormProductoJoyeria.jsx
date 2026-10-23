@@ -246,7 +246,7 @@ export function FormProductoJoyeria({ onClose }) {
               </option>
             ))}
           </select>
-          {errors.id_categoria && <p className="err">Elegí una categoría</p>}
+          {errors.id_categoria && <p className="err">Elige una categoría</p>}
 
           <label className="sel-label">Marca / colección (opcional)</label>
           <select className="select" {...register("id_marca")}>
@@ -276,7 +276,7 @@ export function FormProductoJoyeria({ onClose }) {
           </div>
 
           <span className="ayuda">
-            Medidas y talla se cargan por pieza física, no acá: al generar
+            Medidas y talla se cargan por pieza física, no aquí: al generar
             piezas (alta masiva) o al ajustar una pieza puntual.
           </span>
 
