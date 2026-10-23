@@ -36,6 +36,10 @@ export const PALETAS_TIENDA = [
   { id: "esmeralda", nombre: "Esmeralda", principal: "#34d399", secundario: "#e9c46a", fondo: "#0f2a22" },
   { id: "zafiro", nombre: "Zafiro", principal: "#7cb4ff", secundario: "#c4b5fd", fondo: "#13203d" },
   { id: "rubi", nombre: "Rubí", principal: "#fb7185", secundario: "#f3d20c", fondo: "#2d0f19" },
+  { id: "perla", nombre: "Perla", principal: "#8f6300", secundario: "#b07a9a", fondo: "#faf7f2", claro: true },
+  { id: "rosa-palo", nombre: "Rosa palo", principal: "#a8455e", secundario: "#c9a227", fondo: "#fdf0f2", claro: true },
+  { id: "salvia", nombre: "Salvia", principal: "#2f6b4c", secundario: "#b08d57", fondo: "#eef4ef", claro: true },
+  { id: "porcelana", nombre: "Porcelana", principal: "#2456a6", secundario: "#c08a2e", fondo: "#f4f7fb", claro: true },
 ];
 
 export const ICONOS_BENEFICIO = [
