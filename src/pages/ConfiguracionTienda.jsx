@@ -268,28 +268,38 @@ function EditorTextos({ promo, beneficios, onPromo, onBeneficios }) {
   );
 }
 
+const GRUPOS_PALETA = [
+  { titulo: "Oscuras", claro: false },
+  { titulo: "Claras", claro: true },
+];
+
 function EditorColores({ paleta, onChange }) {
   return (
     <div className="lista">
       <p className="ayuda">Colores de botones, precios, bordes y fondo de la tienda.</p>
-      <div className="paletas" role="radiogroup" aria-label="Paleta de la tienda">
-        {PALETAS_TIENDA.map((p) => (
-          <button
-            key={p.id}
-            type="button"
-            role="radio"
-            aria-checked={paleta === p.id}
-            className={paleta === p.id ? "paleta activa" : "paleta"}
-            onClick={() => onChange(p.id)}
-          >
-            <span className="muestra" style={{ background: p.fondo }}>
-              <i style={{ background: p.principal }} />
-              <i style={{ background: p.secundario }} />
-            </span>
-            <span>{p.nombre}</span>
-          </button>
-        ))}
-      </div>
+      {GRUPOS_PALETA.map((g) => (
+        <div key={g.titulo}>
+          <h3 className="grupo">{g.titulo}</h3>
+          <div className="paletas" role="radiogroup" aria-label={`Paletas ${g.titulo.toLowerCase()}`}>
+            {PALETAS_TIENDA.filter((p) => !!p.claro === g.claro).map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                role="radio"
+                aria-checked={paleta === p.id}
+                className={paleta === p.id ? "paleta activa" : "paleta"}
+                onClick={() => onChange(p.id)}
+              >
+                <span className={p.claro ? "muestra clara" : "muestra"} style={{ background: p.fondo }}>
+                  <i style={{ background: p.principal }} />
+                  <i style={{ background: p.secundario }} />
+                </span>
+                <span>{p.nombre}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -615,6 +625,14 @@ const Container = styled.div`
       border-color: ${({ theme }) => theme.text};
       box-shadow: 0 0 0 1px ${({ theme }) => theme.text};
     }
+  }
+  .grupo {
+    margin: 4px 0 8px;
+    font-size: 13px;
+    opacity: 0.75;
+  }
+  .muestra.clara {
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
   }
   .muestra {
     display: flex;
