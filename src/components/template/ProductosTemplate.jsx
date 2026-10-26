@@ -13,9 +13,7 @@ import { useState } from "react";
 import ConfettiExplosion from "react-confetti-explosion";
 import { Toaster } from "sonner";
 import { JoyeriaTemplate } from "./JoyeriaTemplate";
-import { BannersTemplate } from "./BannersTemplate";
 import { InventarioProductos } from "../organismos/productos/InventarioProductos";
-import { useLicencia } from "../../hooks/useLicencia";
 export function ProductosTemplate() {
   const [openRegistro, SetopenRegistro] = useState(false);
   const [openMarcas, setOpenMarcas] = useState(false);
@@ -27,8 +25,6 @@ export function ProductosTemplate() {
   const [tab, setTab] = useState("productos");
   // sub-pestañas dentro de "Productos": 'catalogo' | 'inventario'
   const [vistaProducto, setVistaProducto] = useState("catalogo");
-  // Los banners son de la tienda en línea.
-  const { tiene } = useLicencia();
   function nuevoRegistro() {
     SetopenRegistro(!openRegistro);
     setAccion("Nuevo");
@@ -54,20 +50,10 @@ export function ProductosTemplate() {
         >
           Joyería
         </button>
-        {tiene("tienda") && (
-          <button
-            className={tab === "banners" ? "on" : ""}
-            onClick={() => setTab("banners")}
-          >
-            Banners
-          </button>
-        )}
       </nav>
 
       {tab === "joyeria" ? (
         <JoyeriaTemplate />
-      ) : tab === "banners" && tiene("tienda") ? (
-        <BannersTemplate />
       ) : (
         <>
           <div className="subtabs">

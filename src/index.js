@@ -45,7 +45,6 @@ export * from "./components/organismos/tablas/Paginacion";
 export * from "./components/organismos/tablas/TablaCategorias";
 export * from "./components/organismos/tablas/TablaProductos";
 export * from "./components/template/404";
-export * from "./components/template/BannersTemplate";
 export * from "./components/template/CategoriasTemplate";
 export * from "./components/template/ClientesProveedoresTemplate";
 export * from "./components/template/ConfiguracionesTemplate";

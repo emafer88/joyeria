@@ -9,7 +9,7 @@ export const TIENDA_URL =
 export const SECCIONES = {
   banner: {
     nombre: "Banner principal",
-    nota: "Las imágenes se cambian en Productos → Banners.",
+    nota: "Las imágenes se cambian en la pestaña Banners.",
   },
   categorias: { nombre: "Categorías", conTitulo: true },
   destacados: { nombre: "Productos destacados", conTitulo: true, conSubtitulo: true },
