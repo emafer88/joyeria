@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
+import { Toaster } from "sonner";
 import { Btn1 } from "../components/moleculas/Btn1";
+import { ListaBanners } from "../components/organismos/banners/ListaBanners";
+import { FormBanner } from "../components/organismos/banners/FormBanner";
+import { useBannersStore } from "../store/BannersStore";
+import { useBannersQuery } from "../tanstack/BannersStack";
 import { useEmpresaStore } from "../store/EmpresaStore";
 import { useGuardarDisenoTiendaMutation } from "../tanstack/EmpresaStack";
 import {
@@ -13,7 +18,7 @@ import {
   esUrlValida,
 } from "../utils/disenoTienda";
 
-const PESTANAS = ["Secciones", "Textos", "Colores", "Contacto"];
+const PESTANAS = ["Secciones", "Banners", "Textos", "Colores", "Contacto"];
 
 // Configuración → Diseño de la tienda. A la derecha, la tienda real en un
 // iframe: cada cambio se le manda como borrador (postMessage) y solo se
@@ -51,6 +56,7 @@ export const ConfiguracionTienda = () => {
 
   return (
     <Container>
+      <Toaster />
       <header>
         <h1>Diseño de la tienda</h1>
         <p className="ayuda">
@@ -83,6 +89,7 @@ export const ConfiguracionTienda = () => {
               onChange={(s) => cambiar("secciones", s)}
             />
           )}
+          {pestana === "Banners" && <EditorBanners />}
           {pestana === "Textos" && (
             <EditorTextos
               promo={diseno.promo}
@@ -209,6 +216,31 @@ function EditorSecciones({ secciones, onChange }) {
           </article>
         );
       })}
+    </div>
+  );
+}
+
+// Los banners viven en su propia tabla: se publican al guardar cada uno, no
+// con el botón de abajo.
+function EditorBanners() {
+  const { modal, cerrarModal, abrirModal, setBannerSelect } = useBannersStore();
+
+  const nuevoBanner = () => {
+    setBannerSelect(null);
+    abrirModal("form", "Nuevo");
+  };
+
+  return (
+    <div className="lista">
+      {modal === "form" && <FormBanner onClose={cerrarModal} />}
+      <p className="ayuda">
+        Imágenes que rotan en el banner principal. Cada banner se publica en
+        cuanto lo guardas o lo eliminas; no depende del botón de abajo.
+      </p>
+      <ListaBanners />
+      <button type="button" className="agregar" onClick={nuevoBanner}>
+        + Nuevo banner
+      </button>
     </div>
   );
 }
@@ -361,6 +393,8 @@ function VistaPreviaTienda({ diseno }) {
   );
   const [ancho, setAncho] = useState(600);
   const origen = useMemo(() => new URL(TIENDA_URL).origin, []);
+  const { dataUpdatedAt: bannersAl } = useBannersQuery();
+  const primeraCarga = useRef(true);
 
   const enviar = () =>
     iframe.current?.contentWindow?.postMessage({ tipo: "cubiks-diseno", diseno }, origen);
@@ -378,6 +412,17 @@ function VistaPreviaTienda({ diseno }) {
     const t = setTimeout(enviar, 200);
     return () => clearTimeout(t);
   }, [diseno]);
+
+  // Los banners no viajan en el borrador: al cambiar alguno se recarga la
+  // tienda para que los vuelva a leer.
+  useEffect(() => {
+    if (!bannersAl) return;
+    if (primeraCarga.current) {
+      primeraCarga.current = false;
+      return;
+    }
+    if (iframe.current) iframe.current.src = TIENDA_URL;
+  }, [bannersAl]);
 
   useEffect(() => {
     if (!caja.current) return;
