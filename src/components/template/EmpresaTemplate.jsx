@@ -19,6 +19,7 @@ export const EmpresaTemplate = () => {
           <SidebarTitle>Empresa</SidebarTitle>
           <SidebarItem to="empresabasicos">Básico</SidebarItem>
           <SidebarItem to="monedaconfig">Moneda</SidebarItem>
+          <SidebarItem to="funciones">Funciones</SidebarItem>
         </SidebarSection>
 
         {/* <SidebarSection>

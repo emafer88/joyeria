@@ -100,9 +100,11 @@ export const DashboardTemplate = () => {
           <Area6>
             <MapaCalorVentas />
           </Area6>
-          <Area7>
-            <ResumenApartados />
-          </Area7>
+          {tiene("apartados") && (
+            <Area7>
+              <ResumenApartados />
+            </Area7>
+          )}
           <Area8>
             <AlertasInventario />
           </Area8>

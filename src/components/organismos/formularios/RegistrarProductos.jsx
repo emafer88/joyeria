@@ -218,7 +218,10 @@ export function RegistrarProductos({
       ? new Date(data.oferta_hasta).toISOString()
       : null;
     const medidas = formatMedidas(data.medidas_largo, data.medidas_ancho);
-    const tallas = data.tallas && data.tallas.trim() !== "" ? data.tallas.trim() : null;
+    // Sin el campo de tallas (giro sin tallas) se conservan las que tenía.
+    const tallas = !tiene("tallas")
+      ? dataSelect.tallas ?? null
+      : data.tallas && data.tallas.trim() !== "" ? data.tallas.trim() : null;
     if (accion === "Editar") {
       const p = {
         _id: dataSelect.id,
@@ -578,7 +581,11 @@ export function RegistrarProductos({
                   ["UNIDAD", "Unidad"],
                   ["GRANEL", "Kilo (precio por kg)"],
                   ["GRAMO", "Gramo (precio por g)"],
-                ].map(([valor, texto]) => (
+                ]
+                  // Sin venta por peso solo queda Unidad, salvo que el
+                  // producto ya se venda por peso.
+                  .filter(([valor]) => valor === "UNIDAD" || tiene("granel") || sevendepor === valor)
+                  .map(([valor, texto]) => (
                   <span className="opcion" key={valor}>
                     <Checkbox1
                       isChecked={sevendepor === valor}
@@ -601,13 +608,15 @@ export function RegistrarProductos({
                   setState={checkUseInventarios}
                 />
               </ContainerSelector>
-              <ContainerSelector>
-                <label>Se puede apartar: </label>
-                <Switch1
-                  state={opciones.permite_apartado}
-                  setState={() => cambiarOpcion("permite_apartado")}
-                />
-              </ContainerSelector>
+              {tiene("apartados") && (
+                <ContainerSelector>
+                  <label>Se puede apartar: </label>
+                  <Switch1
+                    state={opciones.permite_apartado}
+                    setState={() => cambiarOpcion("permite_apartado")}
+                  />
+                </ContainerSelector>
+              )}
               {tiene("tienda") && (
                 <ContainerSelector>
                   <label>Mostrar en la tienda en línea: </label>
@@ -686,20 +695,22 @@ export function RegistrarProductos({
                     <label className="form__label">Ancho (cm, opcional)</label>
                   </InputText>
                 </article>
-                <article>
-                  <InputText icono={<v.iconoflechaderecha />}>
-                    <input
-                      className="form__field"
-                      defaultValue={dataSelect.tallas ?? ""}
-                      type="text"
-                      placeholder="tallas"
-                      {...register("tallas")}
-                    />
-                    <label className="form__label">
-                      Tallas (texto libre, ej. 6, 7, 8, 9)
-                    </label>
-                  </InputText>
-                </article>
+                {tiene("tallas") && (
+                  <article>
+                    <InputText icono={<v.iconoflechaderecha />}>
+                      <input
+                        className="form__field"
+                        defaultValue={dataSelect.tallas ?? ""}
+                        type="text"
+                        placeholder="tallas"
+                        {...register("tallas")}
+                      />
+                      <label className="form__label">
+                        Tallas (texto libre, ej. 6, 7, 8, 9)
+                      </label>
+                    </InputText>
+                  </article>
+                )}
 
                 <span className="titulo">Etiquetas</span>
                 <div className="etiquetas-lista">

@@ -12,12 +12,14 @@ import { useDetalleVentasStore } from "../../../store/DetalleVentasStore";
 import { useCierreCajaStore } from "../../../store/CierreCajaStore";
 import { toast } from "sonner";
 import { usePonerEnEsperaMutate } from "../../../tanstack/VentasStack";
+import { useLicencia } from "../../../hooks/useLicencia";
 export function AreaTecladoPos() {
   const { setStatePantallaCobro, stateMetodosPago } = useVentasStore();
   const { dataempresa } = useEmpresaStore();
   const { dataMetodosPago: datametodospago } = useMetodosPagoStore();
   const {datadetalleventa} = useDetalleVentasStore()
   const { setStateApartar } = useCierreCajaStore();
+  const { tiene } = useLicencia();
   const abrirApartar = () => {
     if (!datadetalleventa?.length) {
       toast.warning("Agrega productos para apartarlos");
@@ -72,15 +74,17 @@ export function AreaTecladoPos() {
             </article>
           );
         })}
-        <article className="box">
-          <Btn1
-            funcion={abrirApartar}
-            titulo="Apartar"
-            border="0"
-            height="70px"
-            width="100%"
-          />
-        </article>
+        {tiene("apartados") && (
+          <article className="box">
+            <Btn1
+              funcion={abrirApartar}
+              titulo="Apartar"
+              border="0"
+              height="70px"
+              width="100%"
+            />
+          </article>
+        )}
         <article className="box">
           <Btn1
             funcion={pedirEspera}

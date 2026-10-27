@@ -16,6 +16,7 @@ import {
 import { UserAuth } from "../context/AuthContent";
 import { useUsuariosStore } from "../store/UsuariosStore";
 import { BasicosConfig } from "../components/organismos/EmpresaConfigDesign/BasicosConfig";
+import { FuncionesConfig } from "../components/organismos/EmpresaConfigDesign/FuncionesConfig";
 import { MonedaConfig } from "../components/organismos/EmpresaConfigDesign/MonedaConfig";
 import { MetodosPago } from "../pages/MetodosPago";
 import { Dashboard } from "../pages/Dashboard";
@@ -230,6 +231,7 @@ export function MyRoutes() {
         <Route index element={<Navigate to="empresabasicos" />} />
         <Route path="empresabasicos" element={<BasicosConfig />} />
         <Route path="monedaconfig" element={<MonedaConfig />} />
+        <Route path="funciones" element={<FuncionesConfig />} />
       </Route>
       <Route
         path="/pos"

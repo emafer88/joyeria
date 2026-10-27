@@ -315,13 +315,15 @@ export function FormProductoJoyeria({ onClose }) {
             </button>
           </div>
 
-          <div className="fila-switch">
-            <label>Se puede apartar</label>
-            <Switch1
-              state={opciones.permite_apartado}
-              setState={() => cambiarOpcion("permite_apartado")}
-            />
-          </div>
+          {tiene("apartados") && (
+            <div className="fila-switch">
+              <label>Se puede apartar</label>
+              <Switch1
+                state={opciones.permite_apartado}
+                setState={() => cambiarOpcion("permite_apartado")}
+              />
+            </div>
+          )}
           {tiene("tienda") && (
             <div className="fila-switch">
               <label>Mostrar en la tienda en línea</label>

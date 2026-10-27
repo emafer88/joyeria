@@ -89,6 +89,21 @@ export const useGuardarPaletaMutation = () => {
     },
   });
 };
+// Funciones del giro apagadas (Configuración → Empresa → Funciones).
+export const useGuardarFuncionesMutation = () => {
+  const queyClient = useQueryClient();
+  const { dataempresa, editarEmpresa } = useEmpresaStore();
+  return useMutation({
+    mutationKey: ["guardar funciones"],
+    mutationFn: (apagadas) =>
+      editarEmpresa({ id: dataempresa?.id, funciones_apagadas: apagadas }, "-", "-"),
+    onError: (error) => toast.error(error.message),
+    onSuccess: () => {
+      toast.success("Funciones guardadas");
+      queyClient.invalidateQueries(["mostrar empresa"]);
+    },
+  });
+};
 export const useGuardarDisenoTiendaMutation = () => {
   const queyClient = useQueryClient();
   const { dataempresa } = useEmpresaStore();
