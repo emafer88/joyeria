@@ -16,6 +16,8 @@ import { useJoyeriaStore } from "../../../store/JoyeriaStore";
 import { useEmpresaStore } from "../../../store/EmpresaStore";
 import { useProductosStore } from "../../../store/ProductosStore";
 import { useLicencia } from "../../../hooks/useLicencia";
+import { SelectorAtributos } from "../atributos/SelectorAtributos";
+import { AtributosDeProducto } from "../../../supabaseCrud/crudAtributos";
 import { useOpcionesProducto } from "../../../hooks/useOpcionesProducto";
 import { useDisenosMLQuery } from "../../../tanstack/MercadoLibreStack";
 import {
@@ -64,6 +66,7 @@ export function FormProductoJoyeria({ onClose }) {
   const publicarMLActual = publicarML ?? !!configML?.publicar;
   const [nuevaMarca, setNuevaMarca] = useState("");
   const [etiquetasSel, setEtiquetasSel] = useState([]);
+  const [atributosSel, setAtributosSel] = useState([]);
   const [nuevaEtiqueta, setNuevaEtiqueta] = useState("");
   const [files, setFiles] = useState([]); // File[] nuevos, aún no subidos
   const [imagenesExistentes, setImagenesExistentes] = useState([]);
@@ -91,6 +94,7 @@ export function FormProductoJoyeria({ onClose }) {
       etiquetasDeProducto(disenoSelect.id).then((rows) =>
         setEtiquetasSel(rows.map((r) => r.id))
       );
+      AtributosDeProducto(disenoSelect.id).then(setAtributosSel);
     }
   }, [esEditar, disenoSelect?.id]);
 
@@ -157,6 +161,7 @@ export function FormProductoJoyeria({ onClose }) {
           id: disenoSelect?.id,
           destacado,
           etiquetasSel,
+          atributosSel,
           opciones,
           // Solo si se movió el switch: guardar la config de ML dispara la
           // sincronización.
@@ -279,6 +284,9 @@ export function FormProductoJoyeria({ onClose }) {
             Medidas y talla se cargan por pieza física, no aquí: al generar
             piezas (alta masiva) o al ajustar una pieza puntual.
           </span>
+
+          <label className="sel-label">Atributos</label>
+          <SelectorAtributos seleccion={atributosSel} onChange={setAtributosSel} />
 
           <label className="sel-label">Etiquetas</label>
           <div className="etiquetas-lista">

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { SetAtributosProducto } from "../supabaseCrud/crudAtributos";
 import { toast } from "sonner";
 import { useEmpresaStore } from "../store/EmpresaStore";
 import { useUsuariosStore } from "../store/UsuariosStore";
@@ -195,6 +196,7 @@ export const useGuardarDisenoMutation = () => {
         });
       }
       await setEtiquetasProducto(idDiseno, etiquetasSel);
+      await SetAtributosProducto(idDiseno, values.atributosSel ?? []);
       if (values.opciones) await EditarOpcionesProducto(idDiseno, values.opciones);
       if (values.configML) {
         await GuardarDisenoML(values.configML);
