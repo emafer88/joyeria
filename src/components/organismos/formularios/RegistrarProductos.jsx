@@ -33,6 +33,11 @@ import { toast } from "sonner";
 import { BtnClose } from "../../ui/buttons/BtnClose";
 import { usePermisosDeMenu } from "../../../hooks/usePermisosDeMenu";
 import { useLicencia } from "../../../hooks/useLicencia";
+import { SelectorAtributos } from "../atributos/SelectorAtributos";
+import {
+  AtributosDeProducto,
+  SetAtributosProducto,
+} from "../../../supabaseCrud/crudAtributos";
 
 // ISO (con offset) -> "YYYY-MM-DDTHH:mm" que espera un <input type="datetime-local">.
 function aDatetimeLocal(iso) {
@@ -71,6 +76,7 @@ export function RegistrarProductos({
   const [idMarca, setIdMarca] = useState(null);
   const [nuevaMarca, setNuevaMarca] = useState("");
   const [etiquetasSel, setEtiquetasSel] = useState([]); // ids de etiquetas
+  const [atributosSel, setAtributosSel] = useState([]); // ids de atributo_valores
   const [nuevaEtiqueta, setNuevaEtiqueta] = useState("");
   // "medidas" se guarda como un solo texto ("45 x 3 cm") pero se carga como
   // dos inputs numéricos (largo/ancho); esto prellena esos dos inputs al editar.
@@ -246,6 +252,7 @@ export function RegistrarProductos({
       await editarProductos(p);
       await EditarOpcionesProducto(dataSelect.id, opciones);
       await setEtiquetasProducto(dataSelect.id, etiquetasSel);
+      await SetAtributosProducto(dataSelect.id, atributosSel);
       if (stateInventarios) {
         if (!dataStockXAlmacenYProducto) {
           const pStock = {
@@ -289,6 +296,7 @@ export function RegistrarProductos({
       const id_producto_nuevo = await insertarProductos(p);
       await EditarOpcionesProducto(id_producto_nuevo, opciones);
       await setEtiquetasProducto(id_producto_nuevo, etiquetasSel);
+      await SetAtributosProducto(id_producto_nuevo, atributosSel);
       if (stateInventarios) {
         const pStock = {
           id_almacen: almacenSelectItem?.id,
@@ -422,6 +430,7 @@ export function RegistrarProductos({
       etiquetasDeProducto(dataSelect.id).then((rows) =>
         setEtiquetasSel(rows.map((r) => r.id))
       );
+      AtributosDeProducto(dataSelect.id).then(setAtributosSel);
     }
   }, [accion, dataSelect?.id]);
   //#endregion validar_accion
@@ -711,6 +720,12 @@ export function RegistrarProductos({
                     </InputText>
                   </article>
                 )}
+
+                <span className="titulo">Atributos</span>
+                <SelectorAtributos
+                  seleccion={atributosSel}
+                  onChange={setAtributosSel}
+                />
 
                 <span className="titulo">Etiquetas</span>
                 <div className="etiquetas-lista">

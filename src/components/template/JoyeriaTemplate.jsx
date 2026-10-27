@@ -10,6 +10,7 @@ import { FormAltaMasivaPiezas } from "../organismos/joyeria/FormAltaMasivaPiezas
 import { FormMovimientoPieza } from "../organismos/joyeria/FormMovimientoPieza";
 import { HistorialPieza } from "../organismos/joyeria/HistorialPieza";
 import { TablaInventarioJoyeria } from "../organismos/joyeria/TablaInventarioJoyeria";
+import { AdminAtributos } from "../organismos/atributos/AdminAtributos";
 
 /**
  * Pestaña "Joyería" (dentro de Productos). Dos vistas:
@@ -20,6 +21,7 @@ export function JoyeriaTemplate() {
   const { modal, cerrarModal, abrirModal, setBuscador, setDisenoSelect } =
     useJoyeriaStore();
   const [vista, setVista] = useState("catalogo");
+  const [openAtributos, setOpenAtributos] = useState(false);
 
   const nuevoDiseno = () => {
     setDisenoSelect(null);
@@ -55,6 +57,13 @@ export function JoyeriaTemplate() {
         <Title>{vista === "catalogo" ? "Diseños de joyería" : "Inventario de piezas"}</Title>
         {vista === "catalogo" && (
           <Btn1
+            funcion={() => setOpenAtributos(true)}
+            bgcolor={v.colorSecundario}
+            titulo="Atributos"
+          />
+        )}
+        {vista === "catalogo" && (
+          <Btn1
             funcion={nuevoDiseno}
             bgcolor="acento"
             titulo="nuevo diseño"
@@ -65,6 +74,7 @@ export function JoyeriaTemplate() {
       <section className="area2">
         <Buscador setBuscador={setBuscador} />
       </section>
+      {openAtributos && <AdminAtributos onClose={() => setOpenAtributos(false)} />}
       <section className="main">
         {vista === "catalogo" ? (
           <ListaProductosJoyeria />

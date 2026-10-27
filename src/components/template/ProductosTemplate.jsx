@@ -15,9 +15,11 @@ import { Toaster } from "sonner";
 import { JoyeriaTemplate } from "./JoyeriaTemplate";
 import { InventarioProductos } from "../organismos/productos/InventarioProductos";
 import { useLicencia } from "../../hooks/useLicencia";
+import { AdminAtributos } from "../organismos/atributos/AdminAtributos";
 export function ProductosTemplate() {
   const [openRegistro, SetopenRegistro] = useState(false);
   const [openMarcas, setOpenMarcas] = useState(false);
+  const [openAtributos, setOpenAtributos] = useState(false);
   const { dataProductos, setBuscador, generarCodigo } = useProductosStore();
   const [accion, setAccion] = useState("");
   const [dataSelect, setdataSelect] = useState([]);
@@ -94,6 +96,9 @@ export function ProductosTemplate() {
               {openMarcas && (
                 <AdminMarcas onClose={() => setOpenMarcas(false)} />
               )}
+              {openAtributos && (
+                <AdminAtributos onClose={() => setOpenAtributos(false)} />
+              )}
 
               <section className="area1">
                 <Title>Productos</Title>
@@ -101,6 +106,11 @@ export function ProductosTemplate() {
                   funcion={() => setOpenMarcas(true)}
                   bgcolor={v.colorSecundario}
                   titulo="Marcas / colecciones"
+                />
+                <Btn1
+                  funcion={() => setOpenAtributos(true)}
+                  bgcolor={v.colorSecundario}
+                  titulo="Atributos"
                 />
                 <Btn1
                   funcion={nuevoRegistro}
