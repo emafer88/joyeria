@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form";
 import { CirclePicker } from "react-color";
 import { useEmpresaStore } from "../../../store/EmpresaStore";
 import { useMutation } from "@tanstack/react-query";
+import { AsignarPadreCategoria } from "../../../supabaseCrud/crudCategorias";
 
 export function RegistrarCategorias({
   onClose,
@@ -19,7 +20,19 @@ export function RegistrarCategorias({
   accion,
   setIsExploding,
 }) {
-  const { insertarCategorias, editarCategoria } = useCategoriasStore();
+  const { insertarCategorias, editarCategoria, datacategorias, mostrarCategorias } =
+    useCategoriasStore();
+  // Subcategoría: el padre es una de primer nivel distinta de esta. Una
+  // categoría que ya tiene hijas no puede volverse hija.
+  const [idPadre, setIdPadre] = useState(
+    accion === "Editar" ? dataSelect.id_padre ?? "" : ""
+  );
+  const tieneHijas =
+    accion === "Editar" &&
+    (datacategorias ?? []).some((c) => c.id_padre === dataSelect.id);
+  const posiblesPadres = (datacategorias ?? []).filter(
+    (c) => !c.id_padre && c.id !== dataSelect?.id
+  );
   const { dataempresa } = useEmpresaStore();
   const [currentColor, setColor] = useState("#F44336");
   const [file, setFile] = useState([]);
@@ -55,6 +68,9 @@ export function RegistrarCategorias({
         _id: dataSelect.id,
       };
       await editarCategoria(p, dataSelect.icono, file);
+      if ((dataSelect.id_padre ?? "") !== idPadre) {
+        await AsignarPadreCategoria(dataSelect.id, idPadre || null);
+      }
     } else {
       const p = {
         _nombre: ConvertirCapitalize(data.descripcion),
@@ -63,8 +79,10 @@ export function RegistrarCategorias({
         _id_empresa: dataempresa.id,
       };
 
-      await insertarCategorias(p, file);
+      const idNueva = await insertarCategorias(p, file);
+      if (idNueva && idPadre) await AsignarPadreCategoria(idNueva, idPadre);
     }
+    await mostrarCategorias({ id_empresa: dataempresa.id });
   }
   function abrirImagenes() {
     ref.current.click();
@@ -149,6 +167,32 @@ export function RegistrarCategorias({
                 </InputText>
               </article>
 
+              <article className="padre">
+                <label htmlFor="categoria-padre">
+                  Dentro de (opcional, para subcategorías)
+                </label>
+                <select
+                  id="categoria-padre"
+                  value={idPadre}
+                  disabled={tieneHijas}
+                  onChange={(e) =>
+                    setIdPadre(e.target.value ? Number(e.target.value) : "")
+                  }
+                >
+                  <option value="">— Ninguna (categoría principal) —</option>
+                  {posiblesPadres.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.nombre}
+                    </option>
+                  ))}
+                </select>
+                {tieneHijas && (
+                  <span className="nota">
+                    Tiene subcategorías, así que es categoría principal.
+                  </span>
+                )}
+              </article>
+
               <article className="colorContainer">
                 <ContentTitle>
                   {<v.paletacolores />}
@@ -172,6 +216,27 @@ export function RegistrarCategorias({
   );
 }
 const Container = styled.div`
+  .padre {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+    label {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    select {
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid ${({ theme }) => theme.color2};
+      background: ${({ theme }) => theme.body};
+      color: ${({ theme }) => theme.text};
+    }
+    .nota {
+      font-size: 12px;
+      opacity: 0.7;
+    }
+  }
   transition: 0.5s;
   top: 0;
   left: 0;

@@ -93,7 +93,8 @@ export function TablaCategorias({
     {
       accessorKey: "nombre",
       header: "Descripcion",
-      cell: (info) => <span>{info.getValue()}</span>,
+      // Las subcategorías se ven como "Ropa › Playeras".
+      cell: (info) => <span>{info.row.original.nombre_completo ?? info.getValue()}</span>,
       enableColumnFilter: true,
       filterFn: (row, columnId, filterStatuses) => {
         if (filterStatuses.length === 0) return true;

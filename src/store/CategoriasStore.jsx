@@ -26,10 +26,11 @@ export const useCategoriasStore = create((set, get) => ({
     set({ categoriaItemSelect: p });
   },
   insertarCategorias: async (p, file) => {
-    await InsertarCategorias(p, file);
+    const id = await InsertarCategorias(p, file);
     const { mostrarCategorias } = get();
     const { parametros } = get();
     set(mostrarCategorias(parametros));
+    return id;
   },
   eliminarCategoria: async (p) => {
     await EliminarCategorias(p);
