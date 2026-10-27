@@ -1,4 +1,5 @@
 import Swal from "sweetalert2";
+import { conNombreCompleto } from "../utils/categorias";
 import { supabase } from "../index";
 
 /**
@@ -294,11 +295,11 @@ export async function MostrarMarcasJoyeria(p) {
 export async function MostrarCategoriasJoyeria(p) {
   const { data, error } = await supabase
     .from("categorias")
-    .select("id, nombre")
+    .select("id, nombre, id_padre")
     .eq("id_empresa", p.id_empresa)
     .order("nombre", { ascending: true });
   if (error) throw new Error(error.message);
-  return data || [];
+  return conNombreCompleto(data || []);
 }
 
 // ---------------------------------------------------------------------------

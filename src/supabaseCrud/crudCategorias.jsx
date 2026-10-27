@@ -1,5 +1,6 @@
 import Swal from "sweetalert2";
 import { supabase } from "../index";
+import { conNombreCompleto } from "../utils/categorias";
 const tabla = "categorias";
 export async function InsertarCategorias(p, file) {
   const { error, data } = await supabase.rpc("insertarcategorias", p);
@@ -20,6 +21,19 @@ export async function InsertarCategorias(p, file) {
       id: nuevo_id,
     };
     await EditarIconoCategorias(piconoeditar);
+  }
+  return data;
+}
+
+// Categoría padre (null = primer nivel). La base valida que haya un solo nivel.
+export async function AsignarPadreCategoria(id, idPadre) {
+  const { error } = await supabase
+    .from(tabla)
+    .update({ id_padre: idPadre ?? null })
+    .eq("id", id);
+  if (error) {
+    Swal.fire({ icon: "error", title: "Subcategoría", text: error.message });
+    throw new Error(error.message);
   }
 }
 
@@ -65,7 +79,7 @@ export async function MostrarCategorias(p) {
     .select()
     .eq("id_empresa", p.id_empresa)
     .order("id", { ascending: false });
-  return data;
+  return conNombreCompleto(data);
 }
 export async function BuscarCategorias(p) {
   const { data } = await supabase
@@ -74,7 +88,7 @@ export async function BuscarCategorias(p) {
     .eq("id_empresa", p.id_empresa)
     .ilike("nombre", "%" + p.descripcion + "%");
 
-  return data;
+  return conNombreCompleto(data);
 }
 export async function EliminarCategorias(p) {
   const { error } = await supabase.from(tabla).delete().eq("id", p.id);

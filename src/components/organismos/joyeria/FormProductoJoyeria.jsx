@@ -247,7 +247,7 @@ export function FormProductoJoyeria({ onClose }) {
             <option value="">— elegir —</option>
             {categorias.map((c) => (
               <option key={c.id} value={c.id}>
-                {c.nombre}
+                {c.nombre_completo}
               </option>
             ))}
           </select>

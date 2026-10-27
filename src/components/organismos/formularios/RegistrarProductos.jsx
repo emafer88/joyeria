@@ -607,7 +607,7 @@ export function RegistrarProductos({
 
               <ContainerSelector>
                 <label>Categoria: </label>
-                <SelectList data={datacategorias} itemSelect={categoriaItemSelect} onSelect={selectCategoria} displayField="nombre"/>
+                <SelectList data={datacategorias} itemSelect={categoriaItemSelect} onSelect={selectCategoria} displayField="nombre_completo"/>
                 
               </ContainerSelector>
               <ContainerSelector>
