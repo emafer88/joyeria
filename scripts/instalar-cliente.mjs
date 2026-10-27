@@ -9,7 +9,7 @@
 //   2) Crea el usuario de acceso del superadmin (Auth).
 //   3) Crea la empresa: el trigger insertpordefecto arma superadmin con todos
 //      los permisos, sucursal, almacén, caja, métodos de pago, etc.
-//   4) Pone el plan y la URL del proyecto en `licencia`.
+//   4) Pone el plan, el giro y la URL del proyecto en `licencia`.
 //   5) Crea las series de comprobantes WEB (tienda) y ML (Mercado Libre).
 //   6) Prueba que el superadmin entra y ve lo que corresponde a su plan.
 //
@@ -23,6 +23,7 @@ import { dirname, join } from "node:path";
 import { createClient } from "@supabase/supabase-js";
 
 const PLANES = ["basico", "tienda", "completo"];
+const GIROS = ["joyeria", "ropa", "abarrotes", "generico"];
 
 const rutaConfig = process.argv[2];
 if (!rutaConfig) {
@@ -43,12 +44,18 @@ const serviceKey = exigir(cfg.service_role_key, "service_role_key");
 const anonKey = exigir(cfg.anon_key, "anon_key");
 const dbUrl = exigir(cfg.db_url, "db_url");
 const plan = exigir(cfg.plan, "plan");
+// Sin "giro" en el JSON (clientes de antes), joyería.
+const giro = cfg.giro ?? "joyeria";
 const empresaCfg = exigir(cfg.empresa, "empresa");
 const nombreEmpresa = exigir(empresaCfg.nombre, "empresa.nombre");
 const correo = exigir(cfg.superadmin?.correo, "superadmin.correo").toLowerCase();
 const password = exigir(cfg.superadmin?.password, "superadmin.password");
 if (!PLANES.includes(plan)) {
   console.error(`plan debe ser uno de: ${PLANES.join(", ")}`);
+  process.exit(1);
+}
+if (!GIROS.includes(giro)) {
+  console.error(`giro debe ser uno de: ${GIROS.join(", ")}`);
   process.exit(1);
 }
 
@@ -158,12 +165,12 @@ let empresa;
 }
 
 // ---------------------------------------------------------------------------
-paso("4) Plan y URL del proyecto");
+paso("4) Plan, giro y URL del proyecto");
 await q(
-  admin.from("licencia").upsert({ id: 1, plan, url_proyecto: url }),
+  admin.from("licencia").upsert({ id: 1, plan, giro, url_proyecto: url }),
   "no se pudo guardar la licencia"
 );
-console.log(`plan = ${plan}, url_proyecto = ${url}`);
+console.log(`plan = ${plan}, giro = ${giro}, url_proyecto = ${url}`);
 
 // ---------------------------------------------------------------------------
 paso("5) Series de comprobantes de la tienda y de Mercado Libre");
@@ -225,11 +232,13 @@ paso("6) Prueba de acceso del superadmin");
       "el superadmin no puede leer sus permisos"
     );
     const planVisto = await q(cliente.rpc("licencia_plan"), "no se pudo leer el plan");
+    const giroVisto = await q(cliente.rpc("licencia_giro"), "no se pudo leer el giro");
     console.log(
-      `ok: ${usuario.nombres} (${usuario.roles?.nombre}), ${permisos.length} permisos, plan visto = ${planVisto}`
+      `ok: ${usuario.nombres} (${usuario.roles?.nombre}), ${permisos.length} permisos, plan visto = ${planVisto}, giro visto = ${giroVisto}`
     );
     if (usuario.roles?.nombre !== "superadmin") fallar("el usuario no quedó como superadmin");
     if (planVisto !== plan) fallar("el plan que ve la app no es el configurado");
+    if (giroVisto !== giro) fallar("el giro que ve la app no es el configurado");
     await cliente.auth.signOut();
   }
 }

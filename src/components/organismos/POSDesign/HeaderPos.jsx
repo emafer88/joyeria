@@ -30,6 +30,7 @@ import {
 import { PosBuscarPieza } from "../../../supabaseCrud/crudJoyeria";
 import { esPorPeso } from "../../../utils/granel";
 import { ModalPesoGranel } from "./ModalPesoGranel";
+import { useLicencia } from "../../../hooks/useLicencia";
 
 
 export function HeaderPos() {
@@ -55,12 +56,15 @@ export function HeaderPos() {
   const queryClient = useQueryClient();
   // Piezas de joyería que matchean el mismo texto buscado, para que el
   // buscador principal también pueda venderlas (antes solo se encontraban
-  // por código exacto desde el escáner flotante de joyería).
-  const { data: dataPiezas } = useBuscarPiezasPosQuery();
+  // por código exacto desde el escáner flotante de joyería). Solo en giros
+  // con piezas con número de serie.
+  const { tiene } = useLicencia();
+  const conPiezas = tiene("piezas");
+  const { data: dataPiezas } = useBuscarPiezasPosQuery(conPiezas);
   const agregarPieza = useAgregarPiezaCarritoMutation();
   const dataCombinada = [
     ...(dataProductos ?? []),
-    ...(dataPiezas ?? []).map((pz) => ({
+    ...((conPiezas && dataPiezas) || []).map((pz) => ({
       ...pz,
       _tipo: "pieza",
       nombre: `💍 ${pz.producto} · ${pz.material}${pz.pureza ? " " + pz.pureza : ""} · ${pz.peso}g — $${Number(pz.precio_venta).toFixed(2)}`,
@@ -205,22 +209,24 @@ export function HeaderPos() {
         // 2) Pieza de joyería: consulta directa por código/SKU exacto. No
         // depende del refetch reactivo de dataPiezas (que llegaba tarde al
         // escanear y hacía fallar la búsqueda).
-        try {
-          const pieza = await PosBuscarPieza({
-            codigo: texto,
-            id_empresa: dataempresa?.id,
-          });
-          if (cancelado) return;
-          if (pieza) {
-            agregarPieza.mutate(pieza, { onSuccess: () => setBuscador("") });
+        if (conPiezas) {
+          try {
+            const pieza = await PosBuscarPieza({
+              codigo: texto,
+              id_empresa: dataempresa?.id,
+            });
+            if (cancelado) return;
+            if (pieza) {
+              agregarPieza.mutate(pieza, { onSuccess: () => setBuscador("") });
+              return;
+            }
+          } catch (e) {
+            if (!cancelado) {
+              toast.error(e.message);
+              setBuscador("");
+            }
             return;
           }
-        } catch (e) {
-          if (!cancelado) {
-            toast.error(e.message);
-            setBuscador("");
-          }
-          return;
         }
         if (!cancelado) {
           toast.error("Producto no encontrado");

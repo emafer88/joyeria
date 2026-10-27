@@ -99,14 +99,14 @@ export const useCategoriasJoyeriaQuery = () => {
  * principal del POS. Usa el mismo texto que la búsqueda de productos
  * normales (ProductosStore.buscador) para que ambas listas se combinen.
  */
-export const useBuscarPiezasPosQuery = () => {
+export const useBuscarPiezasPosQuery = (habilitado = true) => {
   const { dataempresa } = useEmpresaStore();
   const { buscador } = useProductosStore();
   return useQuery({
     queryKey: [K_PIEZAS, "pos_texto", dataempresa?.id, buscador],
     queryFn: () =>
       PosBuscarPiezasTexto({ id_empresa: dataempresa?.id, buscador }),
-    enabled: !!dataempresa?.id,
+    enabled: habilitado && !!dataempresa?.id,
     refetchOnWindowFocus: false,
   });
 };

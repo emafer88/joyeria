@@ -4,6 +4,11 @@ Cada joyería tiene su propio proyecto de Supabase dentro de la organización
 Pro. El plan (`basico`, `tienda`, `completo`) vive en la tabla `licencia` del
 proyecto y solo se cambia con la service_role key.
 
+El giro del negocio (`joyeria`, `ropa`, `abarrotes`, `generico`) también vive
+en `licencia` y decide qué funciones del ramo ve el cliente (piezas con número
+de serie, venta por peso, apartados, tallas). Va como `"giro"` en el JSON del
+cliente; si no está, queda `joyeria`.
+
 ## 1. Crear el proyecto
 
 En supabase.com, dentro de la organización: **New project**. Guarda la
@@ -69,6 +74,12 @@ update licencia set plan = 'completo';
 Si sube a tienda o completo, haz también los pasos de la sección 3 que le
 falten (funciones, secretos y series: volver a correr el instalador crea las
 series que falten).
+
+## Cambiar el giro después
+
+```sql
+update licencia set giro = 'ropa';
+```
 
 ## Suspender o reactivar una cuenta
 

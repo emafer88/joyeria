@@ -4,6 +4,7 @@
   "service_role_key": "<service_role key: Project Settings > API>",
   "db_url": "postgresql://postgres.<ref>:<contraseña de la base, percent-encoded>@aws-0-<region>.pooler.supabase.com:5432/postgres",
   "plan": "basico",
+  "giro": "joyeria",
   "empresa": {
     "nombre": "Joyería Ejemplo",
     "direccion_fiscal": "-",
