@@ -17,6 +17,7 @@ import { ResumenApartados } from "../organismos/DashboardDesign/ResumenApartados
 import { AlertasInventario } from "../organismos/DashboardDesign/AlertasInventario";
 import { CancelacionesPeriodo } from "../organismos/DashboardDesign/CancelacionesPeriodo";
 import { useDesgloseVentasDashboardQuery } from "../../tanstack/ReportesStack";
+import { useLicencia } from "../../hooks/useLicencia";
 export const DashboardTemplate = () => {
   const {totalventas,porcentajeCambio,totalCantidadDetalleVentas,totalGanancias} = useReportesStore() 
   // La ganancia sale del costo: sin "Ver costos" la base la devuelve en null.
@@ -26,9 +27,13 @@ export const DashboardTemplate = () => {
   // Tarjeta cuyo detalle está abierto: ventas | ticket | piezas | ganancias.
   const [detalle, setDetalle] = useState(null);
   const [tab, setTab] = useState("general");
+  // La pestaña Joyería solo existe en giros con piezas con número de serie.
+  const { tiene } = useLicencia();
+  const conPiezas = tiene("piezas");
    return (
     <Container>
       <DashboardHeader />
+      {conPiezas && (
       <Tabs>
         {[
           ["general", "General"],
@@ -39,7 +44,8 @@ export const DashboardTemplate = () => {
           </button>
         ))}
       </Tabs>
-      {tab === "joyeria" ? (
+      )}
+      {conPiezas && tab === "joyeria" ? (
         <DashboardJoyeria veCostos={veCostos} />
       ) : (
         <MainContent>

@@ -14,6 +14,7 @@ import ConfettiExplosion from "react-confetti-explosion";
 import { Toaster } from "sonner";
 import { JoyeriaTemplate } from "./JoyeriaTemplate";
 import { InventarioProductos } from "../organismos/productos/InventarioProductos";
+import { useLicencia } from "../../hooks/useLicencia";
 export function ProductosTemplate() {
   const [openRegistro, SetopenRegistro] = useState(false);
   const [openMarcas, setOpenMarcas] = useState(false);
@@ -25,6 +26,9 @@ export function ProductosTemplate() {
   const [tab, setTab] = useState("productos");
   // sub-pestañas dentro de "Productos": 'catalogo' | 'inventario'
   const [vistaProducto, setVistaProducto] = useState("catalogo");
+  // Sin piezas con número de serie (giros que no son joyería) no hay pestañas.
+  const { tiene } = useLicencia();
+  const conPiezas = tiene("piezas");
   function nuevoRegistro() {
     SetopenRegistro(!openRegistro);
     setAccion("Nuevo");
@@ -37,6 +41,7 @@ export function ProductosTemplate() {
     <Container>
       <Toaster />
 
+      {conPiezas && (
       <nav className="tabs">
         <button
           className={tab === "productos" ? "on" : ""}
@@ -51,8 +56,9 @@ export function ProductosTemplate() {
           Joyería
         </button>
       </nav>
+      )}
 
-      {tab === "joyeria" ? (
+      {conPiezas && tab === "joyeria" ? (
         <JoyeriaTemplate />
       ) : (
         <>
