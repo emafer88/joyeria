@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { MostrarEstadoLicencia } from "../supabaseCrud/crudLicencia";
+import { useEmpresaStore } from "../store/EmpresaStore";
 
 // Mismo criterio que licencia_tiene() en la base.
 const FUNCIONES_POR_PLAN = {
@@ -21,6 +22,20 @@ const FUNCIONES_POR_GIRO = {
   generico: ["apartados"],
 };
 
+// Nombres para Configuración → Empresa → Funciones.
+export const FUNCIONES_GIRO = [
+  ["piezas", "Piezas con número de serie", "Pestañas Joyería y venta de piezas en el POS"],
+  ["granel", "Venta por peso", "Productos por kilo o por gramo"],
+  ["apartados", "Apartados", "Apartar con anticipo y liquidar después"],
+  ["tallas", "Tallas", "Campo de tallas en el producto"],
+];
+export const NOMBRE_GIRO = {
+  joyeria: "Joyería",
+  ropa: "Ropa / calzado",
+  abarrotes: "Abarrotes",
+  generico: "Genérico",
+};
+
 // Rutas (y links de módulos) que solo existen si el plan incluye la función.
 const FUNCION_POR_RUTA = {
   "/pedidos": "tienda",
@@ -40,18 +55,22 @@ export function useLicencia() {
   });
   const plan = data?.plan;
   const giro = data?.giro;
+  // Las del giro que el negocio apagó en Configuración.
+  const { dataempresa } = useEmpresaStore();
+  const apagadas = dataempresa?.funciones_apagadas ?? [];
+  const delGiro = FUNCIONES_POR_GIRO[giro] ?? [];
   const suspendida = !!data?.suspendida;
   const mensajeSuspension = data?.mensaje;
 
   // Mientras carga, nada de lo que depende del plan o del giro se muestra.
   const tiene = (funcion) =>
     !!FUNCIONES_POR_PLAN[plan]?.includes(funcion) ||
-    !!FUNCIONES_POR_GIRO[giro]?.includes(funcion);
+    (delGiro.includes(funcion) && !apagadas.includes(funcion));
 
   const rutaPermitida = (to) => {
     const funcion = FUNCION_POR_RUTA[to];
     return !funcion || tiene(funcion);
   };
 
-  return { plan, giro, suspendida, mensajeSuspension, isLoading, tiene, rutaPermitida };
+  return { plan, giro, delGiro, suspendida, mensajeSuspension, isLoading, tiene, rutaPermitida };
 }

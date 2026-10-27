@@ -7,6 +7,7 @@ import { useCierreCajaStore } from "../../../store/CierreCajaStore";
 import { useVentasStore } from "../../../store/VentasStore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useLicencia } from "../../../hooks/useLicencia";
 export function FooterPos() {
   const { eliminarVenta,idventa } = useVentasStore();
   const {
@@ -18,6 +19,7 @@ export function FooterPos() {
     setStateVentasEspera,
   } = useCierreCajaStore();
   const queryClient = useQueryClient()
+  const { tiene } = useLicencia();
   const {mutate:mutateEliminarVenta,isPending} = useMutation({
     mutationKey:["eliminar venta"],
     mutationFn: ()=>{
@@ -79,13 +81,15 @@ export function FooterPos() {
           icono={<Icon icon="icon-park:preview-open" />}
           titulo="Ventas del turno"
         />
-        <Btn1
-          bgcolor="#fff"
-          color="#2d2d2d"
-          funcion={() => setStateApartados(true)}
-          icono={<Icon icon="mdi:archive-clock-outline" />}
-          titulo="Apartados"
-        />
+        {tiene("apartados") && (
+          <Btn1
+            bgcolor="#fff"
+            color="#2d2d2d"
+            funcion={() => setStateApartados(true)}
+            icono={<Icon icon="mdi:archive-clock-outline" />}
+            titulo="Apartados"
+          />
+        )}
         <Btn1
           bgcolor="#fff"
           color="#2d2d2d"

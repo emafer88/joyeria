@@ -6,12 +6,14 @@ import { Icon } from "@iconify/react/dist/iconify.js";
 import { useVentasStore } from "../../../store/VentasStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useLicencia } from "../../../hooks/useLicencia";
 export function MenuFlotante() {
   const [isOpen, setIsOpen] = useState(false);
   const { eliminarVenta,idventa } = useVentasStore();
   const { setStateIngresoSalida, setTipoRegistro, setStateCierraCaja, setStateVentasTurno, setStateApartados, setStateVentasEspera } =
   useCierreCajaStore();
   const queryClient = useQueryClient()
+  const { tiene } = useLicencia();
   const {mutate:mutateEliminarVenta,isPending} = useMutation({
     mutationKey:["eliminar venta"],
     mutationFn: ()=>{
@@ -87,17 +89,19 @@ export function MenuFlotante() {
           <Icon icon="icon-park:preview-open" />
           <Text>Ventas del turno</Text>
         </MenuItem>
-        <MenuItem
-          isOpen={isOpen}
-          delay="0.45s"
-          onClick={() => {
-            toggleMenu();
-            setStateApartados(true);
-          }}
-        >
-          <Icon icon="mdi:archive-clock-outline" />
-          <Text>Apartados</Text>
-        </MenuItem>
+        {tiene("apartados") && (
+          <MenuItem
+            isOpen={isOpen}
+            delay="0.45s"
+            onClick={() => {
+              toggleMenu();
+              setStateApartados(true);
+            }}
+          >
+            <Icon icon="mdi:archive-clock-outline" />
+            <Text>Apartados</Text>
+          </MenuItem>
+        )}
         <MenuItem
           isOpen={isOpen}
           delay="0.5s"
