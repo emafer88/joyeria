@@ -41,20 +41,26 @@ export const useMostrarStockXAlmacenYProductoQuery = () => {
     useAlmacenesStore();
   const { dataSucursales } = useSucursalesStore();
   const { productosItemSelect } = useProductosStore();
+  const { combinacion } = useMovStockStore();
+  const id_combinacion =
+    combinacion?.id_producto === productosItemSelect?.id ? combinacion?.id : null;
   return useQuery({
     queryKey: [
       "mostrar StockXAlmacenYProducto",
       {
         id_almacen: almacenSelectItem?.id,
         id_producto: productosItemSelect?.id,
+        id_combinacion,
       },
     ],
     queryFn: () =>
       mostrarStockXAlmacenYProducto({
         id_almacen: almacenSelectItem?.id,
         id_producto: productosItemSelect?.id,
+        id_combinacion,
       }),
-    enabled: !!dataSucursales,
+    enabled:
+      !!dataSucursales && !!almacenSelectItem?.id && !!productosItemSelect?.id,
   });
 };
 export const useMostrarStockPorProductoQuery = () => {

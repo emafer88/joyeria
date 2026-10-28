@@ -38,6 +38,8 @@ import {
   AtributosDeProducto,
   SetAtributosProducto,
 } from "../../../supabaseCrud/crudAtributos";
+import { EditorCombinaciones } from "../combinaciones/EditorCombinaciones";
+import { GuardarCombinaciones } from "../../../supabaseCrud/crudCombinaciones";
 
 // ISO (con offset) -> "YYYY-MM-DDTHH:mm" que espera un <input type="datetime-local">.
 function aDatetimeLocal(iso) {
@@ -77,6 +79,10 @@ export function RegistrarProductos({
   const [nuevaMarca, setNuevaMarca] = useState("");
   const [etiquetasSel, setEtiquetasSel] = useState([]); // ids de etiquetas
   const [atributosSel, setAtributosSel] = useState([]); // ids de atributo_valores
+  // Tallas y colores con existencia propia (formato de
+  // guardar_combinaciones_producto); vacío = producto sin combinaciones,
+  // null = el editor todavía no carga las guardadas (no se toca nada).
+  const [combinaciones, setCombinaciones] = useState(null);
   const [nuevaEtiqueta, setNuevaEtiqueta] = useState("");
   // "medidas" se guarda como un solo texto ("45 x 3 cm") pero se carga como
   // dos inputs numéricos (largo/ancho); esto prellena esos dos inputs al editar.
@@ -150,6 +156,10 @@ export function RegistrarProductos({
     setAlmacenSelectItem,
   } = useAlmacenesStore();
   const [stateInventarios, setStateInventarios] = useState(false);
+  // Tallas y colores: giro con tallas y producto por unidad.
+  const usaCombinaciones = tiene("tallas") && sevendepor === "UNIDAD";
+  const conCombinaciones =
+    usaCombinaciones && stateInventarios && combinaciones?.length > 0;
   const [stateEnabledStock, setStateEnabledStock] = useState(false);
 
   const [stateSucursalesLista, setStateSucursalesLista] = useState(false);
@@ -174,6 +184,7 @@ export function RegistrarProductos({
         id_almacen: almacenSelectItem?.id,
         id_producto: dataSelect?.id,
       }),
+    enabled: !!almacenSelectItem?.id && !!dataSelect?.id,
   });
   const {
     data: dataAlmacenes,
@@ -225,8 +236,14 @@ export function RegistrarProductos({
       : null;
     const medidas = formatMedidas(data.medidas_largo, data.medidas_ancho);
     // Sin el campo de tallas (giro sin tallas) se conservan las que tenía.
+    // Con combinaciones, el texto de tallas de la ficha sale de ellas.
+    const tallasCombinaciones = [
+      ...new Set((combinaciones ?? []).map((c) => c.talla).filter(Boolean)),
+    ].join(", ");
     const tallas = !tiene("tallas")
       ? dataSelect.tallas ?? null
+      : conCombinaciones
+      ? tallasCombinaciones || null
       : data.tallas && data.tallas.trim() !== "" ? data.tallas.trim() : null;
     if (accion === "Editar") {
       const p = {
@@ -253,7 +270,15 @@ export function RegistrarProductos({
       await EditarOpcionesProducto(dataSelect.id, opciones);
       await setEtiquetasProducto(dataSelect.id, etiquetasSel);
       await SetAtributosProducto(dataSelect.id, atributosSel);
-      if (stateInventarios) {
+      if (usaCombinaciones && stateInventarios && combinaciones) {
+        // También con lista vacía: quita las que tenía.
+        await GuardarCombinaciones({
+          id_producto: dataSelect.id,
+          id_almacen: almacenSelectItem?.id,
+          combinaciones,
+        });
+      }
+      if (stateInventarios && !conCombinaciones) {
         if (!dataStockXAlmacenYProducto) {
           const pStock = {
             id_almacen: almacenSelectItem?.id,
@@ -297,7 +322,13 @@ export function RegistrarProductos({
       await EditarOpcionesProducto(id_producto_nuevo, opciones);
       await setEtiquetasProducto(id_producto_nuevo, etiquetasSel);
       await SetAtributosProducto(id_producto_nuevo, atributosSel);
-      if (stateInventarios) {
+      if (stateInventarios && conCombinaciones) {
+        await GuardarCombinaciones({
+          id_producto: id_producto_nuevo,
+          id_almacen: almacenSelectItem?.id,
+          combinaciones,
+        });
+      } else if (stateInventarios) {
         const pStock = {
           id_almacen: almacenSelectItem?.id,
           id_producto: id_producto_nuevo,
@@ -358,12 +389,12 @@ export function RegistrarProductos({
     if (!data.precio_compra || String(data.precio_compra).trim() === "") {
       data.precio_compra = 0;
     }
-    if (stateInventarios) {
+    if (stateInventarios && !conCombinaciones) {
       if (!dataalmacen) {
-        if (data.stock.trim() === "") {
+        if (String(data.stock ?? "").trim() === "") {
           data.stock = 0;
         }
-        if (data.stock_minimo.trim() === "") {
+        if (String(data.stock_minimo ?? "").trim() === "") {
           data.stock_minimo = 0;
         }
       }
@@ -704,7 +735,7 @@ export function RegistrarProductos({
                     <label className="form__label">Ancho (cm, opcional)</label>
                   </InputText>
                 </article>
-                {tiene("tallas") && (
+                {tiene("tallas") && !conCombinaciones && (
                   <article>
                     <InputText icono={<v.iconoflechaderecha />}>
                       <input
@@ -826,7 +857,14 @@ export function RegistrarProductos({
                       displayField="nombre"
                     />
                   </ContainerSelector>
-                  {stateEnabledStock && dataStockXAlmacenYProducto && (
+                  {usaCombinaciones && (
+                    <EditorCombinaciones
+                      idProducto={accion === "Editar" ? dataSelect.id : null}
+                      idAlmacen={almacenSelectItem?.id}
+                      onChange={setCombinaciones}
+                    />
+                  )}
+                  {!conCombinaciones && stateEnabledStock && dataStockXAlmacenYProducto && (
                     <ContainerMensajeStock>
                       <span>
                         💀 para editar el stock vaya al módulo de kardex
@@ -834,6 +872,7 @@ export function RegistrarProductos({
                     </ContainerMensajeStock>
                   )}
 
+                  {!conCombinaciones && (<>
                   <article>
                     <InputText icono={<v.iconoflechaderecha />}>
                       <input
@@ -896,6 +935,7 @@ export function RegistrarProductos({
                       <label className="form__label">Ubicacion</label>
                     </InputText>
                   </article>
+                  </>)}
                 </ContainerStock>
               )}
             </section>

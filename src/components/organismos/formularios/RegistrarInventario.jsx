@@ -32,12 +32,16 @@ import { useMostrarStockXAlmacenYProductoQuery } from "../../../tanstack/StockSt
 import { MessageComponent } from "../../ui/messages/MessageComponent";
 import { useEffect } from "react";
 import { usePermisosDeMenu } from "../../../hooks/usePermisosDeMenu";
+import {
+  MostrarCombinaciones,
+  nombreCombinacion,
+} from "../../../supabaseCrud/crudCombinaciones";
 export function RegistrarInventario() {
   const { setStateClose } = useGlobalStore();
   // Sin "Ver costos" el costo actual llega en null: no se muestra ni se pide.
   const { veCostos } = usePermisosDeMenu();
 
-  const { tipo, setTipo } = useMovStockStore();
+  const { tipo, setTipo, combinacion, setCombinacion } = useMovStockStore();
   const {
     selectProductos,
     setBuscador,
@@ -80,6 +84,31 @@ export function RegistrarInventario() {
     useMostrarStockXAlmacenYProductoQuery();
 
   const { mutate, isPending } = useInsertarMovStockMutation();
+
+  // Producto con tallas y colores: la entrada/salida es de una combinación.
+  const { data: combinaciones = [] } = useQuery({
+    queryKey: [
+      "combinaciones producto",
+      productosItemSelect?.id,
+      almacenSelectItem?.id,
+    ],
+    queryFn: () =>
+      MostrarCombinaciones({
+        id_producto: productosItemSelect.id,
+        id_almacen: almacenSelectItem?.id,
+      }),
+    enabled: !!productosItemSelect?.id,
+  });
+  const opcionesCombinacion = combinaciones.map((c) => ({
+    ...c,
+    id_producto: productosItemSelect?.id,
+    nombre: `${nombreCombinacion(c)} (hay ${Number(c.stockAlmacen?.stock ?? 0)})`,
+  }));
+  const combinacionActual =
+    combinacion?.id_producto === productosItemSelect?.id
+      ? opcionesCombinacion.find((c) => c.id === combinacion.id) ?? null
+      : null;
+  const faltaCombinacion = combinaciones.length > 0 && !combinacionActual;
 
   const resetFuction = () => {
     reset();
@@ -129,9 +158,28 @@ export function RegistrarInventario() {
                   : "-"}{" "}
               </strong>
             </span>
+            {combinaciones.length > 0 && (
+              <ContainerSelector>
+                <label>Talla y color:</label>
+                <SelectList
+                  data={opcionesCombinacion}
+                  itemSelect={
+                    combinacionActual ?? { nombre: "Elige talla y color" }
+                  }
+                  onSelect={setCombinacion}
+                  displayField="nombre"
+                />
+              </ContainerSelector>
+            )}
             <span>
               Stock:{" "}
-              <strong>{dataStock?.stock ? dataStock?.stock : "-"} </strong>
+              <strong>
+                {faltaCombinacion
+                  ? "-"
+                  : dataStock?.stock
+                  ? dataStock?.stock
+                  : "-"}{" "}
+              </strong>
             </span>
 
             <ContainerSelector>
@@ -154,7 +202,12 @@ export function RegistrarInventario() {
             </ContainerSelector>
           </section>
           {productosItemSelect?.maneja_inventarios ? (
-            <form className="formulario" onSubmit={handleSubmit(mutate)}>
+            <form
+              className="formulario"
+              onSubmit={handleSubmit((data) => {
+                if (!faltaCombinacion) mutate(data);
+              })}
+            >
               <section className="form-subcontainer">
                 <article>
                   <InputText icono={<v.iconoflechaderecha />}>
@@ -207,8 +260,11 @@ export function RegistrarInventario() {
                   </InputText>
                 </article>
 
+                {faltaCombinacion && (
+                  <span className="aviso">Elige la talla y el color.</span>
+                )}
                 <Btn1
-                  disabled={!productosItemSelect?.nombre}
+                  disabled={!productosItemSelect?.nombre || faltaCombinacion}
                   icono={<v.iconoguardar />}
                   titulo="Guardar"
                   bgcolor="acento"
@@ -278,6 +334,10 @@ const Container = styled.div`
         font-size: 20px;
         cursor: pointer;
       }
+    }
+    .aviso {
+      color: #f46943;
+      font-size: 13px;
     }
     .formulario {
       .form-subcontainer {

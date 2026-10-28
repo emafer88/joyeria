@@ -19,7 +19,7 @@ import { useGlobalStore } from "../../../store/GlobalStore";
  * catálogo, igual que Joyería tiene su propio Catálogo/Inventario.
  */
 export function InventarioProductos() {
-  const { mostrarMovStock, setTipo } = useMovStockStore();
+  const { mostrarMovStock, setTipo, setCombinacion } = useMovStockStore();
   const { dataempresa } = useEmpresaStore();
   const { buscarProductos, buscador } = useProductosStore();
   const { setBuscador, selectProductos } = useProductosStore();
@@ -54,6 +54,7 @@ export function InventarioProductos() {
   });
 
   function nuevoRegistro() {
+    setCombinacion(null);
     setTipo("ingreso");
     setStateClose(true);
     setAccion("Nuevo");
@@ -62,6 +63,11 @@ export function InventarioProductos() {
   // elegido.
   function registrarDesdeFila(fila, tipo) {
     selectProductos(fila.productos);
+    setCombinacion(
+      fila.combinacion
+        ? { ...fila.combinacion, id_producto: fila.productos.id }
+        : null
+    );
     setTipo(tipo);
     setStateClose(true);
     setAccion("Nuevo");

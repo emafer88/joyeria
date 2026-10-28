@@ -32,7 +32,7 @@ export const useInsertarMovStockMutation = () => {
   const queryClient = useQueryClient();
   const {  productosItemSelect,resetProductosItemSelect } = useProductosStore();
  const { itemSelect ,setStateClose} = useGlobalStore();
-  const { tipo, insertarMovStock } = useMovStockStore();
+  const { tipo, insertarMovStock, combinacion } = useMovStockStore();
   const {  editarStock,dataStockXAlmacenYProducto:dataStock } = useStockStore();
   const { almacenSelectItem } =
     useAlmacenesStore();
@@ -46,6 +46,10 @@ export const useInsertarMovStockMutation = () => {
       const pMovimientoStock = {
         id_almacen: almacenSelectItem?.id,
         id_producto: productosItemSelect?.id,
+        id_combinacion:
+          combinacion?.id_producto === productosItemSelect?.id
+            ? combinacion.id
+            : null,
         tipo_movimiento: tipo,
         cantidad: parseFloat(data.cantidad),
         // fecha: la pone la base (now()), igual que los movimientos de ventas.
@@ -84,6 +88,8 @@ export const useInsertarMovStockMutation = () => {
     onSuccess: () => {
       toast.success("Registro guardado correctamente");
       queryClient.invalidateQueries(["buscar productos"]);
+      queryClient.invalidateQueries({ queryKey: ["mostrar existencias"] });
+      queryClient.invalidateQueries({ queryKey: ["combinaciones producto"] });
       setStateClose(false)
       resetProductosItemSelect()
     },
