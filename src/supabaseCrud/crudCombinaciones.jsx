@@ -37,6 +37,16 @@ export async function GuardarCombinaciones({ id_producto, id_almacen, combinacio
   }
 }
 
+// Foto de un color del producto (la tienda la muestra al elegir ese color);
+// null = foto de todos los colores.
+export async function AsignarColorImagen({ id, color }) {
+  const { error } = await supabase
+    .from("producto_imagenes")
+    .update({ color: color || null })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
 // "M · Negro", "M", "Negro".
 export function nombreCombinacion(c) {
   return [c?.talla, c?.color].filter(Boolean).join(" · ");

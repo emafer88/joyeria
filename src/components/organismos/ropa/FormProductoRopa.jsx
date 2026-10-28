@@ -27,6 +27,7 @@ import {
   SetAtributosProducto,
 } from "../../../supabaseCrud/crudAtributos";
 import {
+  AsignarColorImagen,
   GuardarCombinaciones,
   MostrarProductoRopa,
 } from "../../../supabaseCrud/crudCombinaciones";
@@ -112,6 +113,21 @@ export function FormProductoRopa({ idProducto, onListo }) {
   }, [almacenes]);
 
   const categoria = (datacategorias ?? []).find((c) => c.id === idCategoria);
+  const colores = [
+    ...new Set((combinaciones ?? []).map((c) => c.color).filter(Boolean)),
+  ];
+
+  // Se guarda al momento, como borrar o reordenar una foto.
+  async function cambiarColorImagen(imagen, color) {
+    try {
+      await AsignarColorImagen({ id: imagen.id, color });
+      setImagenes((prev) =>
+        prev.map((x) => (x.id === imagen.id ? { ...x, color: color || null } : x))
+      );
+    } catch (err) {
+      toast.error(err.message);
+    }
+  }
 
   async function guardar(e) {
     e.preventDefault();
@@ -230,6 +246,37 @@ export function FormProductoRopa({ idProducto, onListo }) {
           onEliminarExistente={quitarImagen}
           onReordenar={reordenar}
         />
+        {imagenes.length > 0 && colores.length > 0 && (
+          <div className="fotos-color">
+            <span className="titulo">Color de cada foto</span>
+            <span className="ayuda">
+              En la tienda, al elegir un color se ven sus fotos. Las que quedan
+              en “Todos los colores” se muestran cuando un color no tiene
+              fotos propias. Las fotos nuevas se asignan después de guardar.
+            </span>
+            <div className="lista">
+              {imagenes.map((img) => (
+                <label key={img.id}>
+                  <img src={img.url} alt="" />
+                  <select
+                    value={img.color ?? ""}
+                    onChange={(e) => cambiarColorImagen(img, e.target.value)}
+                  >
+                    <option value="">Todos los colores</option>
+                    {colores.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                    {img.color && !colores.includes(img.color) && (
+                      <option value={img.color}>{img.color}</option>
+                    )}
+                  </select>
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       <section className="tarjeta datos">
@@ -380,6 +427,44 @@ const Container = styled.form`
     display: flex;
     flex-direction: column;
     gap: 12px;
+  }
+  .fotos-color {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    .titulo {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .ayuda {
+      font-size: 12px;
+      opacity: 0.7;
+    }
+    .lista {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 120px;
+    }
+    img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    select {
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid ${({ theme }) => theme.color2};
+      background: ${({ theme }) => theme.body};
+      color: ${({ theme }) => theme.text};
+      font-size: 13px;
+    }
   }
   .datos {
     display: grid;
