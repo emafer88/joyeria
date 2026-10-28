@@ -38,20 +38,21 @@ export async function MostrarStockXAlmacenesYProducto(p) {
     .gt("stock", 0);
   return data;
 }
-// Existencias de todos los productos que controlan stock, por almacén.
+// Existencias de todos los productos que controlan stock, por almacén. Las
+// tallas y colores van en la pestaña Ropa y calzado (ropa_inventario).
 export async function MostrarExistencias(p) {
   const { data, error } = await supabase
     .from(tabla)
     .select(
       `id, stock, stock_minimo, ubicacion,
-      combinacion:producto_combinaciones(id, talla, color, color_hex, codigo_barras, orden),
       almacen!inner(id, nombre, sucursales!inner(nombre, id_empresa)),
       productos:productos_v!inner(id, nombre, codigo_barras, sevende_por,
         maneja_inventarios, precio_venta, precio_compra, activo)`
     )
     .eq("almacen.sucursales.id_empresa", p.id_empresa)
     .eq("productos.activo", true)
-    .eq("productos.maneja_inventarios", true);
+    .eq("productos.maneja_inventarios", true)
+    .is("id_combinacion", null);
   if (error) {
     throw new Error(error.message);
   }

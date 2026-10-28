@@ -268,14 +268,16 @@ export function EditorCombinaciones({ idProducto, idAlmacen, onChange }) {
                 const enAlmacen = existentes.get(k)?.stockAlmacen;
                 return (
                   <tr key={k}>
-                    <td className="comb">
-                      {c.color && (
-                        <i
-                          className="muestra"
-                          style={{ background: c.color_hex || "transparent" }}
-                        />
-                      )}
-                      {[c.talla, c.color].filter(Boolean).join(" · ")}
+                    <td>
+                      <span className="comb">
+                        {c.color && (
+                          <i
+                            className="muestra"
+                            style={{ background: c.color_hex || "transparent" }}
+                          />
+                        )}
+                        {[c.talla, c.color].filter(Boolean).join(" · ")}
+                      </span>
                     </td>
                     <td className="num">
                       {enAlmacen ? (
@@ -469,6 +471,7 @@ const Container = styled.div`
     font-weight: 600;
   }
   td input {
+    box-sizing: border-box;
     width: 100%;
     min-width: 64px;
     padding: 5px 8px;

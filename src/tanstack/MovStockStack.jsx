@@ -62,12 +62,15 @@ export const useInsertarMovStockMutation = () => {
       };
       const pProductos = {
         id: productosItemSelect?.id,
-        precio_compra: parseFloat(
-          (productosItemSelect?.precio_compra + data.precio_compra) / 2
-        ),
-        precio_venta: parseFloat(
-          (productosItemSelect?.precio_venta + data.precio_venta) / 2
-        ),
+        // Los inputs llegan como texto: sin Number() "100" + "120" se pega.
+        precio_compra:
+          (Number(productosItemSelect?.precio_compra || 0) +
+            Number(data.precio_compra || 0)) /
+          2,
+        precio_venta:
+          (Number(productosItemSelect?.precio_venta || 0) +
+            Number(data.precio_venta || 0)) /
+          2,
       };
       // Sin "Ver costos" no se conoce el costo actual: no se recalcula.
       if (!veCostos) delete pProductos.precio_compra;
@@ -90,6 +93,7 @@ export const useInsertarMovStockMutation = () => {
       queryClient.invalidateQueries(["buscar productos"]);
       queryClient.invalidateQueries({ queryKey: ["mostrar existencias"] });
       queryClient.invalidateQueries({ queryKey: ["combinaciones producto"] });
+      queryClient.invalidateQueries({ queryKey: ["ropa inventario"] });
       setStateClose(false)
       resetProductosItemSelect()
     },

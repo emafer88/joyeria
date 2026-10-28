@@ -7,7 +7,6 @@ import { useEmpresaStore } from "../../../store/EmpresaStore";
 import { MostrarExistencias } from "../../../supabaseCrud/crudStock";
 import { formatearCantidad } from "../../../utils/granel";
 import { tablaTarjetasMovil } from "../../../styles/tablaMovil";
-import { nombreCombinacion } from "../../../supabaseCrud/crudCombinaciones";
 
 const ESTADOS = {
   todos: "Todos",
@@ -45,11 +44,7 @@ export function TablaExistencias({ onEntrada, onSalida, onMovimientos }) {
     () =>
       rows
         .map((r) => ({ ...r, estado: estadoDe(r) }))
-        .sort(
-          (a, b) =>
-            a.productos.nombre.localeCompare(b.productos.nombre) ||
-            (a.combinacion?.orden ?? -1) - (b.combinacion?.orden ?? -1)
-        ),
+        .sort((a, b) => a.productos.nombre.localeCompare(b.productos.nombre)),
     [rows]
   );
   const conteo = useMemo(() => {
@@ -63,12 +58,7 @@ export function TablaExistencias({ onEntrada, onSalida, onMovimientos }) {
       (r) =>
         (filtro === "todos" || r.estado === filtro) &&
         (!q ||
-          [
-            r.productos.nombre,
-            r.productos.codigo_barras,
-            r.combinacion?.codigo_barras,
-            nombreCombinacion(r.combinacion),
-          ].some((x) =>
+          [r.productos.nombre, r.productos.codigo_barras].some((x) =>
             String(x || "").toLowerCase().includes(q)
           ))
     );
@@ -128,23 +118,8 @@ export function TablaExistencias({ onEntrada, onSalida, onMovimientos }) {
               <tr key={r.id}>
                 <td className="celda-principal">
                   <span className="nombre">{r.productos.nombre}</span>
-                  {r.combinacion && (
-                    <span className="combinacion">
-                      {r.combinacion.color && (
-                        <i
-                          className="muestra"
-                          style={{
-                            background: r.combinacion.color_hex || "transparent",
-                          }}
-                        />
-                      )}
-                      {nombreCombinacion(r.combinacion)}
-                    </span>
-                  )}
-                  {(r.combinacion?.codigo_barras || r.productos.codigo_barras) && (
-                    <span className="codigo">
-                      {r.combinacion?.codigo_barras || r.productos.codigo_barras}
-                    </span>
+                  {r.productos.codigo_barras && (
+                    <span className="codigo">{r.productos.codigo_barras}</span>
                   )}
                 </td>
                 <td data-title="Almacén">
@@ -282,19 +257,6 @@ const Container = styled.div`
   .nombre {
     font-weight: 600;
     display: block;
-  }
-  .combinacion {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-  }
-  .muestra {
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: 1px solid rgba(128, 128, 128, 0.6);
   }
   .codigo {
     font-family: monospace;

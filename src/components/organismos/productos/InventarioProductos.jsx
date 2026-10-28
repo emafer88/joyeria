@@ -63,11 +63,7 @@ export function InventarioProductos() {
   // elegido.
   function registrarDesdeFila(fila, tipo) {
     selectProductos(fila.productos);
-    setCombinacion(
-      fila.combinacion
-        ? { ...fila.combinacion, id_producto: fila.productos.id }
-        : null
-    );
+    setCombinacion(null);
     setTipo(tipo);
     setStateClose(true);
     setAccion("Nuevo");
