@@ -24,9 +24,9 @@ import {
 
 /**
  * Pestaña "Ropa y calzado" (dentro de Productos), para giros con tallas.
- *  - Catálogo: productos con su cuadrícula talla × color.
+ *  - Catálogo: productos con su cuadrícula talla × color; "nuevo" y
+ *    "Editar" abren el formulario en lugar de la lista.
  *  - Inventario: cada talla y color por almacén, con filtros y orden.
- *  - Nuevo / Editar: alta del producto en página propia.
  */
 export function RopaTemplate() {
   const { dataempresa } = useEmpresaStore();
@@ -35,7 +35,8 @@ export function RopaTemplate() {
   const { setAlmacenSelectItem } = useAlmacenesStore();
   const { stateClose, setStateClose, setAccion } = useGlobalStore();
   const [vista, setVista] = useState("catalogo");
-  const [editando, setEditando] = useState(null); // id del producto
+  // Formulario dentro del Catálogo: null = lista, "nuevo" o id del producto.
+  const [formulario, setFormulario] = useState(null);
   const [buscador, setBuscador] = useState("");
   const [historial, setHistorial] = useState(null); // fila de inventario
   const [openAtributos, setOpenAtributos] = useState(false);
@@ -63,11 +64,7 @@ export function RopaTemplate() {
   function irA(v) {
     setVista(v);
     setHistorial(null);
-    if (v !== "nuevo") setEditando(null);
-  }
-  function editar(id) {
-    setEditando(id);
-    setVista("nuevo");
+    setFormulario(null);
   }
   // Abre el formulario de entrada/salida con el producto, la talla/color y el
   // almacén del renglón ya elegidos.
@@ -88,13 +85,9 @@ export function RopaTemplate() {
   const titulo =
     vista === "catalogo"
       ? "Ropa y calzado"
-      : vista === "inventario"
-      ? historial
-        ? "Movimientos"
-        : "Inventario de ropa y calzado"
-      : editando
-      ? "Editar producto"
-      : "Nuevo producto";
+      : historial
+      ? "Movimientos"
+      : "Inventario de ropa y calzado";
 
   return (
     <Container>
@@ -114,33 +107,32 @@ export function RopaTemplate() {
         >
           Inventario
         </button>
-        <button
-          className={vista === "nuevo" ? "on" : ""}
-          onClick={() => {
-            setEditando(null);
-            irA("nuevo");
-          }}
-        >
-          {editando ? "Editar" : "+ Nuevo"}
-        </button>
       </div>
 
-      {vista === "nuevo" ? (
+      {vista === "catalogo" && formulario ? (
         <FormProductoRopa
-          key={editando ?? "nuevo"}
-          idProducto={editando}
-          onListo={() => irA("catalogo")}
+          key={formulario}
+          idProducto={formulario === "nuevo" ? null : formulario}
+          onListo={() => setFormulario(null)}
         />
       ) : (
         <>
           <section className="area1">
             <Title>{titulo}</Title>
             {vista === "catalogo" && (
-              <Btn1
-                funcion={() => setOpenAtributos(true)}
-                bgcolor={v.colorSecundario}
-                titulo="Atributos"
-              />
+              <div className="botones">
+                <Btn1
+                  funcion={() => setOpenAtributos(true)}
+                  bgcolor={v.colorSecundario}
+                  titulo="Atributos"
+                />
+                <Btn1
+                  funcion={() => setFormulario("nuevo")}
+                  bgcolor="acento"
+                  titulo="nuevo"
+                  icono={<v.iconoagregar />}
+                />
+              </div>
             )}
           </section>
 
@@ -184,7 +176,7 @@ export function RopaTemplate() {
                 <CatalogoRopa
                   productos={productos}
                   buscador={buscador}
-                  onEditar={editar}
+                  onEditar={setFormulario}
                 />
               ) : (
                 <InventarioRopa
@@ -233,6 +225,11 @@ const Container = styled.div`
     justify-content: space-between;
     align-items: center;
     gap: 10px 15px;
+  }
+  .botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
   }
   .buscar input {
     width: 100%;

@@ -52,7 +52,7 @@ export function CatalogoRopa({ productos, buscador, onEditar }) {
   if (productos.length === 0)
     return (
       <p className="vacio">
-        Todavía no hay ropa ni calzado. Da de alta el primero en “+ Nuevo”.
+        Todavía no hay ropa ni calzado. Da de alta el primero con “nuevo”.
       </p>
     );
   if (filtrados.length === 0)
