@@ -15,13 +15,18 @@ export async function EditarStock(p, tipo) {
     throw new Error(error.message);
   }
 }
+// La fila del producto en el almacén; con id_combinacion, la de esa talla y
+// color (sin ella, la del producto sin combinaciones).
 export async function MostrarStockXAlmacenYProducto(p) {
-  const { data } = await supabase
+  let q = supabase
     .from(tabla)
     .select()
     .eq("id_almacen", p.id_almacen)
-    .eq("id_producto", p.id_producto)
-    .maybeSingle();
+    .eq("id_producto", p.id_producto);
+  q = p.id_combinacion
+    ? q.eq("id_combinacion", p.id_combinacion)
+    : q.is("id_combinacion", null);
+  const { data } = await q.maybeSingle();
   return data;
 }
 export async function MostrarStockXAlmacenesYProducto(p) {
@@ -33,7 +38,8 @@ export async function MostrarStockXAlmacenesYProducto(p) {
     .gt("stock", 0);
   return data;
 }
-// Existencias de todos los productos que controlan stock, por almacén.
+// Existencias de todos los productos que controlan stock, por almacén. Las
+// tallas y colores van en la pestaña Ropa y calzado (ropa_inventario).
 export async function MostrarExistencias(p) {
   const { data, error } = await supabase
     .from(tabla)
@@ -45,7 +51,8 @@ export async function MostrarExistencias(p) {
     )
     .eq("almacen.sucursales.id_empresa", p.id_empresa)
     .eq("productos.activo", true)
-    .eq("productos.maneja_inventarios", true);
+    .eq("productos.maneja_inventarios", true)
+    .is("id_combinacion", null);
   if (error) {
     throw new Error(error.message);
   }

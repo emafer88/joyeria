@@ -6,6 +6,7 @@ export async function MostrarMovStock(p) {
     .select(
       `
       *,
+      combinacion:producto_combinaciones(talla, color),
       almacen!inner(
         *,
         sucursales!inner(

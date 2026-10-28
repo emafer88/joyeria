@@ -13,6 +13,7 @@ import { useState } from "react";
 import ConfettiExplosion from "react-confetti-explosion";
 import { Toaster } from "sonner";
 import { JoyeriaTemplate } from "./JoyeriaTemplate";
+import { RopaTemplate } from "./RopaTemplate";
 import { InventarioProductos } from "../organismos/productos/InventarioProductos";
 import { useLicencia } from "../../hooks/useLicencia";
 import { AdminAtributos } from "../organismos/atributos/AdminAtributos";
@@ -24,13 +25,15 @@ export function ProductosTemplate() {
   const [accion, setAccion] = useState("");
   const [dataSelect, setdataSelect] = useState([]);
   const [isExploding, setIsExploding] = useState(false);
-  // pestañas: 'productos' (catálogo plano actual) | 'joyeria' (inventario serializado)
+  // pestañas: 'productos' (catálogo plano actual) | 'joyeria' (inventario
+  // serializado) | 'ropa' (tallas y colores)
   const [tab, setTab] = useState("productos");
   // sub-pestañas dentro de "Productos": 'catalogo' | 'inventario'
   const [vistaProducto, setVistaProducto] = useState("catalogo");
-  // Sin piezas con número de serie (giros que no son joyería) no hay pestañas.
+  // Pestañas según el giro: Joyería con piezas, Ropa y calzado con tallas.
   const { tiene } = useLicencia();
   const conPiezas = tiene("piezas");
+  const conTallas = tiene("tallas");
   function nuevoRegistro() {
     SetopenRegistro(!openRegistro);
     setAccion("Nuevo");
@@ -43,7 +46,7 @@ export function ProductosTemplate() {
     <Container>
       <Toaster />
 
-      {conPiezas && (
+      {(conPiezas || conTallas) && (
       <nav className="tabs">
         <button
           className={tab === "productos" ? "on" : ""}
@@ -51,17 +54,29 @@ export function ProductosTemplate() {
         >
           Productos
         </button>
-        <button
-          className={tab === "joyeria" ? "on" : ""}
-          onClick={() => setTab("joyeria")}
-        >
-          Joyería
-        </button>
+        {conPiezas && (
+          <button
+            className={tab === "joyeria" ? "on" : ""}
+            onClick={() => setTab("joyeria")}
+          >
+            Joyería
+          </button>
+        )}
+        {conTallas && (
+          <button
+            className={tab === "ropa" ? "on" : ""}
+            onClick={() => setTab("ropa")}
+          >
+            Ropa y calzado
+          </button>
+        )}
       </nav>
       )}
 
       {conPiezas && tab === "joyeria" ? (
         <JoyeriaTemplate />
+      ) : conTallas && tab === "ropa" ? (
+        <RopaTemplate />
       ) : (
         <>
           <div className="subtabs">

@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { formatearCantidad } from "../../../utils/granel";
 import { tablaTarjetasMovil } from "../../../styles/tablaMovil";
+import { nombreCombinacion } from "../../../supabaseCrud/crudCombinaciones";
 
 const fechaHora = (f) =>
   new Date(f).toLocaleString("es-MX", {
@@ -14,11 +15,14 @@ const fechaHora = (f) =>
 // "registro de inventario manual" es lo que guarda el formulario de
 // entrada/salida; lo demás (ventas) ya viene con un texto legible.
 const motivo = (m) =>
-  m.origen === "inventario" ? "Registro manual" : m.detalle || m.origen;
+  m.origen === "inventario" && m.detalle === "registro de inventario manual"
+    ? "Registro manual"
+    : m.detalle || m.origen;
 
 /** Historial (kardex) de un producto, del más reciente al más viejo. */
 export function MovimientosProducto({ data, producto }) {
   const filas = [...(data ?? [])].sort((a, b) => b.id - a.id);
+  const conCombinaciones = filas.some((m) => m.combinacion);
   return (
     <Container>
       <table>
@@ -26,6 +30,7 @@ export function MovimientosProducto({ data, producto }) {
           <tr>
             <th>Fecha</th>
             <th>Movimiento</th>
+            {conCombinaciones && <th>Talla y color</th>}
             <th>Motivo</th>
             <th>Almacén</th>
             <th className="num">Cantidad</th>
@@ -34,7 +39,7 @@ export function MovimientosProducto({ data, producto }) {
         <tbody>
           {filas.length === 0 && (
             <tr>
-              <td colSpan={5} className="vacio">
+              <td colSpan={6} className="vacio">
                 Este producto todavía no tiene movimientos.
               </td>
             </tr>
@@ -49,6 +54,11 @@ export function MovimientosProducto({ data, producto }) {
                     {entra ? "Entrada" : "Salida"}
                   </span>
                 </td>
+                {conCombinaciones && (
+                  <td data-title="Talla y color">
+                    {nombreCombinacion(m.combinacion) || "—"}
+                  </td>
+                )}
                 <td data-title="Motivo">{motivo(m)}</td>
                 <td data-title="Almacén">
                   {m.almacen?.sucursales?.nombre} · {m.almacen?.nombre}

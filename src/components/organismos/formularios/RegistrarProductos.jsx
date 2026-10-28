@@ -174,6 +174,7 @@ export function RegistrarProductos({
         id_almacen: almacenSelectItem?.id,
         id_producto: dataSelect?.id,
       }),
+    enabled: !!almacenSelectItem?.id && !!dataSelect?.id,
   });
   const {
     data: dataAlmacenes,

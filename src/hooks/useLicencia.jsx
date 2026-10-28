@@ -14,7 +14,7 @@ const FUNCIONES_POR_PLAN = {
 //              piezas en el POS)
 //   granel:    venta por peso (kg / gramo)
 //   apartados: apartar con anticipo
-//   tallas:    tallas en el producto
+//   tallas:    tallas y colores (combinaciones con existencia) en el producto
 const FUNCIONES_POR_GIRO = {
   joyeria: ["piezas", "granel", "apartados", "tallas"],
   ropa: ["apartados", "tallas"],
@@ -27,7 +27,7 @@ export const FUNCIONES_GIRO = [
   ["piezas", "Piezas con número de serie", "Pestañas Joyería y venta de piezas en el POS"],
   ["granel", "Venta por peso", "Productos por kilo o por gramo"],
   ["apartados", "Apartados", "Apartar con anticipo y liquidar después"],
-  ["tallas", "Tallas", "Campo de tallas en el producto"],
+  ["tallas", "Tallas y colores", "Tallas y colores con existencia propia en el producto"],
 ];
 export const NOMBRE_GIRO = {
   joyeria: "Joyería",
