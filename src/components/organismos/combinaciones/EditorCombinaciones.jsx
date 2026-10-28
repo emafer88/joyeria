@@ -20,6 +20,14 @@ const COLORES = [
 
 const clave = (talla, color) => `${talla}|${color}`;
 
+// EAN-13 de uso interno (empieza con 2) con su dígito verificador.
+function codigoBarras() {
+  let d = "2";
+  for (let i = 0; i < 11; i++) d += Math.floor(Math.random() * 10);
+  const suma = [...d].reduce((s, n, i) => s + Number(n) * (i % 2 ? 3 : 1), 0);
+  return d + ((10 - (suma % 10)) % 10);
+}
+
 /**
  * Tallas y colores de un producto, cada combinación con su existencia en el
  * almacén elegido. Avisa a quien lo usa con `onChange(combinaciones)` en el
@@ -104,6 +112,35 @@ export function EditorCombinaciones({ idProducto, idAlmacen, onChange }) {
       })
     );
   }, [combinaciones, filas, cargado]);
+
+  // Cada combinación nueva nace con su código de barras (las guardadas ya
+  // traen su fila y se respetan, aunque no tengan código).
+  useEffect(() => {
+    if (!cargado) return;
+    const faltan = combinaciones
+      .map((c) => clave(c.talla, c.color))
+      .filter((k) => !filas[k]);
+    if (!faltan.length) return;
+    setFilas((prev) => {
+      const sig = { ...prev };
+      for (const k of faltan) sig[k] = { ...sig[k], codigo_barras: codigoBarras() };
+      return sig;
+    });
+  }, [combinaciones, cargado]);
+
+  const sinCodigo = combinaciones.filter(
+    (c) => !filas[clave(c.talla, c.color)]?.codigo_barras
+  );
+  function generarFaltantes() {
+    setFilas((prev) => {
+      const sig = { ...prev };
+      for (const c of sinCodigo) {
+        const k = clave(c.talla, c.color);
+        sig[k] = { ...sig[k], codigo_barras: codigoBarras() };
+      }
+      return sig;
+    });
+  }
 
   function cambiarFila(k, campo, valor) {
     setFilas((prev) => ({ ...prev, [k]: { ...prev[k], [campo]: valor } }));
@@ -328,6 +365,11 @@ export function EditorCombinaciones({ idProducto, idAlmacen, onChange }) {
               })}
             </tbody>
           </table>
+          {sinCodigo.length > 0 && (
+            <button type="button" className="generar" onClick={generarFaltantes}>
+              Generar los códigos de barras que faltan ({sinCodigo.length})
+            </button>
+          )}
           {existentes.size > 0 && (
             <span className="ayuda">
               La existencia de lo que ya estaba se cambia en Inventario
@@ -434,6 +476,16 @@ const Container = styled.div`
       cursor: pointer;
       font-size: 13px;
     }
+  }
+  .generar {
+    align-self: flex-start;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid ${({ theme }) => theme.color2};
+    background: transparent;
+    color: ${({ theme }) => theme.text};
+    cursor: pointer;
+    font-size: 13px;
   }
   .tabla {
     overflow-x: auto;
