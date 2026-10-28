@@ -17,6 +17,7 @@ import { SelectList } from "../../ui/lists/SelectList";
 import { SubidorImagenes } from "../imagenes/SubidorImagenes";
 import { SelectorAtributos } from "../atributos/SelectorAtributos";
 import { EditorCombinaciones } from "../combinaciones/EditorCombinaciones";
+import { FotosPorColor } from "./FotosPorColor";
 import { useLicencia } from "../../../hooks/useLicencia";
 import { usePermisosDeMenu } from "../../../hooks/usePermisosDeMenu";
 import { useOpcionesProducto } from "../../../hooks/useOpcionesProducto";
@@ -27,6 +28,7 @@ import {
   SetAtributosProducto,
 } from "../../../supabaseCrud/crudAtributos";
 import {
+  AsignarColorImagen,
   GuardarCombinaciones,
   MostrarProductoRopa,
 } from "../../../supabaseCrud/crudCombinaciones";
@@ -73,7 +75,8 @@ export function FormProductoRopa({ idProducto, onListo }) {
   const [destacado, setDestacado] = useState(false);
   const [opciones, cambiarOpcion] = useOpcionesProducto(idProducto);
   const [combinaciones, setCombinaciones] = useState(null);
-  const [files, setFiles] = useState([]);
+  const [files, setFiles] = useState([]); // fotos generales nuevas
+  const [filesPorColor, setFilesPorColor] = useState({}); // { color: File[] }
   const [imagenes, setImagenes] = useState([]);
   const [sucursal, setSucursal] = useState(null);
   const [almacen, setAlmacen] = useState(null);
@@ -112,6 +115,27 @@ export function FormProductoRopa({ idProducto, onListo }) {
   }, [almacenes]);
 
   const categoria = (datacategorias ?? []).find((c) => c.id === idCategoria);
+  const colores = (combinaciones ?? []).reduce(
+    (acc, c) =>
+      c.color && !acc.some((x) => x.nombre === c.color)
+        ? [...acc, { nombre: c.color, hex: c.color_hex }]
+        : acc,
+    []
+  );
+  // Arriba, las fotos de todos los colores; las de cada color, con su color.
+  const generales = imagenes.filter((i) => !i.color);
+
+  // Se guarda al momento, como borrar o reordenar una foto.
+  async function cambiarColorImagen(imagen, color) {
+    try {
+      await AsignarColorImagen({ id: imagen.id, color });
+      setImagenes((prev) =>
+        prev.map((x) => (x.id === imagen.id ? { ...x, color: color || null } : x))
+      );
+    } catch (err) {
+      toast.error(err.message);
+    }
+  }
 
   async function guardar(e) {
     e.preventDefault();
@@ -166,8 +190,19 @@ export function FormProductoRopa({ idProducto, onListo }) {
         id_almacen: almacen.id,
         combinaciones,
       });
+      let orden = imagenes.length + 1;
       if (files.length) {
-        await subirImagenesProducto(id, files, imagenes.length + 1);
+        await subirImagenesProducto(id, files, orden);
+        orden += files.length;
+      }
+      // Las de cada color se suben y se marcan con ese color (solo de los
+      // colores que siguen en el producto).
+      for (const { nombre: color } of colores) {
+        const nuevas = filesPorColor[color] ?? [];
+        if (!nuevas.length) continue;
+        const subidas = await subirImagenesProducto(id, nuevas, orden);
+        orden += nuevas.length;
+        for (const img of subidas) await AsignarColorImagen({ id: img.id, color });
       }
       queryClient.invalidateQueries({ queryKey: ["ropa inventario"] });
       queryClient.invalidateQueries({ queryKey: ["combinaciones producto"] });
@@ -223,8 +258,8 @@ export function FormProductoRopa({ idProducto, onListo }) {
 
       <section className="tarjeta">
         <SubidorImagenes
-          label="Fotos del producto (opcional)"
-          imagenesExistentes={imagenes}
+          label="Fotos generales (de todos los colores, opcional)"
+          imagenesExistentes={generales}
           pendientes={files}
           onPendientesChange={setFiles}
           onEliminarExistente={quitarImagen}
@@ -346,6 +381,15 @@ export function FormProductoRopa({ idProducto, onListo }) {
           idProducto={idProducto}
           idAlmacen={almacen?.id}
           onChange={setCombinaciones}
+        />
+        <FotosPorColor
+          colores={colores}
+          imagenes={imagenes}
+          pendientes={filesPorColor}
+          pendientesGenerales={files.length}
+          onPendientesChange={setFilesPorColor}
+          onQuitarExistente={quitarImagen}
+          onCambiarColor={cambiarColorImagen}
         />
       </section>
 
