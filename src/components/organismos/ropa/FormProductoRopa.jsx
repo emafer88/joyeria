@@ -17,6 +17,7 @@ import { SelectList } from "../../ui/lists/SelectList";
 import { SubidorImagenes } from "../imagenes/SubidorImagenes";
 import { SelectorAtributos } from "../atributos/SelectorAtributos";
 import { EditorCombinaciones } from "../combinaciones/EditorCombinaciones";
+import { FotosPorColor } from "./FotosPorColor";
 import { useLicencia } from "../../../hooks/useLicencia";
 import { usePermisosDeMenu } from "../../../hooks/usePermisosDeMenu";
 import { useOpcionesProducto } from "../../../hooks/useOpcionesProducto";
@@ -74,7 +75,8 @@ export function FormProductoRopa({ idProducto, onListo }) {
   const [destacado, setDestacado] = useState(false);
   const [opciones, cambiarOpcion] = useOpcionesProducto(idProducto);
   const [combinaciones, setCombinaciones] = useState(null);
-  const [files, setFiles] = useState([]);
+  const [files, setFiles] = useState([]); // fotos generales nuevas
+  const [filesPorColor, setFilesPorColor] = useState({}); // { color: File[] }
   const [imagenes, setImagenes] = useState([]);
   const [sucursal, setSucursal] = useState(null);
   const [almacen, setAlmacen] = useState(null);
@@ -113,9 +115,15 @@ export function FormProductoRopa({ idProducto, onListo }) {
   }, [almacenes]);
 
   const categoria = (datacategorias ?? []).find((c) => c.id === idCategoria);
-  const colores = [
-    ...new Set((combinaciones ?? []).map((c) => c.color).filter(Boolean)),
-  ];
+  const colores = (combinaciones ?? []).reduce(
+    (acc, c) =>
+      c.color && !acc.some((x) => x.nombre === c.color)
+        ? [...acc, { nombre: c.color, hex: c.color_hex }]
+        : acc,
+    []
+  );
+  // Arriba, las fotos de todos los colores; las de cada color, con su color.
+  const generales = imagenes.filter((i) => !i.color);
 
   // Se guarda al momento, como borrar o reordenar una foto.
   async function cambiarColorImagen(imagen, color) {
@@ -182,8 +190,19 @@ export function FormProductoRopa({ idProducto, onListo }) {
         id_almacen: almacen.id,
         combinaciones,
       });
+      let orden = imagenes.length + 1;
       if (files.length) {
-        await subirImagenesProducto(id, files, imagenes.length + 1);
+        await subirImagenesProducto(id, files, orden);
+        orden += files.length;
+      }
+      // Las de cada color se suben y se marcan con ese color (solo de los
+      // colores que siguen en el producto).
+      for (const { nombre: color } of colores) {
+        const nuevas = filesPorColor[color] ?? [];
+        if (!nuevas.length) continue;
+        const subidas = await subirImagenesProducto(id, nuevas, orden);
+        orden += nuevas.length;
+        for (const img of subidas) await AsignarColorImagen({ id: img.id, color });
       }
       queryClient.invalidateQueries({ queryKey: ["ropa inventario"] });
       queryClient.invalidateQueries({ queryKey: ["combinaciones producto"] });
@@ -239,44 +258,13 @@ export function FormProductoRopa({ idProducto, onListo }) {
 
       <section className="tarjeta">
         <SubidorImagenes
-          label="Fotos del producto (opcional)"
-          imagenesExistentes={imagenes}
+          label="Fotos generales (de todos los colores, opcional)"
+          imagenesExistentes={generales}
           pendientes={files}
           onPendientesChange={setFiles}
           onEliminarExistente={quitarImagen}
           onReordenar={reordenar}
         />
-        {imagenes.length > 0 && colores.length > 0 && (
-          <div className="fotos-color">
-            <span className="titulo">Color de cada foto</span>
-            <span className="ayuda">
-              En la tienda, al elegir un color se ven sus fotos. Las que quedan
-              en “Todos los colores” se muestran cuando un color no tiene
-              fotos propias. Las fotos nuevas se asignan después de guardar.
-            </span>
-            <div className="lista">
-              {imagenes.map((img) => (
-                <label key={img.id}>
-                  <img src={img.url} alt="" />
-                  <select
-                    value={img.color ?? ""}
-                    onChange={(e) => cambiarColorImagen(img, e.target.value)}
-                  >
-                    <option value="">Todos los colores</option>
-                    {colores.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                    {img.color && !colores.includes(img.color) && (
-                      <option value={img.color}>{img.color}</option>
-                    )}
-                  </select>
-                </label>
-              ))}
-            </div>
-          </div>
-        )}
       </section>
 
       <section className="tarjeta datos">
@@ -394,6 +382,15 @@ export function FormProductoRopa({ idProducto, onListo }) {
           idAlmacen={almacen?.id}
           onChange={setCombinaciones}
         />
+        <FotosPorColor
+          colores={colores}
+          imagenes={imagenes}
+          pendientes={filesPorColor}
+          pendientesGenerales={files.length}
+          onPendientesChange={setFilesPorColor}
+          onQuitarExistente={quitarImagen}
+          onCambiarColor={cambiarColorImagen}
+        />
       </section>
 
       <div className="acciones">
@@ -427,44 +424,6 @@ const Container = styled.form`
     display: flex;
     flex-direction: column;
     gap: 12px;
-  }
-  .fotos-color {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    .titulo {
-      font-size: 13px;
-      font-weight: 600;
-    }
-    .ayuda {
-      font-size: 12px;
-      opacity: 0.7;
-    }
-    .lista {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    label {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      width: 120px;
-    }
-    img {
-      width: 120px;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 8px;
-    }
-    select {
-      padding: 6px;
-      border-radius: 6px;
-      border: 1px solid ${({ theme }) => theme.color2};
-      background: ${({ theme }) => theme.body};
-      color: ${({ theme }) => theme.text};
-      font-size: 13px;
-    }
   }
   .datos {
     display: grid;
