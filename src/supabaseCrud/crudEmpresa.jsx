@@ -29,6 +29,18 @@ export async function GuardarDisenoTienda(p) {
     throw new Error(error.message);
   }
 }
+// Logo de la tienda en línea (Diseño de la tienda → Contacto): se sube al
+// bucket de imágenes y el diseño guarda la URL pública al publicar.
+export async function SubirLogoTienda(file) {
+  const ruta = `tienda/logo-${crypto.randomUUID()}`;
+  const { error } = await supabase.storage
+    .from("imagenes")
+    .upload(ruta, file, { cacheControl: "3600", contentType: file.type });
+  if (error) {
+    throw new Error(error.message);
+  }
+  return supabase.storage.from("imagenes").getPublicUrl(ruta).data.publicUrl;
+}
 export async function EditarMonedaEmpresa(p){
   const {error}= await supabase.from(tabla).update(p).eq("id",p.id)
   if(error){

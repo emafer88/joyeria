@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
-import { Toaster } from "sonner";
+import { Toaster, toast } from "sonner";
 import { Btn1 } from "../components/moleculas/Btn1";
 import { ListaBanners } from "../components/organismos/banners/ListaBanners";
 import { FormBanner } from "../components/organismos/banners/FormBanner";
@@ -8,13 +8,15 @@ import { useBannersStore } from "../store/BannersStore";
 import { useBannersQuery } from "../tanstack/BannersStack";
 import { useEmpresaStore } from "../store/EmpresaStore";
 import { useGuardarDisenoTiendaMutation } from "../tanstack/EmpresaStack";
+import { useLicencia } from "../hooks/useLicencia";
+import { SubirLogoTienda } from "../supabaseCrud/crudEmpresa";
 import {
-  DISENO_FABRICA,
   ICONOS_BENEFICIO,
   PALETAS_TIENDA,
   SECCIONES,
   TIENDA_URL,
   completarDiseno,
+  disenoFabrica,
   esUrlValida,
 } from "../utils/disenoTienda";
 
@@ -26,10 +28,12 @@ const PESTANAS = ["Secciones", "Banners", "Textos", "Colores", "Contacto"];
 export const ConfiguracionTienda = () => {
   const { dataempresa } = useEmpresaStore();
   const { mutate, isPending } = useGuardarDisenoTiendaMutation();
+  // Los textos de fábrica dependen del giro (joyería habla de piezas).
+  const { giro } = useLicencia();
 
   const guardado = useMemo(
-    () => completarDiseno(dataempresa?.diseno_tienda),
-    [dataempresa?.diseno_tienda]
+    () => completarDiseno(dataempresa?.diseno_tienda, giro),
+    [dataempresa?.diseno_tienda, giro]
   );
   const [diseno, setDiseno] = useState(guardado);
   const [pestana, setPestana] = useState(PESTANAS[0]);
@@ -47,7 +51,10 @@ export const ConfiguracionTienda = () => {
     const limpio = {
       ...diseno,
       contacto: Object.fromEntries(
-        Object.entries(diseno.contacto).map(([k, val]) => [k, val.trim()])
+        Object.entries(diseno.contacto).map(([k, val]) => [
+          k,
+          typeof val === "string" ? val.trim() : val,
+        ])
       ),
     };
     limpio.contacto.whatsapp = limpio.contacto.whatsapp.replace(/\D/g, "");
@@ -129,7 +136,7 @@ export const ConfiguracionTienda = () => {
             <button
               type="button"
               className="enlace secundario"
-              onClick={() => setDiseno(completarDiseno(DISENO_FABRICA))}
+              onClick={() => setDiseno(completarDiseno(disenoFabrica(giro), giro))}
             >
               Restaurar valores de fábrica
             </button>
@@ -291,7 +298,7 @@ function EditorTextos({ promo, beneficios, onPromo, onBeneficios }) {
         <button
           type="button"
           className="agregar"
-          onClick={() => onBeneficios([...beneficios, { icono: "diamante", titulo: "", texto: "" }])}
+          onClick={() => onBeneficios([...beneficios, { icono: "garantia", titulo: "", texto: "" }])}
         >
           + Agregar beneficio
         </button>
@@ -352,6 +359,17 @@ function EditorContacto({ contacto, invalidas, onChange }) {
   return (
     <div className="lista">
       <p className="ayuda">Aparecen en el pie de página y en la sección de redes. Deja vacío lo que no quieras mostrar.</p>
+      <CampoLogo logo={contacto.logo} onChange={(logo) => onChange({ ...contacto, logo })} />
+      {contacto.logo && (
+        <label className="check-nombre">
+          <input
+            type="checkbox"
+            checked={contacto.mostrarNombre}
+            onChange={(e) => onChange({ ...contacto, mostrarNombre: e.target.checked })}
+          />
+          <span>Mostrar el nombre junto al logo en el encabezado</span>
+        </label>
+      )}
       {CAMPOS_CONTACTO.map(({ k, etiqueta, placeholder }) => (
         <Campo
           key={k}
@@ -362,6 +380,52 @@ function EditorContacto({ contacto, invalidas, onChange }) {
           onChange={(v) => onChange({ ...contacto, [k]: v })}
         />
       ))}
+    </div>
+  );
+}
+
+// Logo del encabezado, el pie y la pestaña del navegador. Se sube al elegirlo
+// y se publica con el resto al guardar; sin logo la tienda muestra el nombre.
+function CampoLogo({ logo, onChange }) {
+  const [subiendo, setSubiendo] = useState(false);
+  const elegir = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Elige una imagen (PNG, JPG, WEBP o SVG)");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("El logo debe pesar menos de 2 MB");
+      return;
+    }
+    setSubiendo(true);
+    try {
+      onChange(await SubirLogoTienda(file));
+    } catch (err) {
+      toast.error(`No se pudo subir el logo: ${err.message}`);
+    } finally {
+      setSubiendo(false);
+    }
+  };
+  return (
+    <div className="campo logo-tienda">
+      <span>Logo</span>
+      <div className="fila-logo">
+        <div className="muestra-logo">
+          {logo ? <img src={logo} alt="Logo de la tienda" /> : <small>Sin logo</small>}
+        </div>
+        <label className="boton-archivo">
+          {subiendo ? "Subiendo..." : logo ? "Cambiar logo" : "Subir logo"}
+          <input type="file" accept="image/*" onChange={elegir} disabled={subiendo} hidden />
+        </label>
+        {logo && !subiendo && (
+          <button type="button" className="enlace" onClick={() => onChange("")}>
+            Quitar
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -612,6 +676,40 @@ const Container = styled.div`
         border-color: #e53935;
       }
     }
+  }
+  .check-nombre {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .fila-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .muestra-logo {
+    width: 120px;
+    height: 56px;
+    border-radius: 8px;
+    border: 1px dashed ${({ theme }) => theme.color2};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+  }
+  .boton-archivo {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid ${({ theme }) => theme.color2};
+    font-size: 13px;
+    cursor: pointer;
   }
   .campo-inline {
     display: flex;

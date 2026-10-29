@@ -53,7 +53,7 @@ export const ICONOS_BENEFICIO = [
   { id: "certificado", nombre: "Certificado" },
 ];
 
-export const DISENO_FABRICA = {
+const FABRICA_GENERAL = {
   paleta: "clasica",
   secciones: [
     { id: "banner", visible: true, titulo: "", subtitulo: "" },
@@ -62,7 +62,7 @@ export const DISENO_FABRICA = {
       id: "destacados",
       visible: true,
       titulo: "Productos destacados",
-      subtitulo: "Una selección de nuestras piezas favoritas",
+      subtitulo: "Una selección de nuestros favoritos",
     },
     {
       id: "ofertas",
@@ -74,40 +74,71 @@ export const DISENO_FABRICA = {
       id: "nuevos",
       visible: true,
       titulo: "Nuevos productos",
-      subtitulo: "Lo último que llegó a la joyería",
+      subtitulo: "Lo último que llegó a la tienda",
     },
     { id: "beneficios", visible: true, titulo: "", subtitulo: "" },
     {
       id: "redes",
       visible: true,
       titulo: "Síguenos en redes",
-      subtitulo: "Novedades, lanzamientos y detrás de escena de cada pieza.",
+      subtitulo: "Novedades, lanzamientos y promociones.",
     },
   ],
   promo: {
     etiqueta: "Promociones",
     titulo: "Consulta nuestras ofertas de temporada",
-    texto: "Piezas seleccionadas con condiciones especiales, todo el año.",
+    texto: "Productos seleccionados con condiciones especiales, todo el año.",
     boton: "Ver catálogo",
   },
   beneficios: [
     { icono: "envio", titulo: "Envío a todo México", texto: "Empaque seguro con seguimiento en cada pedido." },
-    { icono: "garantia", titulo: "Garantía en tus piezas", texto: "Respaldo en materiales y fabricación." },
+    { icono: "garantia", titulo: "Compra con garantía", texto: "Respaldo en cada producto que compras." },
     { icono: "devolucion", titulo: "Devoluciones simples", texto: "Cambios y devoluciones sin complicaciones." },
     { icono: "pago", titulo: "Pagos 100% seguros", texto: "Checkout protegido en cada compra." },
   ],
   contacto: {
-    nombre: "Cubiks Jewelry",
-    descripcion: "Joyería en oro y plata, piezas pensadas para durar toda la vida.",
-    telefono: "+52 55 0000 0000",
-    whatsapp: "5215500000000",
-    email: "contacto@cubiksjewelry.com",
-    direccion: "Ciudad de México, México",
-    instagram: "https://instagram.com/cubiksjewelry",
-    facebook: "https://facebook.com/cubiksjewelry",
+    nombre: "Mi tienda",
+    logo: "",
+    // Con logo propio, si el encabezado también muestra el nombre.
+    mostrarNombre: true,
+    descripcion: "",
+    telefono: "",
+    whatsapp: "",
+    email: "",
+    direccion: "",
+    instagram: "",
+    facebook: "",
     tiktok: "",
   },
 };
+
+// Joyería: mismos datos con los textos que hablan de piezas y joyas.
+const FABRICA_JOYERIA = {
+  ...FABRICA_GENERAL,
+  secciones: FABRICA_GENERAL.secciones.map((s) =>
+    s.id === "destacados"
+      ? { ...s, subtitulo: "Una selección de nuestras piezas favoritas" }
+      : s.id === "nuevos"
+        ? { ...s, subtitulo: "Lo último que llegó a la joyería" }
+        : s.id === "redes"
+          ? { ...s, subtitulo: "Novedades, lanzamientos y detrás de escena de cada pieza." }
+          : s
+  ),
+  promo: {
+    ...FABRICA_GENERAL.promo,
+    texto: "Piezas seleccionadas con condiciones especiales, todo el año.",
+  },
+  beneficios: FABRICA_GENERAL.beneficios.map((b) =>
+    b.icono === "garantia"
+      ? { ...b, titulo: "Garantía en tus piezas", texto: "Respaldo en materiales y fabricación." }
+      : b
+  ),
+};
+
+// Textos de fábrica según el giro: solo una joyería arranca hablando de
+// piezas y joyas.
+export const disenoFabrica = (giro) =>
+  giro === "joyeria" ? FABRICA_JOYERIA : FABRICA_GENERAL;
 
 export const esUrlValida = (url) => url === "" || /^https?:\/\/[^\s"'<>]+$/i.test(url);
 
@@ -115,9 +146,9 @@ const texto = (valor, defecto) => (typeof valor === "string" ? valor : defecto);
 
 // Lo guardado completado con lo de fábrica (mismo criterio que la tienda),
 // para que el editor siempre tenga todos los campos.
-export function completarDiseno(guardado) {
+export function completarDiseno(guardado, giro) {
   const g = guardado && typeof guardado === "object" ? guardado : {};
-  const f = DISENO_FABRICA;
+  const f = disenoFabrica(giro);
   const vistos = new Set();
   const secciones = [];
   for (const s of Array.isArray(g.secciones) ? g.secciones : []) {
@@ -139,7 +170,7 @@ export function completarDiseno(guardado) {
     secciones,
     promo: { ...f.promo, ...(g.promo ?? {}) },
     beneficios: Array.isArray(g.beneficios)
-      ? g.beneficios.slice(0, 4).map((b) => ({ icono: "diamante", titulo: "", texto: "", ...b }))
+      ? g.beneficios.slice(0, 4).map((b) => ({ icono: "garantia", titulo: "", texto: "", ...b }))
       : f.beneficios.map((b) => ({ ...b })),
     contacto: { ...f.contacto, ...(g.contacto ?? {}) },
   };
