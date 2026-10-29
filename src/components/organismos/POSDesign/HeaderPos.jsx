@@ -30,6 +30,8 @@ import {
 import { PosBuscarPieza } from "../../../supabaseCrud/crudJoyeria";
 import { esPorPeso } from "../../../utils/granel";
 import { ModalPesoGranel } from "./ModalPesoGranel";
+import { ModalCombinacionPos } from "./ModalCombinacionPos";
+import { PosBuscarCombinacion } from "../../../supabaseCrud/crudCombinaciones";
 import { useLicencia } from "../../../hooks/useLicencia";
 
 
@@ -40,6 +42,8 @@ export function HeaderPos() {
   const [stateListaproductos, setStateListaproductos] = useState(false);
   // Producto a granel esperando que se capture su peso.
   const [productoGranel, setProductoGranel] = useState(null);
+  // Producto con tallas y colores esperando que se elija la combinación.
+  const [productoTallas, setProductoTallas] = useState(null);
   const { setBuscador, dataProductos, selectProductos, buscador } =
     useProductosStore();
   
@@ -127,8 +131,14 @@ export function HeaderPos() {
     }
     agregarProducto(item);
   }
-  // Los productos por peso (kg o g) primero piden el peso; los demás se agregan directo.
+  // Los productos por peso (kg o g) primero piden el peso y los que tienen
+  // tallas y colores piden la combinación; los demás se agregan directo.
   function agregarProducto(producto) {
+    if (producto.tiene_combinaciones) {
+      setStateListaproductos(false);
+      setProductoTallas(producto);
+      return;
+    }
     if (esPorPeso(producto)) {
       setStateListaproductos(false);
       setProductoGranel(producto);
@@ -142,6 +152,25 @@ export function HeaderPos() {
     setProductoGranel(null);
     mutationInsertarVentas(kg);
   }
+  // La combinación viaja en el producto seleccionado (_comb) hasta
+  // insertarDVentas.
+  function agregarCombinacion(producto, comb) {
+    selectProductos({
+      ...producto,
+      _comb: { id: comb.id_combinacion ?? comb.id, talla: comb.talla, color: comb.color },
+    });
+    mutationInsertarVentas();
+  }
+  function elegirCombinacion(comb) {
+    const producto = productoTallas;
+    setProductoTallas(null);
+    agregarCombinacion(producto, comb);
+  }
+  function cerrarModalTallas() {
+    setProductoTallas(null);
+    setBuscador("");
+    buscadorRef.current?.focus();
+  }
   function cerrarModalPeso() {
     setProductoGranel(null);
     setBuscador("");
@@ -150,15 +179,21 @@ export function HeaderPos() {
   async function insertarDVentas(idventa, cantidad) {
     const productosItemSelect =
       useProductosStore.getState().productosItemSelect;
+    const comb = productosItemSelect._comb;
     const pDetalleVentas = {
       _id_venta: idventa,
       _cantidad: cantidad ?? (parseFloat(cantidadInput) || 1),
       _precio_venta: productosItemSelect.precio_venta,
-      _descripcion: productosItemSelect.nombre,
+      _descripcion: comb
+        ? [productosItemSelect.nombre, comb.talla, comb.color]
+            .filter(Boolean)
+            .join(" · ")
+        : productosItemSelect.nombre,
       _id_producto: productosItemSelect.id,
       _precio_compra: productosItemSelect.precio_compra,
       _id_sucursal:  dataCierreCaja?.caja?.id_sucursal,
       _id_almacen: almacenSelectItem?.id,
+      _id_combinacion: comb?.id ?? null,
     };
     console.log("pDetalleVentas", pDetalleVentas);
     await insertarDetalleVentas(pDetalleVentas);
@@ -169,9 +204,10 @@ export function HeaderPos() {
     onError: (error, cantidadGranel) => {
       toast.error(`Error: ${error.message}`);
       queryClient.invalidateQueries(["mostrar Stock XAlmacenes YProducto"]);
-      // El modal de otros almacenes agrega por unidades; a granel (kg) solo
-      // se avisa que no alcanza el stock.
-      if (dataStockXAlmacenesYProducto && cantidadGranel == null) {
+      // El modal de otros almacenes agrega por unidades y sin talla; a granel
+      // (kg) o con talla y color solo se avisa que no alcanza el stock.
+      const conTalla = !!useProductosStore.getState().productosItemSelect?._comb;
+      if (dataStockXAlmacenesYProducto && cantidadGranel == null && !conTalla) {
         setStateModal(true);
       }
     },
@@ -206,7 +242,26 @@ export function HeaderPos() {
           setBuscador("");
           return;
         }
-        // 2) Pieza de joyería: consulta directa por código/SKU exacto. No
+        // 2) Talla y color de ropa por su propio código de barras o SKU.
+        try {
+          const comb = await PosBuscarCombinacion({
+            id_empresa: dataempresa?.id,
+            codigo: texto,
+          });
+          if (cancelado) return;
+          if (comb) {
+            agregarCombinacion(comb, comb);
+            setBuscador("");
+            return;
+          }
+        } catch (e) {
+          if (!cancelado) {
+            toast.error(e.message);
+            setBuscador("");
+          }
+          return;
+        }
+        // 3) Pieza de joyería: consulta directa por código/SKU exacto. No
         // depende del refetch reactivo de dataPiezas (que llegaba tarde al
         // escanear y hacía fallar la búsqueda).
         if (conPiezas) {
@@ -249,6 +304,15 @@ export function HeaderPos() {
   }, [buscador]);
   return (
     <Header>
+      {productoTallas && (
+        <ModalCombinacionPos
+          producto={productoTallas}
+          id_almacen={almacenSelectItem?.id}
+          cantidad={parseFloat(cantidadInput) || 1}
+          onElegir={elegirCombinacion}
+          onCerrar={cerrarModalTallas}
+        />
+      )}
       {productoGranel && (
         <ModalPesoGranel
           producto={productoGranel}
