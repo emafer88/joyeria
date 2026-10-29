@@ -51,7 +51,10 @@ export const ConfiguracionTienda = () => {
     const limpio = {
       ...diseno,
       contacto: Object.fromEntries(
-        Object.entries(diseno.contacto).map(([k, val]) => [k, val.trim()])
+        Object.entries(diseno.contacto).map(([k, val]) => [
+          k,
+          typeof val === "string" ? val.trim() : val,
+        ])
       ),
     };
     limpio.contacto.whatsapp = limpio.contacto.whatsapp.replace(/\D/g, "");
@@ -357,6 +360,16 @@ function EditorContacto({ contacto, invalidas, onChange }) {
     <div className="lista">
       <p className="ayuda">Aparecen en el pie de página y en la sección de redes. Deja vacío lo que no quieras mostrar.</p>
       <CampoLogo logo={contacto.logo} onChange={(logo) => onChange({ ...contacto, logo })} />
+      {contacto.logo && (
+        <label className="check-nombre">
+          <input
+            type="checkbox"
+            checked={contacto.mostrarNombre}
+            onChange={(e) => onChange({ ...contacto, mostrarNombre: e.target.checked })}
+          />
+          <span>Mostrar el nombre junto al logo en el encabezado</span>
+        </label>
+      )}
       {CAMPOS_CONTACTO.map(({ k, etiqueta, placeholder }) => (
         <Campo
           key={k}
@@ -663,6 +676,13 @@ const Container = styled.div`
         border-color: #e53935;
       }
     }
+  }
+  .check-nombre {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    cursor: pointer;
   }
   .fila-logo {
     display: flex;

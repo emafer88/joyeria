@@ -99,6 +99,8 @@ const FABRICA_GENERAL = {
   contacto: {
     nombre: "Mi tienda",
     logo: "",
+    // Con logo propio, si el encabezado también muestra el nombre.
+    mostrarNombre: true,
     descripcion: "",
     telefono: "",
     whatsapp: "",
