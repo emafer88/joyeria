@@ -124,3 +124,25 @@ export function agruparPorProducto(filas) {
     return { ...p, combinaciones, tallas, colores };
   });
 }
+
+// POS: combinaciones de un producto con su existencia en el almacén de la
+// caja (stock null = nunca tuvo entrada ahí).
+export async function PosCombinaciones({ id_producto, id_almacen }) {
+  const { data, error } = await supabase.rpc("pos_combinaciones", {
+    _id_producto: id_producto,
+    _id_almacen: id_almacen,
+  });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+// POS: combinación por código de barras o SKU exacto, con los datos del
+// producto que pide el carrito. null si no hay.
+export async function PosBuscarCombinacion({ id_empresa, codigo }) {
+  const { data, error } = await supabase.rpc("pos_buscar_combinacion", {
+    _id_empresa: id_empresa,
+    _codigo: codigo,
+  });
+  if (error) throw new Error(error.message);
+  return data?.[0] ?? null;
+}

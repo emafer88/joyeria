@@ -40,7 +40,11 @@ const TicketVenta = async (output, data) => {
     ...data.productos.flatMap((item) => [
       [
         {
-          text: `${item.productos?.codigo_barras} - ${item.productos.nombre}`,
+          // Con talla y color: el código de esa combinación y la descripción
+          // del renglón ("Playera · M · Negro").
+          text: item.id_combinacion
+            ? `${item.codigo_combinacion ?? item.productos?.codigo_barras} - ${item.descripcion}`
+            : `${item.productos?.codigo_barras} - ${item.productos.nombre}`,
           style: "tProductsBody",
           colSpan: 4,
         },
