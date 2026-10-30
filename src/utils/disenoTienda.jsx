@@ -4,7 +4,7 @@
 // iguales en los dos repos.
 
 export const TIENDA_URL =
-  import.meta.env.VITE_TIENDA_URL ?? "https://cubiks-ecommerce.fer-ema-777.workers.dev";
+  import.meta.env.VITE_TIENDA_URL ?? "https://tienda.cubiks.mx";
 
 export const SECCIONES = {
   banner: {
