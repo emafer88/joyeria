@@ -115,7 +115,7 @@ export const useCartVentasStoreTemporal = create(
       setStatePantallaCobro: (p) =>
         set((state) => {
           if (state.items.length === 0) {
-            toast.warning("Agrega productos, no seas puerco");
+            toast.warning("Agrega al menos un producto a la venta");
             return {
               state,
             };
