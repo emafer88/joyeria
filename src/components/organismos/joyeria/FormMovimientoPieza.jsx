@@ -256,6 +256,8 @@ const Container = styled.div`
     position: relative;
     width: 560px;
     max-width: 92%;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
     border-radius: 20px;
     background: ${({ theme }) => theme.bgtotal};
     box-shadow: -10px 15px 30px rgba(10, 9, 9, 0.4);
