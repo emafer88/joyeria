@@ -78,6 +78,7 @@ const Container = styled.div`
   #cards {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 8px;
     max-width: 916px;
     width: calc(100% - 20px);
