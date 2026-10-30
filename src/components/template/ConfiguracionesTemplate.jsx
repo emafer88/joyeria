@@ -62,7 +62,9 @@ export function ConfiguracionesTemplate() {
   );
 }
 const Container = styled.div`
-  background-image: url(${fondocuadros});
+  /* Con comillas: Vite incrusta el SVG como data URL con comillas simples, y
+     sin comillas el navegador descarta esta línea y las siguientes (display). */
+  background-image: url("${fondocuadros}");
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat, repeat;
